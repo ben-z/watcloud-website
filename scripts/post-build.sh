@@ -14,4 +14,5 @@ ln -s "_deployments/onboarding-form" "$PROJECT_DIR/out/onboarding-form-test"
 
 # Optimize images
 # https://next-export-optimize-images.vercel.app/docs/getting-started
+# Disabled for now, because the generated images are often larger than the originals.
 # npm run optimize-images

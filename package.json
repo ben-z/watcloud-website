@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "npm run generate-fixtures && next dev",
     "build": "npm run generate-fixtures && next build && ./scripts/post-build.sh",
-    "clean": "rm -rf .next out build",
+    "clean": "rm -rf .next out build node_modules/.cache",
+    "deepclean": "npm run clean && rm -rf node_modules",
     "pretest": "npm run generate-fixtures && npm run type-check && npm run lint",
     "test": "jest",
     "lint": "next lint",

@@ -10,10 +10,10 @@ module.exports = withNextra({
   output: 'export',
   images: {
     // output: export doesn't support image optimization
-    // so we are using next-export-optimize-images below
     unoptimized: true,
   },
   // Next.js doesn't support trailing slashes in basePath
+  // This config needs to be in sync with export-images.config.js
   basePath: (process.env.WEBSITE_BASE_PATH || '').replace(/\/$/, ""),
   // FIXME: This is commented out because it's not compatible with output: export.
   // async redirects() {
@@ -35,6 +35,7 @@ module.exports = withNextra({
 })
 
 // next-export-optimize-images
+// Disabled for now, because the generated images are often larger than the originals.
 // const withExportImages = require('next-export-optimize-images')
 // module.exports = withExportImages(module.exports)
 
