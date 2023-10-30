@@ -1,0 +1,79 @@
+const withNextra = require('nextra')({
+  theme: 'nextra-theme-docs',
+  themeConfig: './theme.config.jsx',
+  latex: true, // LaTeX support: https://nextra.site/docs/guide/advanced/latex
+});
+ 
+module.exports = withNextra({
+  // any other next.js config
+  reactStrictMode: true,
+  output: 'export',
+  images: {
+    // output: export doesn't support image optimization
+    // so we are using next-export-optimize-images below
+    unoptimized: true,
+  },
+  // Next.js doesn't support trailing slashes in basePath
+  basePath: (process.env.WEBSITE_BASE_PATH || '').replace(/\/$/, ""),
+  // FIXME: This is commented out because it's not compatible with output: export.
+  // async redirects() {
+  //   return [
+  //     {
+  //       source: '/onboarding',
+  //       // TODO: make this a symlink instead of redirect
+  //       destination: 'https://watonomous.github.io/infra-config/onboarding-form/',
+  //       permanent: false,
+  //     }
+  //   ]
+  // },
+  webpack: (config) => {
+    // Add Typescript support
+    // Reference: https://www.altogic.com/blog/nextjs-typescript
+    config.resolve.extensions.push(".ts", ".tsx");
+    return config;
+  },
+})
+
+// next-export-optimize-images
+// const withExportImages = require('next-export-optimize-images')
+// module.exports = withExportImages(module.exports)
+
+
+// Injected content via Sentry wizard below
+
+const { withSentryConfig } = require("@sentry/nextjs");
+
+module.exports = withSentryConfig(
+  module.exports,
+  {
+    // For all available options, see:
+    // https://github.com/getsentry/sentry-webpack-plugin#options
+
+    // Suppresses source map uploading logs during build
+    silent: false,
+    
+    // These variables are set in CI to enable source map uploading
+    org: process.env.WATCLOUD_WEBSITE_SENTRY_ORG,
+    project: process.env.WATCLOUD_WEBSITE_SENTRY_PROJECT,
+    authToken: process.env.WATCLOUD_WEBSITE_SENTRY_AUTH_TOKEN,
+  },
+  {
+    // For all available options, see:
+    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+
+    // Upload a larger set of source maps for prettier stack traces (increases build time)
+    widenClientFileUpload: true,
+
+    // Transpiles SDK to be compatible with IE11 (increases bundle size)
+    transpileClientSDK: true,
+
+    // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers (increases server load)
+    // tunnelRoute: "/monitoring",
+
+    // Hides source maps from generated client bundles
+    hideSourceMaps: true,
+
+    // Automatically tree-shake Sentry logger statements to reduce bundle size
+    disableLogger: true,
+  }
+);

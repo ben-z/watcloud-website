@@ -1,0 +1,43 @@
+{
+  "index": {
+    "title": "Welcome",
+    "type": "page",
+    "display": "hidden",
+    "theme": {
+      "layout": "full",
+      "timestamp": false
+    }
+  },
+  "machines": {
+    "title": "Machines",
+    "type": "page",
+    "theme": {
+      "layout": "full",
+      "timestamp": false
+    }
+  },
+  "docs": {
+    "title": "Documentation",
+    "type": "page"
+  },
+  "get-involved": {
+    "title": "Get Involved",
+    "type": "page",
+    "theme": {
+      "timestamp": false
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "type": "page",
+    "theme": {
+      "timestamp": false
+    }
+  },
+  "status": {
+    "title": "Status ↗",
+    "type": "page",
+    "href": "https://status.watonomous.ca/",
+    "newWindow": true
+  }
+}

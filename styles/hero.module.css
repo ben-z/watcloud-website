@@ -1,0 +1,60 @@
+a.cta-btn {
+    display: inline-block;
+    background: linear-gradient(to bottom, #238aff, #0077ff);
+    text-decoration: none;
+    border-radius: 9999px;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    margin-top: 0.5rem;
+    text-shadow: 0 1px 1px #00387838;
+    box-shadow: 0 1px 2px #00295738;
+    transition: all 0.2s ease;
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+a.cta-btn span {
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+a.cta-btn:hover span {
+    transform: translateX(3px);
+}
+a.cta-btn:hover {
+    box-shadow: 0 5px 30px -10px #0078ffab;
+    filter: brightness(1.05);
+}
+a.cta-btn:active {
+    box-shadow: 0 1px 3px #00295738;
+    filter: brightness(0.95);
+}
+a.cta-btn:active span {
+    transform: translateX(5px);
+}
+a.cta-btn:focus-visible {
+    outline: 2px solid
+        hsl(var(--nextra-primary-hue) var(--nextra-primary-saturation) 77%);
+    outline-offset: 2px;
+}
+a.cta-btn:focus-visible span {
+    transform: translateX(3px);
+}
+a.cta-btn.secondary {
+    /* Darker button */
+    background: linear-gradient(to bottom, #1a1a1a, #000000);
+}
+:global(.dark) a.cta-btn.secondary {
+    /* Lighter button */
+    background: linear-gradient(to bottom, #eaeaea, #ffffff);
+    color: #000000;
+    text-shadow: 0 1px 1px #ffffff38;
+    box-shadow: 0 1px 2px #ffffff38;
+}
+a.cta-btn.secondary:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 5px 30px -10px #000000ab;
+}
+:global(.dark) a.cta-btn.secondary:hover {
+    filter: brightness(0.95);
+    box-shadow: 0 5px 30px -10px #ffffffab;
+}

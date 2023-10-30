@@ -1,0 +1,45 @@
+---
+title: "Introduction"
+---
+
+# WATcloud
+
+import { Link } from 'nextra-theme-docs'
+import websiteConfig from '@/build/fixtures/website-config.json'
+
+Hello! 👋
+
+## Who We Are
+We are **WATcloud**, a dedicated division of [WATonomous](https://watonomous.ca/). Our expertise is in building and managing cloud infrastructure, serving both WATonomous and various student initiatives at the University of Waterloo.
+
+## Our Offerings
+- **Compute Cluster**: We provide Linux virtual machines equipped with a good amount of compute, memory, storage, networking, and GPU resources. Backing our infrastructure is a 10 Gbps link to [UWaterloo's ISPs](https://uwaterloo.ca/information-systems-technology/about/organizational-structure/technology-integrated-services-tis/network-services-resources/external-connections) ([network map](https://ns-info.uwaterloo.ca/netstats/core.php)) and a cluster network with 10/40Gbps links between computers. Integrated with tools like Docker, a distributed filesystem (Ceph), and Network-Attached Storage (NAS), our Linux virtual machines cater to diverse project requirements. Please refer to our [inventory](/machines) for more information.
+- **Platform Management**: We manage collaboration and communication platforms such as GitHub, Google Workspace, and Discord for WATonomous.
+
+{/* TODO: list the number of student teams we help, the number of FYDP groups, and the total number of users. */}
+
+## Quickstart
+
+import { Cards } from 'nextra/components'
+
+<Cards num={2}>
+  <Cards.Card
+    image
+    arrow
+    title="Request access"
+    href="/docs/compute-cluster/getting-access"
+  >
+    <span className="hidden dark:block">![Goose with a Computer (Dark)](/assets/goose-with-computer-dark.jpg)</span>
+    <span className="dark:hidden">![Goose with a Computer (Light)](/assets/goose-with-computer-light.jpg)</span>
+  </Cards.Card>
+  <Cards.Card image arrow title="Get Involved" href="/get-involved">
+    <span className="hidden dark:block">![Server Room (Dark)](/assets/server-room-dark-min.jpg)</span>
+    <span className="dark:hidden">![Server Room (Light)](/assets/server-room-light-min.jpg)</span>
+  </Cards.Card>
+</Cards>
+
+## Connect with Us
+If you're affiliated with a student group from WATonomous, the Sedra Student Design Center, or any lab at the University of Waterloo and need infrastructure support, pleae reach out to us at infra-outreach@watonomous.ca.
+
+## Join Our Community
+For real-time interactions, updates, and more, join us on our <Link href={`https://discord.gg/${websiteConfig.discord_invite_code}`}>Discord server</Link>. And stay tuned for our upcoming workshops and training sessions!

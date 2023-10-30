@@ -1,0 +1,38 @@
+# SSH
+
+Now that you have access to the WATcloud compute cluster (Don't have access yet? Make a request [here](./getting-access)),
+you can use [SSH](https://www.cloudflare.com/learning/access-management/what-is-ssh/) to connect to the cluster.
+
+The general syntax for connecting to the cluster is:
+
+```bash copy
+SSH_KEY_PATH="<path_to_ssh_key>"
+SSH_USERNAME="<username>"
+SSH_HOST="<hostname>"
+ssh -v -i "$SSH_KEY_PATH" "$SSH_USERNAME@$SSH_HOST"
+```
+
+or if you are using a jump host:
+
+```bash copy
+SSH_KEY_PATH="<path_to_ssh_key>"
+SSH_USERNAME="<username>"
+SSH_HOST="<hostname>"
+SSH_JUMP_HOST="<jump_host>"
+ssh -v -o ProxyCommand="ssh -W %h:%p -i \"$SSH_KEY_PATH\" \"$SSH_USERNAME@$SSH_JUMP_HOST\"" -i "$SSH_KEY_PATH" "$SSH_USERNAME@$SSH_HOST"
+```
+
+## Command Generator
+
+Here's a tool to help you generate a personalized SSH command. This tool will generate a command that you can copy and paste into your terminal.
+
+The generated command does *not* require setting up [ssh agent](https://www.ssh.com/ssh/agent) or [ssh config](https://www.ssh.com/ssh/config/).
+However, you may soon find that setting them up will make your life easier. If you are interested in learning more about these
+tools, please check out the official documentation linked above and use your [search-fu](https://www.urbandictionary.com/define.php?term=search-fu)
+to find more resources.
+
+import { SSHCommandGenerator } from '@/components/ssh-command-generator'
+
+<div className="mt-6">
+    <SSHCommandGenerator />
+</div>

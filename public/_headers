@@ -1,0 +1,6 @@
+/previews/*
+  # Disable caching for development previews.
+  # This only appears to work in Cloudflare Pages and not GitHub Pages:
+  # https://developers.cloudflare.com/pages/platform/headers/
+  Cache-Control: no-cache
+  
