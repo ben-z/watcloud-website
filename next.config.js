@@ -39,9 +39,7 @@ module.exports = withNextra({
 // const withExportImages = require('next-export-optimize-images')
 // module.exports = withExportImages(module.exports)
 
-
 // Injected content via Sentry wizard below
-
 const { withSentryConfig } = require("@sentry/nextjs");
 
 module.exports = withSentryConfig(
