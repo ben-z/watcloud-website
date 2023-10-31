@@ -33,11 +33,5 @@
     "theme": {
       "timestamp": false
     }
-  },
-  "status": {
-    "title": "Status ↗",
-    "type": "page",
-    "href": "https://status.watonomous.ca/",
-    "newWindow": true
   }
 }
