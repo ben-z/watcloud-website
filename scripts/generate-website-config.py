@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import yaml
 from pathlib import Path
 
@@ -19,6 +20,8 @@ def generate_fixtures(outputs_path):
         "ga_measurement_id": "G-F19HMC41TD",
         # Deployed in the Kubernetes cluster
         "sentry_tunnel": "https://stunnel.watonomous.ca/tunnel",
+        # TODO: replace this with a publicly-available repository
+        "docs_repository_base": f"{os.environ.get('NEXTRA_GIT_REPO_BASE_URL', 'https://github.com/UNKNOWN_ORG/UNKNOWN_REPO')}/tree/{os.environ.get('NEXTRA_GIT_REF', 'UNKNOWN_GIT_REF')}/website",
     }
     
 

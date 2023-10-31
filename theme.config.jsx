@@ -48,7 +48,7 @@ const logo = (
 
 export default {
   logo,
-  docsRepositoryBase: (process.env.NEXTRA_GIT_REPO_BASE_URL && process.env.NEXTRA_GIT_REF) ? path.join(process.env.NEXTRA_GIT_REPO_BASE_URL, `tree/${process.env.NEXTRA_GIT_REF}/website`) : "https://github.com/shuding/nextra/tree/main/docs",
+  docsRepositoryBase: websiteConfig.docs_repository_base,
   feedback: {
     labels: "website"
   },
