@@ -20,6 +20,13 @@
     "title": "Documentation",
     "type": "page"
   },
+  "blog": {
+    "title": "Blog",
+    "type": "page",
+    "theme": {
+      "typesetting": "article"
+    }
+  },
   "get-involved": {
     "title": "Get Involved",
     "type": "page",

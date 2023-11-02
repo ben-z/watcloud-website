@@ -1,0 +1,56 @@
+{/* Derived from https://github.com/vercel/turbo/blob/66196a70d02cddc8899ed1423684b1f716aa310e/docs/pages/blog.mdx */}
+import { getPagesUnderRoute } from "nextra/context"
+import Link from "next/link"
+import { useRouter } from 'next/router'
+import { websiteConfig } from '@/lib/data'
+import { dayjsTz } from '@/lib/utils'
+
+export function BlogHeader() {
+  return (
+    <div className="max-w-screen-lg mx-auto pt-4 pb-8 mb-16 border-b border-gray-400 border-opacity-20">
+      <h1>
+        <span className="font-bold leading-tight lg:text-5xl">Blog</span>
+      </h1>
+      <p className="text-center text-gray-500 dark:text-gray-400 font-space-grotesk">
+
+      </p>
+    </div>
+  );
+}
+
+export function BlogIndex() {
+  return getPagesUnderRoute("/blog").map((page) => {
+    const { date, timezone } = page.frontMatter || {}
+    const dateObj = date && timezone && dayjsTz(date, timezone).toDate()
+    const { locale = websiteConfig.default_locale } = useRouter()
+
+    return (
+      <div key={page.route} className="mb-10">
+        <Link href={page.route} style={{ color: "inherit", textDecoration: "none" }} className="block font-semibold mt-8 text-2xl">
+          {page.meta?.title || page.frontMatter?.title || page.name}
+        </Link>
+        <p className="opacity-80" style={{ marginTop: ".5rem" }}>
+          {page.frontMatter?.description}{" "}
+          <span className="inline-block">
+            <Link href={page.route}>{"Read more →"}</Link>
+          </span>
+        </p>
+        {dateObj ? (
+          <p className="opacity-50 text-sm">
+            {/* suppressHydrationWarning is used to prevent warnings due to differing server/client locales */}
+            <time dateTime={dateObj.toISOString()} suppressHydrationWarning>
+                {dateObj.toLocaleDateString(locale, {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                })}
+            </time>
+        </p>
+        ) : null}
+      </div>
+    );
+  });
+}
+
+<BlogHeader />
+<BlogIndex />

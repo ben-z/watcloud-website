@@ -1,5 +1,11 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import dayjs from "dayjs";
+import dayjsUTC from "dayjs/plugin/utc";
+import dayjsTimezone from "dayjs/plugin/timezone";
+ 
+dayjs.extend(dayjsUTC);
+dayjs.extend(dayjsTimezone);
  
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -150,4 +156,9 @@ export function debounce<T extends (...args: any[]) => any>(func: T, waitForMs: 
       }, waitForMs);
     });
   };
+}
+
+
+export function dayjsTz(date: string, timezone: string) {
+  return dayjs.tz(date, timezone)
 }
