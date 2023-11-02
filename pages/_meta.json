@@ -24,7 +24,8 @@
     "title": "Blog",
     "type": "page",
     "theme": {
-      "typesetting": "article"
+      "typesetting": "article",
+      "timestamp": false
     }
   },
   "get-involved": {
