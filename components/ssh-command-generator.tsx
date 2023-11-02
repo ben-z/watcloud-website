@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { Pre, Code } from 'nextra/components'
 import stripIndent from 'strip-indent';
@@ -15,23 +15,15 @@ import { Input } from "@/components/ui/input"
 import { machineInfo } from '@/lib/data'
 import { hostnameSorter } from '@/lib/wato-utils'
 
-const defaultMachineName = machineInfo.dev_vms[0].name
-const accessibleMachines = Object.fromEntries([...machineInfo.dev_vms, ...machineInfo.bastions].map(m => [m.name, m]))
-const bastionNames = machineInfo.bastions.map(m => m.name)
-const accessibleMachinesList = Object.keys(accessibleMachines).map(m => ({value: m, label: m}))
-const hostNameToMachineName = Object.fromEntries(Object.entries(accessibleMachines).flatMap(([machineName, machine]) => machine.hostnames.map(hostname => [hostname, machineName])))
-
-function getDefaultHostName(machineName: string) {
-    if (bastionNames.includes(machineName)) {
-        return accessibleMachines[machineName]?.hostnames[0] || ""
-    }
-    // The default hostname is the first cluster hostname
-    return accessibleMachines[machineName]?.hostnames.find(h => h.endsWith(".cluster.watonomous.ca")) || ""
-}
+const DEFAULT_MACHINE_NAME = machineInfo.dev_vms[0].name
+const ACCESSIBLE_MACHINES = Object.fromEntries([...machineInfo.dev_vms, ...machineInfo.bastions].map(m => [m.name, m]))
+const BASTION_NAMES = machineInfo.bastions.map(m => m.name)
+const ACCESSIBLE_MACHINE_LIST = Object.keys(ACCESSIBLE_MACHINES).map(m => ({value: m, label: m}))
+const HOSTNAME_TO_MACHINE_NAME = Object.fromEntries(Object.entries(ACCESSIBLE_MACHINES).flatMap(([machineName, machine]) => machine.hostnames.map(hostname => [hostname, machineName])))
 
 function getEntrypoints(machineName: string, hostname: string) {
     const entrypoints = []
-    if (bastionNames.includes(machineName)) {
+    if (BASTION_NAMES.includes(machineName)) {
         entrypoints.push({value: "direct", label: "Direct"})
     } else if (hostname.endsWith(".ext.watonomous.ca")) {
         for (const bastion of machineInfo.bastions) {
@@ -58,10 +50,10 @@ export function SSHCommandGenerator() {
     const [username, _setUsername] = useState("")
     const [sshKeyPath, _setSSHKeyPath] = useState("")
 
-    const machineName = _machineName || hostNameToMachineName[queryHostname] || defaultMachineName
-    const hostnameOptions = accessibleMachines[machineName]?.hostnames.toSorted(hostnameSorter).map(h => ({value: h, label: h})) || []
-    const hostname = hostnameOptions.map(o => o.value).includes(_hostname || queryHostname) ? (_hostname || queryHostname) : getDefaultHostName(machineName)
-    const entrypointOptions = getEntrypoints(machineName, hostname)
+    const machineName = _machineName || HOSTNAME_TO_MACHINE_NAME[queryHostname] || DEFAULT_MACHINE_NAME
+    const hostnameOptions = useMemo(() => ACCESSIBLE_MACHINES[machineName]?.hostnames.toSorted(hostnameSorter).map(h => ({value: h, label: h})) || [], [machineName])
+    const hostname = hostnameOptions.map(o => o.value).includes(_hostname || queryHostname) ? (_hostname || queryHostname) : (hostnameOptions[0]?.value || "")
+    const entrypointOptions = useMemo(() => getEntrypoints(machineName, hostname), [machineName, hostname])
     const entrypoint = entrypointOptions.map(o => o.value).includes(_entrypoint) ? _entrypoint : (entrypointOptions[0]?.value || "")
 
     function setEntrypoint(e: string) {
@@ -133,8 +125,8 @@ export function SSHCommandGenerator() {
         sshCommand = preamble + stripIndent(`
             ssh -v -i "${displaySSHKeyPath}" "${displayUsername}@${displayHostname}"
         `).trim()
-    } else if (bastionNames.includes(entrypoint)) {
-        const jump_host = accessibleMachines[entrypoint]
+    } else if (BASTION_NAMES.includes(entrypoint)) {
+        const jump_host = ACCESSIBLE_MACHINES[entrypoint]
         const jump_host_hostname = jump_host.hostnames[0]
         sshCommand = stripIndent(`
             # Connect to ${machineName} via ${jump_host.name} (${jump_host_hostname})
@@ -156,7 +148,7 @@ export function SSHCommandGenerator() {
                 <dt className="mb-1 mt-2 text-gray-500 dark:text-gray-400 border-none">Machine</dt>
                 <dd className='border-none'>
                     <ComboBox
-                        options={accessibleMachinesList}
+                        options={ACCESSIBLE_MACHINE_LIST}
                         value={machineName}
                         setValue={setMachineName}
                         selectPlaceholder="Select machine"

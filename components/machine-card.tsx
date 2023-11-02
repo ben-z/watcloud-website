@@ -161,13 +161,15 @@ export function MachineCard({
                 <dl className="text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700 overflow-hidden">
                     { 'hostnames' in machine && machine.hostnames.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
-                            <Popover>
-                                <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.hostnames.length, "Hostname")}{<PopoverTrigger><HelpCircle className="ml-1 mr-1 h-3 w-3 text-muted-foreground" /></PopoverTrigger>}</dt>
-                                <PopoverContent side="top">
-                                    <p><Code>*.cluster.watonomous.ca</Code> hostnames resolve to internal IP addresses in the cluster. They are accessible only from within the cluster.</p>
-                                    <p><Code>*.watonomous.ca</Code> hostnames resolve to external IP addresses. They are accessible from anywhere. However, they may be behind the UWaterloo firewall. To access them, you may need to use a VPN or a bastion server.</p>
-                                </PopoverContent>
-                            </Popover>
+                            <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.hostnames.length, "Hostname")}
+                                <Popover>
+                                    <PopoverTrigger><HelpCircle className="ml-1 mr-1 h-3 w-3 text-muted-foreground" /></PopoverTrigger>
+                                    <PopoverContent side="top">
+                                        <p><Code>*.cluster.watonomous.ca</Code> hostnames resolve to internal IP addresses in the cluster. They are accessible only from within the cluster.</p>
+                                        <p><Code>*.watonomous.ca</Code> hostnames resolve to external IP addresses. They are accessible from anywhere. However, they may be behind the UWaterloo firewall. To access them, you may need to use a VPN or a bastion server.</p>
+                                    </PopoverContent>
+                                </Popover>
+                            </dt>
                             <dd className="font-semibold">
                                 <ul className="list-none">
                                     <TooltipProvider>
