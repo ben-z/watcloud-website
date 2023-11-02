@@ -33,12 +33,5 @@
     "theme": {
       "timestamp": false
     }
-  },
-  "contact": {
-    "title": "Contact",
-    "type": "page",
-    "theme": {
-      "timestamp": false
-    }
   }
 }
