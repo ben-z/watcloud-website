@@ -18,6 +18,9 @@ rm -rf "$PROJECT_DIR/build/fixtures"
 # Create the fixture directory
 mkdir -p "$PROJECT_DIR/build/fixtures"
 
+# TODO: have a way to download the latest fixtures from the website so that the public
+# can run the development server too.
+
 # Create a new worktree
 git worktree add "$PROJECT_DIR/build/data" origin/data
 
