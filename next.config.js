@@ -15,23 +15,25 @@ module.exports = withNextra({
   // Next.js doesn't support trailing slashes in basePath
   // This config needs to be in sync with export-images.config.js
   basePath: (process.env.WEBSITE_BASE_PATH || '').replace(/\/$/, ""),
-  // FIXME: This is commented out because it's not compatible with output: export.
-  // async redirects() {
-  //   return [
-  //     {
-  //       source: '/onboarding',
-  //       // TODO: make this a symlink instead of redirect
-  //       destination: 'https://watonomous.github.io/infra-config/onboarding-form/',
-  //       permanent: false,
-  //     }
-  //   ]
-  // },
   webpack: (config) => {
     // Add Typescript support
     // Reference: https://www.altogic.com/blog/nextjs-typescript
     config.resolve.extensions.push(".ts", ".tsx");
     return config;
   },
+  eslint: {
+    dirs: [
+      'pages',
+      'src',
+      'app',
+      'components',
+      'lib',
+      'theme.config.jsx',
+      "tailwind.config.js",
+      "next.config.js",
+      "postcss.config.js",
+    ]
+  }
 })
 
 // next-export-optimize-images

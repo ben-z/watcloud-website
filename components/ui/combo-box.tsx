@@ -26,6 +26,7 @@ export function ComboBox({
     emptySearchResultText,
     buttonClassName = "",
     popoverContentClassName = "",
+    allowDeselect = true,
 }: {
     options: { value: string; label: string }[]
     value: string
@@ -35,6 +36,7 @@ export function ComboBox({
     emptySearchResultText: string
     buttonClassName?: string
     popoverContentClassName?: string
+    allowDeselect?: boolean
 }) {
     const [open, setOpen] = useState(false)
 
@@ -63,7 +65,11 @@ export function ComboBox({
                                 key={entry.value}
                                 value={entry.value}
                                 onSelect={(currentValue) => {
-                                    setValue(currentValue === value ? "" : currentValue)
+                                    if (allowDeselect && currentValue === value) {
+                                        setValue("")
+                                    } else if (currentValue !== value) {
+                                        setValue(currentValue)
+                                    }
                                     setOpen(false)
                                 }}
                             >

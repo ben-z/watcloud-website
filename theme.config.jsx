@@ -47,7 +47,7 @@ const logo = (
   </svg>
 )
 
-export default {
+const themeConfig = {
   logo,
   docsRepositoryBase: websiteConfig.docs_repository_base,
   feedback: {
@@ -90,23 +90,23 @@ export default {
     text: (
       // Maybe create a footer component instead?
       // eg: map over FooterData.links, FooterData.icons
-      <div class="w-full mx-auto max-w-screen-xl md:flex md:gap-x-20 md:items-center md:justify-between">
+      <div className="w-full mx-auto max-w-screen-xl md:flex md:gap-x-20 md:items-center md:justify-between">
         <span>
           Made with <Heart className="inline-block align-text-bottom"/> using <Code2 className="inline-block align-text-bottom"/> and <Bot className="inline-block align-text-bottom"/> by the WATcloud team.
         </span>
-        <ul class="flex flex-wrap items-start mt-8 text-sm font-medium text-gray-500 md:flex-nowrap dark:text-gray-400 md:mt-0">
+        <ul className="flex flex-wrap items-start mt-8 text-sm font-medium text-gray-500 md:flex-nowrap dark:text-gray-400 md:mt-0">
           <li>
-            <Link href="https://status.watonomous.ca" class="mr-4 hover:underline md:mr-6">
+            <Link href="https://status.watonomous.ca" className="mr-4 hover:underline md:mr-6">
               Status Page
             </Link>
           </li>
           <li>
-            <Link href="https://cloud.watonomous.ca/onboarding-form" class="mr-4 hover:underline md:mr-6">
+            <Link href="https://cloud.watonomous.ca/onboarding-form" className="mr-4 hover:underline md:mr-6">
               Onboarding Form
             </Link>
           </li>
           <li>
-            <Link href="https://github.com/WATonomous" class="mr-4 hover:underline md:mr-6">
+            <Link href="https://github.com/WATonomous" className="mr-4 hover:underline md:mr-6">
               GitHub
             </Link>
           </li>
@@ -129,3 +129,5 @@ export default {
     backToTop: true,
   }
 }
+
+export default themeConfig

@@ -20,24 +20,41 @@ const ACCESSIBLE_MACHINES = Object.fromEntries([...machineInfo.dev_vms, ...machi
 const BASTION_NAMES = machineInfo.bastions.map(m => m.name)
 const ACCESSIBLE_MACHINE_LIST = Object.keys(ACCESSIBLE_MACHINES).map(m => ({value: m, label: m}))
 const HOSTNAME_TO_MACHINE_NAME = Object.fromEntries(Object.entries(ACCESSIBLE_MACHINES).flatMap(([machineName, machine]) => machine.hostnames.map(hostname => [hostname, machineName])))
+const ALL_ENTRYPOINTS: Map<string,string> = new Map(Object.entries({
+    "direct": "Direct",
+    "uw-vpn": "UW VPN",
+    "uw-campus": "UW Campus",
+    ...Object.fromEntries(machineInfo.bastions.map(b => [b.name, b.name])),
+}))
 
-function getEntrypoints(machineName: string, hostname: string) {
-    const entrypoints = []
+function getEntrypointToHostnamesMap(machineName: string, hostnames: string[]): Map<string, Set<string>> {
+    const ret: Map<string, Set<string>> = new Map()
+
+    // All bastions are to be accessed directly
     if (BASTION_NAMES.includes(machineName)) {
-        entrypoints.push({value: "direct", label: "Direct"})
-    } else if (hostname.endsWith(".ext.watonomous.ca")) {
-        for (const bastion of machineInfo.bastions) {
-            entrypoints.push({value: bastion.name, label: bastion.name})
-        }
-        entrypoints.push({value: "uw-vpn", label: "UW VPN"})
-        entrypoints.push({value: "uw-campus", label: "UW Campus"})
-    } else if (hostname.endsWith(".cluster.watonomous.ca")) {
-        for (const bastion of machineInfo.bastions) {
-            entrypoints.push({value: bastion.name, label: bastion.name})
+        ret.set('direct', new Set(hostnames))
+        return ret
+    }
+
+    for (const hostname of hostnames) {
+        if (hostname.endsWith(".ext.watonomous.ca")) {
+            ret.set('uw-vpn', ret.get('uw-vpn') || new Set())
+            ret.get('uw-vpn')!.add(hostname)
+            ret.set('uw-campus', ret.get('uw-campus') || new Set())
+            ret.get('uw-campus')!.add(hostname)
+            for (const bastion of machineInfo.bastions) {
+                ret.set(bastion.name, ret.get(bastion.name) || new Set())
+                ret.get(bastion.name)!.add(hostname)
+            }
+        } else if (hostname.endsWith(".cluster.watonomous.ca")) {
+            for (const bastion of machineInfo.bastions) {
+                ret.set(bastion.name, ret.get(bastion.name) || new Set())
+                ret.get(bastion.name)!.add(hostname)
+            }
         }
     }
 
-    return entrypoints
+    return ret
 }
 
 export function SSHCommandGenerator() {
@@ -51,21 +68,24 @@ export function SSHCommandGenerator() {
     const [sshKeyPath, _setSSHKeyPath] = useState("")
 
     const machineName = _machineName || HOSTNAME_TO_MACHINE_NAME[queryHostname] || DEFAULT_MACHINE_NAME
-    const hostnameOptions = useMemo(() => ACCESSIBLE_MACHINES[machineName]?.hostnames.toSorted(hostnameSorter).map(h => ({value: h, label: h})) || [], [machineName])
-    const hostname = hostnameOptions.map(o => o.value).includes(_hostname || queryHostname) ? (_hostname || queryHostname) : (hostnameOptions[0]?.value || "")
-    const entrypointOptions = useMemo(() => getEntrypoints(machineName, hostname), [machineName, hostname])
-    const entrypoint = entrypointOptions.map(o => o.value).includes(_entrypoint) ? _entrypoint : (entrypointOptions[0]?.value || "")
+    const machineHostnames = useMemo(() => ACCESSIBLE_MACHINES[machineName]?.hostnames.toSorted(hostnameSorter) || [], [machineName])
+    const entrypointToHostnamesMap = useMemo(() => getEntrypointToHostnamesMap(machineName, machineHostnames), [machineName, machineHostnames])
+    const entrypoint = _entrypoint || entrypointToHostnamesMap.keys().next()?.value || ""
+    const hostname = entrypointToHostnamesMap.get(entrypoint)?.has(_hostname || queryHostname) ? (_hostname || queryHostname) : (entrypointToHostnamesMap.get(entrypoint)?.values().next()?.value || "")
 
-    function setEntrypoint(e: string) {
-        _setEntrypoint(e)
-    }
+    const entrypointOptions = [...entrypointToHostnamesMap.keys()].map(k => ({value: k, label: ALL_ENTRYPOINTS.get(k)!}))
+    const hostnameOptions = [...entrypointToHostnamesMap.get(entrypoint) || []].map(h => ({value: h, label: h}))
+
     function setHostname(h: string) {
         _setHostname(h)
-        setEntrypoint("")
+    }
+    function setEntrypoint(e: string) {
+        _setEntrypoint(e)
+        setHostname("")
     }
     function setMachineName(n: string) {
         _setMachineName(n)
-        setHostname("")
+        setEntrypoint("")
     }
     function setUsername(u: string) {
         _setUsername(u)
@@ -154,6 +174,26 @@ export function SSHCommandGenerator() {
                         selectPlaceholder="Select machine"
                         searchPlaceholder="Find machine..."
                         emptySearchResultText="No machines found"
+                        allowDeselect={false}
+                    />
+                </dd>
+                <dt className="mb-1 mt-2 text-gray-500 dark:text-gray-400 border-none">
+                    <Popover>
+                        Entrypoint{<PopoverTrigger><HelpCircle className="ml-1 mr-1 h-3 w-3 text-muted-foreground" /></PopoverTrigger>}
+                        <PopoverContent side="top">
+                            The entrypoint determines how you connect to the machine.
+                        </PopoverContent>
+                    </Popover>
+                </dt>
+                <dd className='border-none'>
+                    <ComboBox
+                        options={entrypointOptions}
+                        value={entrypoint}
+                        setValue={setEntrypoint}
+                        selectPlaceholder="Select entrypoint"
+                        searchPlaceholder="Find entrypoint..."
+                        emptySearchResultText="No entrypoints found"
+                        allowDeselect={false}
                     />
                 </dd>
                 <dt className="mb-1 mt-2 text-gray-500 dark:text-gray-400 border-none">
@@ -173,24 +213,7 @@ export function SSHCommandGenerator() {
                         searchPlaceholder="Find hostname..."
                         emptySearchResultText="No hostnames found"
                         popoverContentClassName="w-120"
-                    />
-                </dd>
-                <dt className="mb-1 mt-2 text-gray-500 dark:text-gray-400 border-none">
-                    <Popover>
-                        Entrypoint{<PopoverTrigger><HelpCircle className="ml-1 mr-1 h-3 w-3 text-muted-foreground" /></PopoverTrigger>}
-                        <PopoverContent side="top">
-                            The entrypoint determines how you connect to the machine.
-                        </PopoverContent>
-                    </Popover>
-                </dt>
-                <dd className='border-none'>
-                    <ComboBox
-                        options={entrypointOptions}
-                        value={entrypoint}
-                        setValue={setEntrypoint}
-                        selectPlaceholder="Select entrypoint"
-                        searchPlaceholder="Find entrypoint..."
-                        emptySearchResultText="No entrypoints found"
+                        allowDeselect={false}
                     />
                 </dd>
                 <dt className="mb-1 mt-2 text-gray-500 dark:text-gray-400 border-none">
@@ -229,7 +252,7 @@ export function SSHCommandGenerator() {
                         autoComplete='off'
                     />
                 </dd>
-                <dt className="mb-1 mt-2 text-gray-500 dark:text-gray-400 border-none">SSH Command</dt>
+                <dt className="mb-1 mt-2 text-gray-500 dark:text-gray-400 border-none">Generated SSH Command</dt>
                 <dd className='border-none'>
                     <Pre hasCopyCode>
                         <Code>{sshCommand}</Code>
