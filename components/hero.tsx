@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import Link from 'next/link'
+import { Link } from "nextra-theme-docs"
 import {
     bytesToSize,
     pluralizeWithCount,

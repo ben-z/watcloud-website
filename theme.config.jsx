@@ -1,8 +1,7 @@
 import { DiscordIcon } from 'nextra/icons'
 import { Bot, Heart, Code2 } from "lucide-react"
 import websiteConfig from '@/build/fixtures/website-config.json'
-import Link from "next/link"
-import path from 'path'
+import { Link } from "nextra-theme-docs"
 
 const logo = (
   // This logo is designed in Sketch, exported as SVG, and then manually adjusted based on
@@ -90,23 +89,23 @@ const themeConfig = {
     text: (
       // Maybe create a footer component instead?
       // eg: map over FooterData.links, FooterData.icons
-      <div className="w-full mx-auto max-w-screen-xl md:flex md:gap-x-20 md:items-center md:justify-between">
+      <div className="w-full mx-auto max-w-screen-xl lg:flex lg:gap-x-20 lg:items-center lg:justify-between text-center lg:text-left">
         <span>
-          Made with <Heart className="inline-block align-text-bottom"/> using <Code2 className="inline-block align-text-bottom"/> and <Bot className="inline-block align-text-bottom"/> by the WATcloud team.
+          Made with <Heart className="inline-block align-text-bottom"/> using <Code2 className="inline-block align-text-bottom"/> and <Bot className="inline-block align-text-bottom"/><br className="md:hidden"/> by the WATcloud team.
         </span>
-        <ul className="flex flex-wrap items-start mt-8 text-sm font-medium text-gray-500 md:flex-nowrap dark:text-gray-400 md:mt-0">
+        <ul className="flex flex-wrap justify-center items-start mt-8 lg:mt-0 text-sm font-medium text-gray-500 lg:flex-nowrap dark:text-gray-400 gap-6">
           <li>
-            <Link href="https://status.watonomous.ca" className="mr-4 hover:underline md:mr-6">
+            <Link href="https://status.watonomous.ca" className="text-inherit no-underline hover:underline decoration-auto">
               Status Page
             </Link>
           </li>
           <li>
-            <Link href="https://cloud.watonomous.ca/onboarding-form" className="mr-4 hover:underline md:mr-6">
+            <Link href="https://cloud.watonomous.ca/onboarding-form" className="text-inherit no-underline hover:underline decoration-auto">
               Onboarding Form
             </Link>
           </li>
           <li>
-            <Link href="https://github.com/WATonomous" className="mr-4 hover:underline md:mr-6">
+            <Link href="https://github.com/WATonomous" className="text-inherit no-underline hover:underline decoration-auto">
               GitHub
             </Link>
           </li>
