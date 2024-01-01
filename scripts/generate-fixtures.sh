@@ -35,7 +35,9 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
-set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+if [ ${#POSITIONAL_ARGS[@]} -ne 0 ]; then
+    set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
