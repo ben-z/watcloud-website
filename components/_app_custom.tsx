@@ -1,4 +1,9 @@
 // This file cannot be _app.mdx because the polyfills below gets lost in mdx translation.
+// This file cannot be _app.tsx because it's not fully supported and some styles are not
+// applied properly:
+// - https://github.com/WATonomous/infra-config/issues/1932
+// - https://github.com/shuding/nextra/issues/1632
+// The solution is to import the tsx file into the mdx file.
 
 // Custom polyfills not yet available in `next-core`:
 // https://github.com/vercel/next.js/issues/58242
@@ -7,7 +12,6 @@ import 'core-js/features/array/to-reversed'
 import 'core-js/features/array/to-spliced'
 import 'core-js/features/array/to-sorted'
 
-import '../styles/global.css';
 import type { AppProps, NextWebVitalsMetric } from 'next/app'
 import { useReportWebVitals } from 'next/web-vitals'
 import { GoogleAnalytics, event } from "nextjs-google-analytics";
