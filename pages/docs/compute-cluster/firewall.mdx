@@ -1,0 +1,78 @@
+# Firewall
+
+The WATcloud compute cluster is housed at the University of Waterloo. All machines in the cluster are behind the University's firewall.
+In order to connect to the cluster, you must be on the campus network, connected to the University's [VPN][uw-vpn], or use a
+[Bastion](#bastion) as a jump host.
+
+[uw-vpn]: https://uwaterloo.ca/web-resources/resources/virtual-private-network-vpn
+
+## Bastion
+
+A Bastion (or "Bastion Host") is a machine that is exposed to the internet and is used as a gateway to access other machines that are
+behind a firewall[^bastion]. At WATcloud, we host a Bastion that you can use to connect to the cluster.
+
+[^bastion]: See the [Wikipedia page](https://en.wikipedia.org/wiki/Bastion_host) for more information.
+
+<span className="dark:hidden">
+```mermaid
+flowchart
+	subgraph Internet
+		user <-.->|"firewall rule exception"| bastion(("bastion"))
+		subgraph firewall["UWaterloo Firewall"]
+			bastion <--> wato1
+			bastion <--> wato2
+			bastion <--> wato3
+			bastion <--> dotdotdot["..."]
+		end
+	end
+
+style Internet fill:transparent,stroke:#000,stroke-width:2px
+style firewall fill:transparent,stroke:#F00,stroke-width:2px,color:#F00
+style bastion fill:transparent,stroke:#000
+style wato1 fill:transparent,stroke:#000
+style wato2 fill:transparent,stroke:#000
+style wato3 fill:transparent,stroke:#000
+style dotdotdot fill:transparent,stroke:#000
+style user fill:transparent,stroke:#000
+linkStyle 0 stroke:lightgreen,stroke-width:5px
+```
+</span>
+<span className="hidden dark:block">
+```mermaid
+flowchart
+	subgraph Internet
+		user <-.->|"firewall rule exception"| bastion(("bastion"))
+		subgraph firewall["UWaterloo Firewall"]
+			bastion <--> wato1
+			bastion <--> wato2
+			bastion <--> wato3
+			bastion <--> dotdotdot["..."]
+		end
+	end
+
+style Internet fill:transparent,stroke:#FFF,stroke-width:2px
+style firewall fill:transparent,stroke:#F00,stroke-width:2px,color:#F00
+style bastion fill:transparent,stroke:#FFF
+style wato1 fill:transparent,stroke:#FFF
+style wato2 fill:transparent,stroke:#FFF
+style wato3 fill:transparent,stroke:#FFF
+style dotdotdot fill:transparent,stroke:#FFF
+style user fill:transparent,stroke:#FFF
+linkStyle 0 stroke:lightgreen,stroke-width:5px
+```
+</span>
+
+## VPN
+
+A VPN (or "Virtual Private Network") is a service that allows you to connect to a private network over the internet.
+The University of Waterloo provides a [VPN][uw-vpn] service that allows you to connect to the campus network from anywhere
+in the world. Once you are on the UWaterloo VPN, you can connect to the WATcloud compute cluster as if you were on campus.
+
+[uw-vpn]: https://uwaterloo.ca/web-resources/resources/virtual-private-network-vpn
+
+{
+// Separate footnotes from the main content
+}
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />

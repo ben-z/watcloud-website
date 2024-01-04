@@ -7,39 +7,78 @@ title: "Introduction"
 import { Link } from 'nextra-theme-docs'
 import websiteConfig from '@/build/fixtures/website-config.json'
 
-Hello! 👋
+WATcloud is a student-run cloud infrastructure group at the University of Waterloo.
+Our main service is the [WATcloud compute cluster](/docs/compute-cluster/overview) (sometimes referred to as "the compute cluster" or "WATcloud"),
+where we provide compute (CPU and GPU), storage, and networking resources to student teams, clubs, and labs at the university and partnering organizations.
 
-## Who We Are
-We are **WATcloud**, a dedicated division of [WATonomous](https://watonomous.ca/). Our expertise is in building and managing cloud infrastructure, serving both WATonomous and various student initiatives at the University of Waterloo.
-
-## Our Offerings
-- **Compute Cluster**: We provide Linux virtual machines equipped with a good amount of compute, memory, storage, networking, and GPU resources. Backing our infrastructure is a 10 Gbps link to [UWaterloo's ISPs](https://uwaterloo.ca/information-systems-technology/about/organizational-structure/technology-integrated-services-tis/network-services-resources/external-connections) ([network map](https://ns-info.uwaterloo.ca/netstats/core.php)) and a cluster network with 10/40Gbps links between computers. Integrated with tools like Docker, a distributed filesystem (Ceph), and Network-Attached Storage (NAS), our Linux virtual machines cater to diverse project requirements. Please refer to our [inventory](/machines) for more information.
-- **Platform Management**: We manage collaboration and communication platforms such as GitHub, Google Workspace, and Discord for WATonomous.
-
-{/* TODO: list the number of student teams we help, the number of FYDP groups, and the total number of users. */}
+{/*
+TODO: Once we have the affiliation infrastructure set up, list the number of student teams we help, the number of FYDP groups, and the total number of users.
+We could list total users and the number of users in the past term and the current term.
+*/}
 
 ## Quickstart
 
 import { Cards } from 'nextra/components'
+import Picture from '@/components/picture'
 
-<Cards num={2}>
-  <Cards.Card
-    image
-    arrow
-    title="Request access"
-    href="/docs/compute-cluster/getting-access"
-  >
-    <span className="hidden dark:block">![Goose with a Computer (Dark)](/assets/goose-with-computer-dark.jpg)</span>
-    <span className="dark:hidden">![Goose with a Computer (Light)](/assets/goose-with-computer-light.jpg)</span>
+<Cards num={3}>
+  <Cards.Card image arrow title="Getting Access" href="/docs/compute-cluster/getting-access">
+    <span className="hidden dark:block"><Picture alt="Abstract Computer (Dark)" srcs={["avif","generated.webp","generated.jpg"].map(f => `${websiteConfig.base_path}/assets/computer-dark.${f}`)} /></span>
+    <span className="dark:hidden"><Picture alt="Abstract Computer (Light)" srcs={["avif","generated.webp","generated.jpg"].map(f => `${websiteConfig.base_path}/assets/computer-light.${f}`)} /></span>
+  </Cards.Card>
+  <Cards.Card image arrow title="View Specs" href="/machines">
+    <span className="hidden dark:block"><Picture alt="Robot with GPU (Dark)" srcs={["avif","generated.webp","generated.jpg"].map(f => `${websiteConfig.base_path}/assets/robot-dark.${f}`)} /></span>
+    <span className="dark:hidden"><Picture alt="Robot with GPU (Light)" srcs={["avif","generated.webp","generated.jpg"].map(f => `${websiteConfig.base_path}/assets/robot-light.${f}`)} /></span>
   </Cards.Card>
   <Cards.Card image arrow title="Get Involved" href="/get-involved">
-    <span className="hidden dark:block">![Server Room (Dark)](/assets/server-room-dark-min.jpg)</span>
-    <span className="dark:hidden">![Server Room (Light)](/assets/server-room-light-min.jpg)</span>
+    <span className="hidden dark:block"><Picture alt="Constructing the Cloud (Dark)" srcs={["avif","generated.webp","generated.jpg"].map(f => `${websiteConfig.base_path}/assets/cloud-dark.${f}`)} /></span>
+    <span className="dark:hidden"><Picture alt="Constructing the Cloud (Light)" srcs={["avif","generated.webp","generated.jpg"].map(f => `${websiteConfig.base_path}/assets/cloud-light.${f}`)} /></span>
   </Cards.Card>
 </Cards>
 
-## Connect with Us
-If you're affiliated with a student group from WATonomous, the Sedra Student Design Center, or any lab at the University of Waterloo and need infrastructure support, pleae reach out to us at infra-outreach@watonomous.ca.
+## Brief History
+
+WATcloud started as a group of computing enthusiasts who build servers at the [WATonomous][wato] student design team. Now we serve clubs
+and teams from all over the University of Waterloo and support collaborative projects with international schools like [MIT][mit],
+[Pitt][pitt], [RIT][rit], [CMU][cmu], and [PoliTO][polito][^international-collaboration].
+
+[^international-collaboration]: An example of an international group we support is [MIT-PITT-RW][mprw] (MPRW), a collaboration between UWaterloo,
+MIT, Pitt, and RIT to build a full-size self-driving racecar. UWaterloo students work alongside our international collaborators to use the
+WATcloud compute cluster to develop software, run simulations, and train ML models.
+
+[wato]: https://watonomous.ca
+[mit]: https://mit.edu
+[pitt]: https://pitt.edu
+[rit]: https://rit.edu
+[cmu]: https://cmu.edu
+[polito]: https://www.polito.it/
+[mprw]: https://mitpittrw.com
+
 
 ## Join Our Community
-For real-time interactions, updates, and more, join us on our <Link href={`https://discord.gg/${websiteConfig.discord_invite_code}`}>Discord server</Link>. And stay tuned for our upcoming workshops and training sessions!
+For real-time server status updates and getting help, join us in our <Link href={`https://discord.gg/${websiteConfig.discord_invite_code}`}>Discord server</Link>. And stay tuned for our upcoming workshops and training sessions!
+
+## FAQ
+
+### Is the compute cluster free to use?
+
+Absolutely! We're a student-run group, and we don't charge for our infrastructure. However, we do have a limited amount of resources, so we ask that you use them responsibly.
+
+### How do I get access to the compute cluster?
+
+Please visit the [Getting Access](/docs/compute-cluster/getting-access) page for more information.
+
+### What’s the relationship between WATcloud and WATonomous?
+
+WATonomous' compute cluster was born to meet the needs of the team. As the team grew, so did the cluster. Eventually, the subteam responsible for the cluster
+became WATcloud, and opened up the cluster up to other groups. Now, WATcloud and WATonomous operate akin to AWS and Amazon.
+We work in close proximity (e.g. we share the same Discord server and Google Workspace), but the services we provide are tailored to all groups we support.
+WATonomous has access to the same [support resources](/docs/compute-cluster/support-resources) as every other group.
+
+
+{
+// Separate footnotes from the main content
+}
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />

@@ -1,0 +1,133 @@
+# Machine Usage Guide
+
+This page contains information about how to use the machines in the cluster.
+
+## Hardware
+
+Most machines in the cluster come with standard workstation hardware that include CPU, RAM, GPU, and storage[^machine-specs]. In special
+cases, you can request to have specialized hardware such as FPGAs installed in the machines.
+
+[^machine-specs]: The specs of the machines can be found [here](/machines).
+
+## Networking
+
+All machines in the cluster are connected to both the university network (over 10Gbps or 1Gbps Ethernet)
+and a cluster network (over 40Gbps or 10Gbps Ethernet). The IP address range for the university network is
+`129.97.0.0/16`[^uwaterloo-ip-range] and the IP address range for the cluster network is `10.0.50.0/24`.
+
+[^uwaterloo-ip-range]: The IP range for the university network can be found [here](https://uwaterloo.ca/information-systems-technology/about/organizational-structure/technology-integrated-services-tis/network-services-resources/ip-requests-and-registrations).
+
+## Operating System
+
+All general-use machines are virtual machines (VMs)[^hypervisor]. This setup allows us to easily manage the machines remotely
+and reduce the complexity of the bare-metal OSes.
+
+[^hypervisor]: We use [Proxmox](https://www.proxmox.com/en/) as our hypervisor.
+
+## Services
+
+### `/home` Directory
+
+We run an SSD-backed Ceph[^ceph] cluster to provide distributed storage for the machines in the cluster. All general-use machines
+share a common `/home` directory that is backed by the Ceph cluster. This means that you can access your files (think
+bashrc files, project files, miniconda environments, etc.) from any general-use machine in the cluster.
+
+Due to the relatively expensive cost of SSDs, the Ceph cluster is only meant for storing small files. If you need to store large
+files (e.g. datasets, videos, ML model checkpoints), you should use one of the alternatives listed below.
+
+[^ceph]: [Ceph](https://ceph.io/) is a distributed storage system that provides high performance and reliability.
+
+### `/mnt/wato-drive*` Directory
+
+We have a few HDD-backed NFS[^nfs] servers that provide large storage for the machines in the cluster. These NASes are mounted
+on all general-use machines at the `/mnt/wato-drive*` directories. You can use these mounts to store large files such as datasets.
+
+[^nfs]: [NFS](https://en.wikipedia.org/wiki/Network_File_System) stands for "Network File System" and is used to share files over a network.
+
+### `/mnt/scratch` Directory
+
+On some high-performance machines, we have an NVMe/SATA SSD-backed local storage pool that is mounted at the `/mnt/scratch` directory.
+These local storage pools are meant for temporary storage for long-running jobs that require fast and reliable filesystem access,
+such as storing training data and model checkpoints for ML workloads.
+
+The space on `/mnt/scratch` is limited. Please make sure to clean up your files after you are done with them.
+
+### S3-compatible Object storage
+
+We have an S3-compatible object storage that runs on the Ceph cluster. If you require this functionality, please contact a WATcloud
+admin to get access.
+
+### Kubernetes
+
+We run a Kubernetes cluster using [microk8s](https://microk8s.io/). This is mostly for running internal WATcloud services. However,
+if you require this functionality, please contact a WATcloud admin to get access.
+
+### GitHub Actions Runners
+
+We run a GitHub Runner farm on the Kubernetes cluster using [actions-runner-controller](https://github.com/actions/actions-runner-controller).
+Currently, it's enabled for the WATonomous organization. If you require this functionality, please reach out to a WATcloud admin to get access.
+
+## Software
+
+We try to keep the general-use machines lean. We generally refrain from installing software that make sense for rootless installation or running in
+containerized environments.
+
+Examples of software that we install on the general-use machines include:
+- Docker (rootless)
+- NVIDIA Container Toolkit
+- zsh
+- various CLI tools (e.g. `vifm`, `iperf`, `moreutils`, `jq`, `ncdu`)
+
+Examples of software that we do not install on the general-use machines include:
+- conda (use [miniconda](https://docs.conda.io/en/latest/miniconda.html) instead)
+- ROS (use [Docker](https://hub.docker.com/_/ros) instead)
+- CUDA (use [Docker](https://hub.docker.com/r/nvidia/cuda) instead)
+- PyTorch (use [Docker](https://hub.docker.com/r/pytorch/pytorch) instead)
+- TensorFlow (use [Docker](https://hub.docker.com/r/tensorflow/tensorflow) instead)
+
+If there is a piece of software that you think should be installed on the general-use machines, please reach out to a WATcloud team member.
+
+## Maintenance and Outages
+
+We try to keep the machines in the cluster up and running at all times. However, we do need to perform regular maintenance to keep the machines
+up-to-date and our services running smoothly. All scheduled maintenance will be announced in the
+[infrastructure-support repo](https://github.com/WATonomous/infrastructure-support/discussions)[^maintenance-notify]. Emergency maintenance and maintenance
+that has little effect on user experience will be announced in the `#server-use` channel on Discord.
+
+[^maintenance-notify]: The GitHub team `@WATonomous/watcloud-compute-cluster-users` will be notified.  Please ensure that you
+[enable notifications](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications)
+to receive these notices.
+
+Sometimes, the machines in the cluster may go down unexpectedly due to hardware failures or power outages. We have a comprehensive suite of
+healthchecks and internal monitoring tools to detect these failures and notify us. However, due to the part-time nature of the student team, we may not
+be able to respond to these failures immediately. If you notice that a machine is down, please restlessly ping the WATcloud team on Discord
+(`@WATcloud` or `@WATcloud Leads`, in the `#server-use` channel).
+
+To see if a machine is having issues, please visit [status.watonomous.ca](https://status.watonomous.ca). The WATcloud team uses this page as
+a dashboard to monitor the health of the machines in the cluster.
+
+## Usage Guidelines
+
+- Be [nice](https://man7.org/linux/man-pages/man2/nice.2.html)
+  - If you have a long-running non-interactive process, please [increase its niceness](https://www.tecmint.com/set-linux-process-priority-using-nice-and-renice-commands/) so that interactive programs don't lag.
+  - Being nice is simply changing `./my_program arg1 arg2` to `nice ./my_program arg1 arg2`.
+- Clean up after yourself
+  - If you are using `/mnt/scratch`, please make sure to clean up your files after you are done with them.
+  - Please only use `/home` for small files. Writing large files to `/home` will significantly slow down the filesystem for all users.
+  - `/mnt/wato-drive*` are large storage pools, but they are not infinite and can fill up quickly with today's large datasets.
+    Please remove unneeded files from these directories.
+  - Please clean up your Docker images and containers regularly. `docker system prune -a` is your friend.
+- Resource allocation
+  - Currently, we don't have any resource allocation policies in place. However, if we notice that the cluster's resources are frequently exhausted,
+    we may need to implement a resource allocation system common in HPC[^hpc] clusters.
+
+[^hpc]: [High-performance computing](https://en.wikipedia.org/wiki/High-performance_computing) (HPC) is the use of supercomputers and parallel processing
+techniques to solve complex computational problems. Examples of HPC clusters include [Cedar](https://docs.computecanada.ca/wiki/Cedar) and
+[Graham](https://docs.computecanada.ca/wiki/Graham).
+
+{
+// Separate footnotes from the main content
+}
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />

@@ -1,7 +1,10 @@
 # SSH
 
 Now that you have access to the WATcloud compute cluster (Don't have access yet? Make a request [here](./getting-access)),
-you can use [SSH](https://www.cloudflare.com/learning/access-management/what-is-ssh/) to connect to the cluster.
+you can use SSH[^ssh] to connect to the cluster.
+
+[^ssh]: SSH stands for Secure Shell. It is a protocol that allows you to connect to a remote machine and execute commands on it.
+Learn more about SSH [here](https://www.cloudflare.com/learning/access-management/what-is-ssh/).
 
 ## Quick Start
 
@@ -12,7 +15,7 @@ Here's a tool to help you generate a personalized SSH command. This tool will ge
 Choose your preferred machine and entrypoint[^entrypoint] below. Your personalized SSH command will be generated and displayed below.
 
 [^entrypoint]: An entrypoint is a service or location that you connect to or be at when you connect to the cluster. This is necessary
-because the cluster is behind a [firewall](#firewall) and you cannot connect to it directly.
+because the cluster is behind a [firewall](./firewall) and you cannot connect to it directly.
 
 import { SSHCommandGenerator } from '@/components/ssh-command-generator'
 
@@ -22,10 +25,15 @@ import { SSHCommandGenerator } from '@/components/ssh-command-generator'
 
 The above is your personalized SSH command. Copy and paste it into your terminal to connect to the cluster.
 
-The generated command does *not* require setting up [ssh agent](https://www.ssh.com/ssh/agent) or [ssh config](https://www.ssh.com/ssh/config/).
+The generated command does *not* require setting up ssh agent[^ssh-agent] or ssh config[^ssh-config].
 However, you may soon find that setting them up will make your life easier. If you are interested in learning more about these
-tools, please check out the official documentation linked above and use your [search-fu](https://www.urbandictionary.com/define.php?term=search-fu)
-to find more resources.
+tools, please check out [Tips and Tricks](#tips-and-tricks) and the official documentation linked in the footnotes.
+
+[^ssh-agent]: [SSH agent](https://www.ssh.com/ssh/agent) is a program that runs in the background and stores your SSH keys.
+It comes with neat features like [SSH agent forwarding](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/using-ssh-agent-forwarding)
+that allows you to use your local SSH keys on remote machines.
+
+[^ssh-config]: [SSH config](https://www.ssh.com/ssh/config/) is a configuration file that allows you to simplify your SSH commands.
 
 ## Syntax
 
@@ -48,71 +56,92 @@ SSH_JUMP_HOST="<jump_host>"
 ssh -v -o ProxyCommand="ssh -W %h:%p -i \"$SSH_KEY_PATH\" \"$SSH_USERNAME@$SSH_JUMP_HOST\"" -i "$SSH_KEY_PATH" "$SSH_USERNAME@$SSH_HOST"
 ```
 
-## Firewall
+## Tips and Tricks
 
-The WATcloud compute cluster is housed at the University of Waterloo. All machines in the cluster are behind the University's firewall.
-In order to connect to the cluster, you must be on the campus network, connected to the University's [VPN][uw-vpn], or use a
-[Bastion](#bastion) as a jump host.
+### Additional SSH Keys
 
-[uw-vpn]: https://uwaterloo.ca/web-resources/resources/virtual-private-network-vpn
+To use additional SSH keys, you have the following options:
 
-### Bastion
+1. [Update your profile](../utilities/profile-editor) to add additional SSH keys.
+2. Manually create `~/.ssh/authorized_keys` and place your SSH keys in there.You'll
+need to make sure that this file is present in all machines that you want to connect to[^authorized_keys_note].
 
-A Bastion (or "Bastion Host") is a machine that is exposed to the internet and is used as a gateway to access other machines that are
-behind a firewall[^bastion]. At WATcloud, we host a Bastion that you can use to connect to the cluster.
+[^authorized_keys_note]: For example, if you use Bastion to connect to the cluster, you'll need to make sure that
+`~/.ssh/authorized_keys` is present on both Bastion and the machine you intend to connect to.
 
-[^bastion]: See the [Wikipedia page](https://en.wikipedia.org/wiki/Bastion_host) for more information.
+### SSH Agent
 
-<span className="dark:hidden">
-```mermaid
-flowchart
-	subgraph Internet
-		user <-.->|"firewall rule exception"| bastion(("bastion"))
-		subgraph firewall["UWaterloo Firewall"]
-			bastion <--> wato1
-			bastion <--> wato2
-			bastion <--> wato3
-			bastion <--> dotdotdot["..."]
-		end
-	end
+SSH agent is useful for many reasons, for example:
+1. It removes the need to use the `-i` flag to specify the path to your SSH key.
+2. It allows you to use [SSH agent forwarding](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/using-ssh-agent-forwarding).
 
-style Internet fill:transparent,stroke:#000,stroke-width:2px
-style firewall fill:transparent,stroke:#F00,stroke-width:2px,color:#F00
-style bastion fill:transparent,stroke:#000
-style wato1 fill:transparent,stroke:#000
-style wato2 fill:transparent,stroke:#000
-style wato3 fill:transparent,stroke:#000
-style dotdotdot fill:transparent,stroke:#000
-style user fill:transparent,stroke:#000
-linkStyle 0 stroke:lightgreen,stroke-width:5px
+You can use SSH agent as follows:
+
+```bash copy
+# Start an SSH agent if it's not already running
+[[ -z "$SSH_AUTH_SOCK" ]] && eval "$(ssh-agent -s)"
+# Add your SSH key to the agent. Replace ~/.ssh/id_rsa with the path to your SSH key.
+ssh-add ~/.ssh/id_rsa
+# Connect to the cluster
+ssh -v "<ssh_username>@<ssh_host>" # This is the same as ssh -v -i ~/.ssh/id_rsa "<ssh_username>@<ssh_host>" without SSH agent
+# or if you are using a jump host
+ssh -v -o ProxyCommand="ssh -W %h:%p \"<ssh_username>@<ssh_jump_host>\"" "<ssh_username>@<ssh_host>"
 ```
-</span>
-<span className="hidden dark:block">
-```mermaid
-flowchart
-	subgraph Internet
-		user <-.->|"firewall rule exception"| bastion(("bastion"))
-		subgraph firewall["UWaterloo Firewall"]
-			bastion <--> wato1
-			bastion <--> wato2
-			bastion <--> wato3
-			bastion <--> dotdotdot["..."]
-		end
-	end
 
-style Internet fill:transparent,stroke:#FFF,stroke-width:2px
-style firewall fill:transparent,stroke:#F00,stroke-width:2px,color:#F00
-style bastion fill:transparent,stroke:#FFF
-style wato1 fill:transparent,stroke:#FFF
-style wato2 fill:transparent,stroke:#FFF
-style wato3 fill:transparent,stroke:#FFF
-style dotdotdot fill:transparent,stroke:#FFF
-style user fill:transparent,stroke:#FFF
-linkStyle 0 stroke:lightgreen,stroke-width:5px
+### `~/.ssh/config`
+
+If you find yourself using the same SSH command over and over again, you can use `~/.ssh/config` to simplify your life.
+
+For example, if you find yourself using the following command often:
+
+```bash copy
+ssh -v -o ProxyCommand="ssh -W %h:%p -i \"<ssh_key_path>\" \"<ssh_username>@<ssh_jump_host>\"" -i "<ssh_key_path>" "<ssh_username>@<ssh_host>"
 ```
-</span>
+
+you can add the following to your `~/.ssh/config`:
+
+```ssh-config copy
+Host <ssh_jump_host>
+    HostName <ssh_jump_host>
+    User <ssh_username>
+    IdentityFile <ssh_key_path>
+
+Host <ssh_host>
+    HostName <ssh_host>
+    User <ssh_username>
+    IdentityFile <ssh_key_path>
+    ProxyJump <ssh_jump_host>
+```
+
+and then simply run:
+
+```bash copy
+ssh -v <ssh_host>
+```
+
+A real-world example of this is:
+
+```ssh-config copy
+Host bastion
+    HostName bastion.watonomous.ca
+    User alex
+    IdentityFile ~/.ssh/id_rsa
+
+Host trpro-ubuntu2
+    HostName trpro-ubuntu2.cluster.watonomous.ca
+    User alex
+    IdentityFile ~/.ssh/id_rsa
+    ProxyJump bastion
+```
+
+```bash copy
+ssh -v trpro-ubuntu2
+```
 
 
+{
+// Separate footnotes from the main content
+}
 import { Separator } from "@/components/ui/separator"
 
 <Separator className="mt-6" />

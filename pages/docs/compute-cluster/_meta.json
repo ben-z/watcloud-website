@@ -1,4 +1,8 @@
 {
+    "overview": "Overview",
     "getting-access": "Getting Access",
-    "ssh": "SSH"
+    "ssh": "SSH",
+    "machine-usage-guide": "Machine Usage Guide",
+    "firewall": "Firewall",
+    "support-resources": "Support Resources"
 }

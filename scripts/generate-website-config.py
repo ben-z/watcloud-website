@@ -1,16 +1,17 @@
 import argparse
 import json
 import os
+import re
 import yaml
 from pathlib import Path
 
 def generate_fixtures(outputs_path):
     with open(Path(outputs_path, "discord/outputs.yaml"), 'r') as file:
         discord_outputs = yaml.safe_load(file)
-    
+
     with open(Path(outputs_path, "sentry/outputs.yaml"), 'r') as file:
         sentry_outputs = yaml.safe_load(file)
-    
+
     return {
         "discord_invite_code": discord_outputs["watcloud_website_invite_code"],
         # Obtained from https://healthchecks.io/projects/7acc2ad3-f672-40c9-a061-12c8fd128f8b/settings/
@@ -22,8 +23,9 @@ def generate_fixtures(outputs_path):
         "sentry_tunnel": "https://stunnel.watonomous.ca/tunnel",
         "docs_repository_base": "https://github.com/WATonomous/watcloud-website/tree/master/",
         "default_locale": "en-US",
+        "base_path": re.sub(r"/$", "", os.getenv("WEBSITE_BASE_PATH", "")),
     }
-    
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate website config')
