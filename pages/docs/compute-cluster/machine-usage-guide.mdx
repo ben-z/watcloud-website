@@ -52,6 +52,14 @@ such as storing training data and model checkpoints for ML workloads.
 
 The space on `/mnt/scratch` is limited. Please make sure to clean up your files after you are done with them.
 
+### Docker
+
+Every general-use machine has Docker Rootless[^docker-rootless] installed. There is a per-user storage quota to ensure that everyone has
+enough space to run their workloads. The storage quota is described on the [Quotas](./quotas) page.
+
+[^docker-rootless]: [Docker](https://www.docker.com/) is a platform for neatly packaging software, both for development and deployment.
+  [Docker Rootless](https://docs.docker.com/engine/security/rootless/) is a way to run Docker without root privileges.
+
 ### S3-compatible Object storage
 
 We have an S3-compatible object storage that runs on the Ceph cluster. If you require this functionality, please contact a WATcloud

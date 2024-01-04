@@ -103,6 +103,18 @@ def get_hosted_storage(data_path, host_name):
     
     return exports
 
+def get_mounts_with_quotas(host):
+    mounts = host.get("mounts", [])
+    mounts_with_quotas = []
+    for mount in mounts:
+        if mount.get("user_quota"):
+            mounts_with_quotas.append({
+                "name": mount["name"],
+                "mountpoint": mount["mountpoint"],
+                "user_quota": mount["user_quota"],
+            })
+    return mounts_with_quotas
+
 def generate_fixtures(host_config_path, data_path):
     with open(host_config_path, 'r') as file:
         host_config = yaml.safe_load(file)
@@ -123,6 +135,7 @@ def generate_fixtures(host_config_path, data_path):
                 "hostnames": [r["name"] for n in host["networks"] for r in n.get("dns_records",[])],
                 "lsb_release_info": get_lsb_release_info(data_path, name),
                 "ssh_host_keys": get_file_lines(data_path, name, "ssh-host-keys.log"),
+                "mounts_with_quotas": get_mounts_with_quotas(host),
             }
             dev_vms.append(properties)
         if "bare_metal_nodes" in group_names:
