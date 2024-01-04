@@ -113,17 +113,6 @@ const themeConfig = {
       </div>
     )
   },
-  banner: {
-    text: (
-      <>
-        <span>
-          🏗️ This website is still a work in progress. Please report any issues you find to the <a href="mailto:infra-outreach@watonomous.ca" className="underline">WATcloud team</a>.
-        </span>
-      </>
-    ),
-    dismissible: true,
-    key: 'wip-banner',
-  },
   toc: {
     backToTop: true,
   }
