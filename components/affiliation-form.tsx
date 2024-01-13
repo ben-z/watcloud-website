@@ -1,8 +1,7 @@
 import affiliationSchemaJSON from "@/build/fixtures/affiliation.schema.json";
 import affiliationSchemaValidate from "@/build/fixtures/affiliation.schema.validate";
-import { JSONSchema7 } from "json-schema";
-import JSONSchemaForm from "@/components/json-schema-form";
-import { ValidateFunction } from "ajv";
+import RJSFFields from "@/components/rjsf-fields";
+import RJSFTemplates from "@/components/rjsf-templates";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,10 +11,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
 import { slugify } from "@/lib/utils";
-import { UseFormReturn } from "react-hook-form";
+import Form from "@rjsf/core"; // Or whatever theme you use
+import {
+  ValidatorFunctions,
+  createPrecompiledValidator,
+} from "@rjsf/validator-ajv8";
+import { JSONSchema7 } from "json-schema";
 import { Loader2 } from "lucide-react";
+import { createRef, useState } from "react";
+
+const validator = createPrecompiledValidator(
+  {
+    [affiliationSchemaJSON["$id"]]: affiliationSchemaValidate,
+  } as ValidatorFunctions,
+  affiliationSchemaJSON as JSONSchema7
+);
+
+const formRef = createRef<Form>()
 
 export default function AffiliationForm() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -23,9 +36,9 @@ export default function AffiliationForm() {
   const [alertDescription, setAlertDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function onSubmit(data: any, form: UseFormReturn) {
+  async function onSubmit({ formData: data }: any) {
     setIsAlertOpen(true);
-    setAlertTitle("Submitting")
+    setAlertTitle("Submitting");
     setAlertDescription("Please wait while we submit your request...");
     setIsSubmitting(true);
 
@@ -33,34 +46,36 @@ export default function AffiliationForm() {
     const slug = slugify(name);
 
     try {
-      const res = await fetch(
-        "https://repo-ingestion.watonomous.ca/ingest",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            repo: "watonomous/infra-config",
-            branch_suffix: `affiliation-${slug}`,
-            files: [
-              {
-                path: `directory/affiliations/data/${slug}.yml`,
-                content: JSON.stringify(data),
-                transforms: [{ type: "json2yaml" }],
-              },
-            ],
-          }),
-        }
-      );
+      const res = await fetch("https://repo-ingestion.watonomous.ca/ingest", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          repo: "watonomous/infra-config",
+          branch_suffix: `affiliation-${slug}`,
+          files: [
+            {
+              path: `directory/affiliations/data/${slug}.yml`,
+              content: JSON.stringify(data),
+              transforms: [{ type: "json2yaml" }],
+            },
+          ],
+        }),
+      });
 
       if (res.status === 200) {
         setAlertTitle("Success!");
         setAlertDescription(
-          `Successfully submitted registration request for "${name}"!`
-          + ` We will review your request and get back to you shortly.`
-          + ` Your request ID is "${(await res.json()).pr_url}".`);
-        form.reset();
+          `Successfully submitted registration request for "${name}"!` +
+            ` We will review your request and get back to you shortly.` +
+            ` Your request ID is "${(await res.json()).pr_url}".`
+        );
+        if (!formRef.current) {
+          console.error(`Form ref is not set! formRef: ${formRef}, formRef.current: ${formRef.current}`);
+        } else {
+          formRef.current.reset();
+        }
       } else {
         setAlertTitle("Error");
         setAlertDescription(
@@ -77,12 +92,19 @@ export default function AffiliationForm() {
     }
     setIsSubmitting(false);
   }
+
   return (
-    <>
-      <JSONSchemaForm
+    <div className="my-8">
+      <Form
         schema={affiliationSchemaJSON as JSONSchema7}
-        validate={affiliationSchemaValidate as unknown as ValidateFunction}
+        validator={validator}
+        noHtml5Validate
         onSubmit={onSubmit}
+        ref={formRef}
+        showErrorList={"bottom"}
+        focusOnFirstError={true}
+        templates={RJSFTemplates}
+        fields={RJSFFields}
       />
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
@@ -92,13 +114,15 @@ export default function AffiliationForm() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             {isSubmitting ? (
-              <AlertDialogAction disabled><Loader2 className="animate-spin"/></AlertDialogAction>
+              <AlertDialogAction disabled>
+                <Loader2 className="animate-spin" />
+              </AlertDialogAction>
             ) : (
               <AlertDialogAction>OK</AlertDialogAction>
             )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }
