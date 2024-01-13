@@ -6,6 +6,7 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx,md,mdx}',
     './app/**/*.{js,ts,jsx,tsx,md,mdx}',
     './src/**/*.{js,ts,jsx,tsx,md,mdx}',
+    './lib/**/*.{js,ts,jsx,tsx,md,mdx}',
     '*.{js,ts,jsx,tsx,md,mdx}',
   ],
   // Some of the theme configurations are added automatically by

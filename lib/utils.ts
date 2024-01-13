@@ -158,7 +158,10 @@ export function debounce<T extends (...args: any[]) => any>(func: T, waitForMs: 
   };
 }
 
-
 export function dayjsTz(date: string, timezone: string) {
   return dayjs.tz(date, timezone)
+}
+
+export function slugify(text: string) {
+  return text.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "")
 }

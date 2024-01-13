@@ -1,6 +1,7 @@
 {
   "index": "Introduction",
   "compute-cluster": "Compute Cluster",
-  "community-docs": "Community Docs",
-  "utilities": "Utilities"
+  "registered-affiliations": "Registered Affiliations",
+  "utilities": "Utilities",
+  "community-docs": "Community Docs"
 }
