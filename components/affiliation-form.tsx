@@ -15,16 +15,19 @@ import {
 import { useState } from "react";
 import { slugify } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
+import { Loader2 } from "lucide-react";
 
 export default function AffiliationForm() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertDescription, setAlertDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function onSubmit(data: any, form: UseFormReturn) {
     setIsAlertOpen(true);
     setAlertTitle("Submitting")
     setAlertDescription("Please wait while we submit your request...");
+    setIsSubmitting(true);
 
     const { name } = data;
     const slug = slugify(name);
@@ -72,6 +75,7 @@ export default function AffiliationForm() {
         `Something went wrong! Network request failed with error "${e}".`
       );
     }
+    setIsSubmitting(false);
   }
   return (
     <>
@@ -87,7 +91,11 @@ export default function AffiliationForm() {
             <AlertDialogDescription>{alertDescription}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction>OK</AlertDialogAction>
+            {isSubmitting ? (
+              <AlertDialogAction disabled><Loader2 className="animate-spin"/></AlertDialogAction>
+            ) : (
+              <AlertDialogAction>OK</AlertDialogAction>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
