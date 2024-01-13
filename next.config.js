@@ -78,3 +78,9 @@ module.exports = withSentryConfig(
     disableLogger: true,
   }
 );
+
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
+
+module.exports = withBundleAnalyzer(module.exports);
