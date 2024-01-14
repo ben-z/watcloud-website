@@ -14,7 +14,6 @@ import {
 import { slugify } from "@/lib/utils";
 import Form from "@rjsf/core"; // Or whatever theme you use
 import {
-  ValidatorFunctions,
   createPrecompiledValidator,
 } from "@rjsf/validator-ajv8";
 import { JSONSchema7 } from "json-schema";
@@ -22,9 +21,7 @@ import { Loader2 } from "lucide-react";
 import { createRef, useState } from "react";
 
 const validator = createPrecompiledValidator(
-  {
-    [affiliationSchemaJSON["$id"]]: affiliationSchemaValidate,
-  } as ValidatorFunctions,
+  affiliationSchemaValidate,
   affiliationSchemaJSON as JSONSchema7
 );
 
