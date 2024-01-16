@@ -118,13 +118,13 @@ a dashboard to monitor the health of the machines in the cluster.
 
 - Be [nice](https://man7.org/linux/man-pages/man2/nice.2.html)
   - If you have a long-running non-interactive process, please [increase its niceness](https://www.tecmint.com/set-linux-process-priority-using-nice-and-renice-commands/) so that interactive programs don't lag.
-  - Being nice is simply changing `./my_program arg1 arg2` to `nice ./my_program arg1 arg2`.
+  - Being nice is simply changing `./my_program arg1 arg2{:bash}` to `nice ./my_program arg1 arg2{:bash}`.
 - Clean up after yourself
   - If you are using `/mnt/scratch`, please make sure to clean up your files after you are done with them.
   - Please only use `/home` for small files. Writing large files to `/home` will significantly slow down the filesystem for all users.
   - `/mnt/wato-drive*` are large storage pools, but they are not infinite and can fill up quickly with today's large datasets.
     Please remove unneeded files from these directories.
-  - Please clean up your Docker images and containers regularly. `docker system prune -a` is your friend.
+  - Please clean up your Docker images and containers regularly. `docker system prune -all{:bash}` is your friend.
 - Resource allocation
   - Currently, we don't have any resource allocation policies in place. However, if we notice that the cluster's resources are frequently exhausted,
     we may need to implement a resource allocation system common in HPC[^hpc] clusters.
@@ -132,6 +132,103 @@ a dashboard to monitor the health of the machines in the cluster.
 [^hpc]: [High-performance computing](https://en.wikipedia.org/wiki/High-performance_computing) (HPC) is the use of supercomputers and parallel processing
 techniques to solve complex computational problems. Examples of HPC clusters include [Cedar](https://docs.computecanada.ca/wiki/Cedar) and
 [Graham](https://docs.computecanada.ca/wiki/Graham).
+
+## Troubleshooting
+
+This section contains some common issues that users may encounter when using the machines in the cluster and their solutions. If you encounter an issue that is not listed here, please [reach out](./support-resources).
+
+### Cannot connect to the Docker daemon
+
+You may encounter this error when trying to run Docker commands:
+
+```
+Cannot connect to the Docker daemon at unix:///run/user/$UID/docker.sock. Is the docker daemon running?
+```
+
+To troubleshoot this issue, please run the following command to confirm whether the Docker daemon is running:
+
+```bash copy
+systemctl --user status docker-rootless
+```
+
+A healthy Docker daemon should look like this:
+
+```ansi
+[0;1;32m●[0m docker-rootless.service - Docker Application Container Engine (Rootless)
+     Loaded: loaded (/usr/lib/systemd/user/docker-rootless.service; enabled; vendor preset: enabled)
+     Active: [0;1;32mactive (running)[0m since Tue 2024-01-16 05:47:04 UTC; 44s ago
+       Docs: https://docs.docker.com/go/rootless/
+   Main PID: 2090042 (rootlesskit)
+      Tasks: 63
+     Memory: 54.7M
+        CPU: 587ms
+     CGroup: /user.slice/user-1507.slice/user@1507.service/app.slice/docker-rootless.service
+             ├─2090042 rootlesskit --net=slirp4netns --mtu=65520 --slirp4netns-sandbox=auto --slirp4netns-seccomp=auto --disable-host-loopback --port-driver=builtin --copy-up=/etc --copy-up=/run --propagation=rslave /usr/bin/dockerd-rootless.sh --data-root /var/lib/cluster/users/1507/docker --config-file /etc/docker/daemon.json
+             ├─2090053 /proc/self/exe --net=slirp4netns --mtu=65520 --slirp4netns-sandbox=auto --slirp4netns-seccomp=auto --disable-host-loopback --port-driver=builtin --copy-up=/etc --copy-up=/run --propagation=rslave /usr/bin/dockerd-rootless.sh --data-root /var/lib/cluster/users/1507/docker --config-file /etc/docker/daemon.json
+             ├─2090072 slirp4netns --mtu 65520 -r 3 --disable-host-loopback --enable-sandbox --enable-seccomp 2090053 tap0
+             ├─2090080 dockerd --data-root /var/lib/cluster/users/1507/docker --config-file /etc/docker/daemon.json
+             └─2090112 containerd --config /run/user/1507/docker/containerd/containerd.toml
+```
+
+If the daemon failed to start, the output may look like this:
+
+```ansi
+[0;31;1m×[0m docker-rootless.service - Docker Application Container Engine (Rootless)
+     Loaded: loaded (/usr/lib/systemd/user/docker-rootless.service; enabled; vendor preset: enabled)
+     Active: [0;31;1mfailed[0m (Result: exit-code) since Tue 2024-01-16 05:15:38 UTC; 9min ago
+       Docs: https://docs.docker.com/go/rootless/
+    Process: 2049816 ExecStart=/usr/bin/dockerd-rootless.sh --data-root /var/lib/cluster/users/1507/docker --config-file /etc/docker/daemon.json [0;31;1m(code=exited, status=1/FAILURE)[0m
+   Main PID: 2049816 (code=exited, status=1/FAILURE)
+        CPU: 283ms
+
+Jan 16 05:15:38 trpro-ubuntu2 systemd[73045]: docker-rootless.service: Scheduled restart job, restart counter is at 3.
+Jan 16 05:15:38 trpro-ubuntu2 systemd[73045]: Stopped Docker Application Container Engine (Rootless).
+Jan 16 05:15:38 trpro-ubuntu2 systemd[73045]: [0;1;38:5:185mdocker-rootless.service: Start request repeated too quickly.[0m
+Jan 16 05:15:38 trpro-ubuntu2 systemd[73045]: [0;1;38:5:185mdocker-rootless.service: Failed with result 'exit-code'.[0m
+Jan 16 05:15:38 trpro-ubuntu2 systemd[73045]: [0;31;1mFailed to start Docker Application Container Engine (Rootless).
+```
+
+To get more information about why the daemon failed to start, you can view the logs by running:
+
+```bash copy
+journalctl --user --catalog --pager-end --unit docker-rootless.service
+```
+
+One of the most common reasons for the Docker daemon to fail to start is that the storage quota has been exceeded. If this is the case, you will see `disk quota exceeded` in the logs:
+
+```ansi {3}
+[0mJan 16 05:15:35 trpro-ubuntu2 dockerd-rootless.sh[2049885]: time="2024-01-16T05:15:35.066806684Z" level=info msg="containerd successfully booted in 0.020404s"
+Jan 16 05:15:35 trpro-ubuntu2 dockerd-rootless.sh[2049852]: time="2024-01-16T05:15:35.077397993Z" level=info msg="stopping healthcheck following graceful shutdown" module=libcontainerd
+Jan 16 05:15:36 trpro-ubuntu2 dockerd-rootless.sh[2049852]: failed to start daemon: Unable to get the TempDir under /var/lib/cluster/users/1507/docker: mkdir /var/lib/cluster/users/1507/docker/tmp: disk quota exceeded
+Jan 16 05:15:36 trpro-ubuntu2 dockerd-rootless.sh[2049827]: [rootlesskit:child ] error: command [/usr/bin/dockerd-rootless.sh --data-root /var/lib/cluster/users/1507/docker --config-file /etc/docker/daemon.json] exited: exit status 1
+Jan 16 05:15:36 trpro-ubuntu2 dockerd-rootless.sh[2049816]: [rootlesskit:parent] error: child exited: exit status 1
+Jan 16 05:15:36 trpro-ubuntu2 systemd[73045]: [0;1mdocker-rootless.service: Main process exited, code=exited, status=1/FAILURE[0m
+[0;38:5:245m░░ [0;32mSubject: Unit process exited[0m
+[0;38:5:245m░░[0m [0;32mDefined-By: systemd[0m
+[0;38:5:245m░░[0m [0;32mSupport: http://www.ubuntu.com/support[0m
+[0;38:5:245m░░[0m
+[0;38:5:245m░░[0m [0;32mAn ExecStart= process belonging to unit UNIT has exited.[0m
+[0;38:5:245m░░[0m
+[0;38:5:245m░░[0m [0;32mThe process' exit code is 'exited' and its exit status is 1.[0m
+Jan 16 05:15:36 trpro-ubuntu2 systemd[73045]: [0;1;38:5:185mdocker-rootless.service: Failed with result 'exit-code'.
+```
+
+For more information about storage quotas, please see the [Quotas](./quotas) page.
+
+To free up space for Docker, you can selectively delete files from the `/var/lib/cluster/users/$(id -u)/docker` directory until you are no longer over quota. However, it could be difficult to determine which files to delete. If you would like to delete all your Docker files (including images, containers, volumes, etc.), which effectively resets your Docker installation, you can delete the entire directory:
+
+```bash copy
+rm -r /var/lib/cluster/users/$(id -u)/docker
+```
+
+If you would prefer to use Docker tools to clean up your Docker installation (e.g. `docker system prune -all{:bash}`), you can reach out to a WATcloud team member to temporarily increase your storage quota so that Docker daemon can be started.
+
+Once you have freed up enough space, you can restart the Docker daemon by running:
+
+```bash copy
+systemctl --user start docker-rootless
+```
+
 
 {
 // Separate footnotes from the main content
