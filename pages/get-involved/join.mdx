@@ -1,0 +1,99 @@
+# Joining WATcloud
+
+- Automation
+- DevOps
+- Sysadmin
+- HPC
+- Linux
+- Terraform
+- Ansible
+- Infrastructure as Code
+- CI/CD
+- Observability
+- Kubernetes
+- SLURM
+- HomeLab
+- Web Development
+- Robots taking over the world
+
+Does any of the above sound familiar? Are you interested in bringing powerful compute to the masses? Do you want to work with compute infrastructure similar to those used by the world's most well-known companies[^tesla]? If so, we'd love to have you onboard!
+
+[^tesla]: Our compute infrastructure is errily similar to the dev farm used by the Tesla Autopilot team 😱
+
+## Who we're looking for
+
+WATcloud is not like a course project, where you can do some work, get a grade, and then forget about it. We provide a service that is always up. We have users that depend on us. We have a responsibility to keep our service running, and to keep our users happy. We're looking for people who are passionate about what they do, and who are willing to put in the effort to build and quickly iterate on projects until every aspectis fully automated, reliable, observable, and trivially maintainable[^e2e-maintainable].
+
+[^e2e-maintainable]: A project is trivially maintainable if it can be maintained by someone who has never seen the project before, and who has no prior knowledge of the project's internals beyond a high-level overview of its purpose. Most of the time, this involves building something that we can take down and rebuild from scratch by running a single command.
+
+## How to apply
+
+import { Link } from 'nextra-theme-docs'
+import websiteConfig from '@/build/fixtures/website-config.json'
+
+The best way to join WATcloud is to start contributing! We have a backlog of projects that we'd like to work on, but the list of projects always grows faster than we can work on them. A few of our projects are self-contained enough that anyone can pick them up and work on them. Below is a list of such projects. If you are able to complete one of these projects independently, we will be happy to bring you onboard immediately! If you are interested in working on a project that is not listed below, such as hardware projects (e.g. building computers, upgrading networking hardware) and projects that directly affect our infrastructure (Kubernetes, Terraform, Ansible, etc.), please reach out to us on <Link href={`https://discord.gg/${websiteConfig.discord_invite_code}`}>Discord</Link> or email infra-outreach@watonomous.ca.
+
+## Projects
+
+If you can complete one of the projects below, you are guaranteed a spot on the team!
+
+### File Auto-Expiration Tool
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/1143 */}
+
+At WATcloud, we have many shared drives that are used by our users to store files. Some drives, like the [scratch drive](../docs/compute-cluster/machine-usage-guide#mntscratch-directory), is meant for temporary storage. However, users often forget to delete their files, and drives quickly fills up. We need a tool that can give us a list of files that have not been accessed in a long time, so that we can take appropriate action (e.g. notify the user, then delete the file). This tool should be a lightweight script that we can run on a schedule.
+
+Assume that the drive is 2-5 TiB, backed by NVMe SSD. The filesystem type is flexible, but preferrably ext4 or xfs. The tool should have minimal impact on drive lifespan. Please be aware of the different timestamp types (e.g. access time, modification time, inode change time), and how they are accounted for by different filesystems and access methods.
+
+### Automatic DNS failover
+
+We host a Kubernetes cluster on our infrastructure and run a number of services. The services are exposed via [nginx-ingress](https://github.com/kubernetes/ingress-nginx). Different machines are assigned the same DNS name. For example, we could have `s3.watonomous.ca` point to all Kubernetes hosts in the cluster (using multiple DNS A records), and the client accessing `s3.watonomous.ca` would send requests to one of the hosts, and nginx-ingress would route the request to the appropriate service. This is a simple way to reduce downtime, since if one of the hosts goes down, there's only a `1/n` chance that the client will be affected[^assume-round-robin]. However, this is still not ideal. Most clients are not designed with a retry mechanism, and certainly rarer to have a retry mechanism that re-issues DNS lookups. We would like to have a tool that can automatically detect when a host goes down, and remove its DNS record from the DNS server. This way, clients will be less likely to be affected by a host going down.
+
+We use Cloudflare as our DNS provider. Cloudflare was generous enough to give us a sponsorship that included [Zero-Downtime Failover](https://developers.cloudflare.com/fundamentals/basic-tasks/protect-your-origin-server/#zero-downtime-failover). This works well for externally-accessible services, but we also have internal services that resolve to IP addresses that are only accessible from the cluster. This tool will help us achieve a similar[^similar-reliability] level of reliability for internal services.
+
+[^assume-round-robin]: We are assuming that there's perfect DNS round-robin or random selection.
+[^similar-reliability]: It's slightly less reliable than Cloudflare's Zero-Downtime Failover, since there's a delay between when the host goes down and when the DNS record is removed. However, this is still much better than the current situation, where the DNS record of a downed host is never removed.
+
+### Broken Internal Link Detector
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/996#issuecomment-1875748581 */}
+
+We have a statically-generated Next.js website[^website]. Sometimes, we make typos in our hyperlinks. We would like to have a tool that can detect broken internal links. This should be a tool that runs at build-time and fails the build if it detects a broken link. The tool should be able to handle links to hashes (e.g. `#section`) in addition to links to pages. An initial brainstorm of how this could be implemented is available [here](https://chat.openai.com/share/0e0ffb40-1110-4bd5-8a1a-dd22a0e6483d).
+
+[^website]: The source code of the website is accessible at https://github.com/WATonomous/watcloud-website
+
+### Linux User Manager
+
+{/* 
+Internal references:
+- https://github.com/WATonomous/infra-config/issues/960#issuecomment-1704040966
+- https://github.com/WATonomous/infra-config/issues/1834
+*/}
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { CheckSquareIcon } from "lucide-react"
+
+<Alert variant="success" className="mt-6">
+  {/* <Terminal className="h-4 w-4" /> */}
+  <CheckSquareIcon className='h-5 w-5'/>
+  <AlertTitle>Completed</AlertTitle>
+  <AlertDescription>
+    This project has been completed and the source code is available [here](https://github.com/WATonomous/linux-directory-provisioner). Please don't hesitate to reach out if you have any comments or suggestions!
+  </AlertDescription>
+</Alert>
+
+At WATcloud, we use [Ansible](https://www.ansible.com/) for provisioning machines and users. However, due to the nature of Ansible, there are a lot of inefficiencies in user provisioning. The provisioning pipeline's running time scales linearly with the number of users[^ansible-user-linear]. As of 2023, we have accumulated over 300 users in the cluster. This results in a single provisioning step that takes over 15 minutes. We would like to have a tool that can manage users on a machine, and that can be used in place of Ansible for user provisioning. This tool should be able to accept the following arguments:
+
+- Managed UID range: the range of UIDs that the tool has control over
+- Managed GID range: the range of GIDs that the tool has control over
+- User list (username, UID, password, SSH keys): a list of users that the tool should manage.
+- Group list (groupname, GID, members): a list of groups that the tool should manage.
+
+[^ansible-user-linear]: Ansible issues a separate command for each action for each user. Even with the [pipelining](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#ansible-pipelining) feature, the provisioning pipeline is unbearably slow.
+
+{
+// Separate footnotes from the main content
+}
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />
