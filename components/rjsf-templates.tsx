@@ -238,7 +238,7 @@ function CustomSubmitButton(props: SubmitButtonProps) {
   if (norender) {
     return null;
   }
-  return <Button type="submit">Submit</Button>;
+  return <Button type="submit" className="mt-8">Submit</Button>;
 }
 
 function CustomFieldErrorTemplate(props: FieldErrorProps) {
