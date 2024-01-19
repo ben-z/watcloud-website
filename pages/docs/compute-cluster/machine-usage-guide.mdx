@@ -137,6 +137,24 @@ techniques to solve complex computational problems. Examples of HPC clusters inc
 
 This section contains some common issues that users may encounter when using the machines in the cluster and their solutions. If you encounter an issue that is not listed here, please [reach out](./support-resources).
 
+### Permission denied while trying to connect to the Docker daemon
+
+You may encounter this error when trying to run Docker commands:
+
+```
+permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/containers/json": dial unix /var/run/docker.sock: connect: permission denied
+```
+
+This error occurs when your shell doesn't source `/etc/profile` (`zsh` is known to do this). Our Docker rootless setup
+requires that the `DOCKER_HOST` environment variable be set properly, which is done in `/etc/profile`. To fix this,
+please add the following line to your shell's rc file (e.g. `~/.zshrc`):
+
+```bash copy
+export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/docker.sock
+```
+
+Remember to restart your shell or source the rc file after making the change.
+
 ### Cannot connect to the Docker daemon
 
 You may encounter this error when trying to run Docker commands:
