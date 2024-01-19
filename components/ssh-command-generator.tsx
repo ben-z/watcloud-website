@@ -122,7 +122,7 @@ export function SSHCommandGenerator() {
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const displaySSHKeyPath = sshKeyPath || "<ssh_key_path>"
-    const displayUsername = username || "<username>"
+    const displayUsername = (username || "<username>").replace(/\$$/, "\\$")
     const displayHostname = hostname || "<hostname>"
 
     let sshCommand = "";
