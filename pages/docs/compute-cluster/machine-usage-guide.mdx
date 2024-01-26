@@ -124,7 +124,7 @@ a dashboard to monitor the health of the machines in the cluster.
   - Please only use `/home` for small files. Writing large files to `/home` will significantly slow down the filesystem for all users.
   - `/mnt/wato-drive*` are large storage pools, but they are not infinite and can fill up quickly with today's large datasets.
     Please remove unneeded files from these directories.
-  - Please clean up your Docker images and containers regularly. `docker system prune -all{:bash}` is your friend.
+  - Please clean up your Docker images and containers regularly. `docker system prune --all{:bash}` is your friend.
 - Resource allocation
   - Currently, we don't have any resource allocation policies in place. However, if we notice that the cluster's resources are frequently exhausted,
     we may need to implement a resource allocation system common in HPC[^hpc] clusters.
