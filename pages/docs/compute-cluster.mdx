@@ -1,0 +1,25 @@
+# WATcloud Compute Cluster
+
+![Server Room (Light)](/assets/server-room-light-min.jpg)
+
+The WATcloud Compute Cluster is a collection of servers that are available for use by students and faculty at the University of Waterloo
+and partnering institutions.
+
+## Quick Links
+
+import {
+  CPUIcon,
+  CheckSquareIcon,
+  TerminalIcon,
+  BookMarkedIcon,
+  HelpCircleIcon,
+} from "lucide-react"
+import { Card, Cards } from 'nextra/components'
+
+<Cards>
+  <Card icon={<CPUIcon />} title="Machine List" href="/machines" /> 
+  <Card icon={<CheckSquareIcon />} title="Getting Access" href="./getting-access" />
+  <Card icon={<TerminalIcon />} title="SSH Guide" href="./ssh" />
+  <Card icon={<BookMarkedIcon />} title="Machine Usage Guide" href="./machine-usage-guide" />
+  <Card icon={<HelpCircleIcon />} title="Support Resources" href="./support-resources" />
+</Cards>
