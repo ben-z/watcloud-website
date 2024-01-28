@@ -366,7 +366,7 @@ function CustomBaseInputTemplate(props: BaseInputTemplateProps) {
   );
 }
 
-export default {
+const templates = {
   ArrayFieldTemplate: CustomArrayFieldTemplate,
   ArrayFieldItemTemplate: CustomArrayFieldItemTemplate,
   BaseInputTemplate: CustomBaseInputTemplate,
@@ -377,3 +377,5 @@ export default {
   ObjectFieldTemplate: CustomObjectFieldTemplate,
   ButtonTemplates: { SubmitButton: CustomSubmitButton },
 };
+
+export default templates;

@@ -16,7 +16,7 @@ const Redirect = ({
     setTimeout(() => {
         router.replace(to); // replace the current route with the new route
     },  delay_ms);
-  }, [router]);
+  }, [router, to, delay_ms]);
 
   return loading_indicator;
 };
