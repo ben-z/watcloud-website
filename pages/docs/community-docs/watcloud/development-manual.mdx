@@ -1,0 +1,80 @@
+# WATcloud Development Manual
+
+This document is a collection of snippets and notes that are useful for the development process.
+It's not meant to be a complete guide, but rather a collection of useful information.
+This is similar to our [internal notes](https://github.com/WATonomous/infra-notes), except that
+all information here is non-sensitive. We will gradually migrate information from the internal notes to
+this document.
+
+This document is best read when cross-referenced with the code in the [infra-config](https://github.com/WATonomous/infra-config) repo.
+
+## Ansible
+
+### Developing Ansible Roles
+
+Occasionally, we may need to develop new Ansible roles or fork existing ones to fix bugs or add features.
+A list of existing roles can be found by [searching for `ansible-role-` on GitHub](https://github.com/WATonomous?q=ansible-role-&type=all&language=&sort=).
+
+To develop a role, we can clone the role locally and mount it into our development environment.
+For example, to develop [ansible-role-microk8s](https://github.com/WATonomous/ansible-role-microk8s),
+we do the following:
+
+```bash
+# Clone the role alongside the infra-config repo
+git clone git@github.com:WATonomous/infra-config.git
+git clone git@github.com:WATonomous/ansible-role-microk8s.git
+```
+
+The resulting folder structure should look like this:
+
+import { FileTree } from 'nextra/components'
+
+<FileTree>
+  <FileTree.Folder name="infra-config" defaultOpen>
+    <FileTree.File name="docker-compose.yml" />
+    <FileTree.File name="ansible-galaxy-requirements.yml" />
+    <FileTree.File name="... other files" />
+  </FileTree.Folder>
+  <FileTree.Folder name="ansible-role-microk8s" />
+</FileTree>
+
+Then we can mount the role into our development environment by making the following changes to `docker-compose.yml`:
+
+```ansi
+[0;1mdiff --git a/docker-compose.yml b/docker-compose.yml[0m
+[0;1mindex 30e581dab..cc9b34874 100644[0m
+[0;1m--- a/docker-compose.yml[0m
+[0;1m+++ b/docker-compose.yml[0m
+[0;36m@@ -8,6 +8,7 @@[0m services:
+       # The output directory is mounted as rw so that the provisioner can write
+       # to it.
+       - ./outputs:/infra-config/outputs:rw
+[0;32m+      - ../ansible-role-microk8s:/root/.ansible/roles/watonomous.microk8s:ro[0m
+     tmpfs:
+       - /run:exec
+       - /tmp:exec
+```
+
+Now, when we run the provisioner, it will use the local copy of the role instead of the one installed by Ansible Galaxy.
+
+After we're done developing the role, we can remove the mount from `docker-compose.yml` and submit a PR to the role's repo. Once the PR is merged, we can update the role version in `ansible-galaxy-requirements.yml` and remove the local copy of the role.
+
+For most custom roles, we simply use the commit hash as the version. Ansible Galaxy will automatically
+download the role from GitHub using the commit hash. So updating the role version in `ansible-galaxy-requirements.yml` is
+as simple as:
+
+```ansi
+[0;1mdiff --git a/ansible/ansible-galaxy-requirements.yml b/ansible/ansible-galaxy-requirements.yml[0m
+[0;1mindex cdf321adf..b2ba4c1ec 100644[0m
+[0;1m--- a/ansible/ansible-galaxy-requirements.yml[0m
+[0;1m+++ b/ansible/ansible-galaxy-requirements.yml[0m
+[0;36m@@ -24,7 +24,7 @@[0m roles:
+     version: 7854b75566d7cb3f41009f83a3ceee93c2890262
+   - name: watonomous.microk8s
+     src: git+https://github.com/WATonomous/ansible-role-microk8s
+[0;31m-    version: dfe4a5c92207d08462b6f206cd7b42010b34fa38[0m
+[0;32m+    version: d544a16cbde82bd7457a8d498215ad78e6a689d0[0m
+   - name: geerlingguy.filebeat
+     src: git+https://github.com/geerlingguy/ansible-role-filebeat
+     version: 407a4c3cd31cc8f9c485b9177fb7287e71745efb
+```
