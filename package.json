@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "main": "next",
   "scripts": {
-    "preprocess": "npm run generate-fallback-images && npm run generate-fixtures",
+    "preprocess": "npm run generate-fixtures",
     "dev": "npm run preprocess && next dev",
     "build": "npm run preprocess && next build && ./scripts/post-build.sh",
     "clean": "rm -rf .next out build node_modules/.cache",
@@ -14,7 +14,6 @@
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
     "generate-fixtures": "./scripts/generate-fixtures.sh",
-    "generate-fallback-images": "sharp --format webp --input './public/assets/*.avif' --output './public/assets/{name}.generated.webp' && sharp --format jpg --input './public/assets/*.avif' --output './public/assets/{name}.generated.jpg'",
     "optimize-images": "next-export-optimize-images"
   },
   "repository": {

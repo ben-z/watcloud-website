@@ -11,8 +11,6 @@ function PageIndex({
 }) {
     const pages = getPagesUnderRoute(pageRoot);
 
-    console.log(pages)
-
     return (
         <Cards>
         {
