@@ -1,15 +1,9 @@
-const withNextra = require('nextra')({
-  theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.jsx',
-  latex: true, // LaTeX support: https://nextra.site/docs/guide/advanced/latex
-});
- 
-module.exports = withNextra({
-  // any other next.js config
+// Original Next.js config
+module.exports = {
   reactStrictMode: true,
   output: 'export',
   images: {
-    // output: export doesn't support image optimization
+    // output: export doesn't support Next.js image optimization
     unoptimized: true,
   },
   // Next.js doesn't support trailing slashes in basePath
@@ -34,14 +28,18 @@ module.exports = withNextra({
       "postcss.config.js",
     ]
   }
-})
+}
 
-// next-export-optimize-images
-// Disabled for now, because the generated images are often larger than the originals.
-// const withExportImages = require('next-export-optimize-images')
-// module.exports = withExportImages(module.exports)
+// Add Nextra config
+const withNextra = require('nextra')({
+  theme: 'nextra-theme-docs',
+  themeConfig: './theme.config.jsx',
+  latex: true, // LaTeX support: https://nextra.site/docs/guide/advanced/latex
+});
+  
+module.exports = withNextra(module.exports)
 
-// Injected content via Sentry wizard below
+// Add Sentry config
 const { withSentryConfig } = require("@sentry/nextjs");
 
 module.exports = withSentryConfig(
@@ -79,6 +77,7 @@ module.exports = withSentryConfig(
   }
 );
 
+// Add bundle analyzer config
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
 });
