@@ -15,7 +15,7 @@ usage() {
 }
 
 to_pascale_case() {
-    echo "$1" | sed -r 's/(^|_|-)([a-z])/\U\2/g'
+    echo "$1" | sed -E 's/(^|_|-)([a-z])/\U\2/g'
 }
 
 # Parse command line arguments

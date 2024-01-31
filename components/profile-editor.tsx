@@ -36,6 +36,7 @@ export function ProfileEditor() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertDescription, setAlertDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,6 +46,7 @@ export function ProfileEditor() {
   });
 
   async function onSubmit({ email }: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
     try {
       const res = await fetch(
         "https://user-config-lookup.watonomous.ca/send-edit-link",
@@ -70,6 +72,7 @@ export function ProfileEditor() {
       setAlertDescription(`Something went wrong! Network request failed with error "${e}".`);
     }
     setIsAlertOpen(true);
+    setIsSubmitting(false);
   }
 
   return (
@@ -93,7 +96,9 @@ export function ProfileEditor() {
               </FormItem>
             )}
           />
-          <Button type="submit">Submit</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? <>Submitting...</> : <>Submit</>}
+          </Button>
         </form>
       </Form>
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
