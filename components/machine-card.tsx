@@ -170,7 +170,7 @@ export function MachineCard({
                                     </PopoverContent>
                                 </Popover>
                             </dt>
-                            <dd className="font-semibold">
+                            <dd className="font-medium">
                                 <ul className="list-none">
                                     <TooltipProvider>
                                         {machine.hostnames.length ? machine.hostnames.sort(hostnameSorter).map((hostname, index) => {
@@ -193,7 +193,7 @@ export function MachineCard({
                     { 'lsb_release_info' in machine && machine.lsb_release_info ? (
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">OS</dt>
-                            <dd className="font-semibold">{machine.lsb_release_info['description']}</dd>
+                            <dd className="font-medium">{machine.lsb_release_info['description']}</dd>
                         </div>
                     ) : undefined}
                     <div className="flex flex-col py-3 first:pt-0">
@@ -209,7 +209,7 @@ export function MachineCard({
                                 <span>CPU</span>
                             )}
                         </dt>
-                        <dd className="font-semibold">{machine.cpu_info['model']}</dd>
+                        <dd className="font-medium">{machine.cpu_info['model']}</dd>
                     </div>
                     <div className="flex flex-col py-3 first:pt-0">
                         <dt className="mb-1 text-gray-500 dark:text-gray-400">
@@ -224,16 +224,16 @@ export function MachineCard({
                                 </PopoverContent>
                             </Popover>
                         </dt>
-                        <dd className="font-semibold">{machine.cpu_info['logical_processors']}</dd>
+                        <dd className="font-medium">{machine.cpu_info['logical_processors']}</dd>
                     </div>
                     <div className="flex flex-col py-3 first:pt-0">
                         <dt className="mb-1 text-gray-500 dark:text-gray-400">RAM</dt>
-                        <dd className="font-semibold">{bytesToSize(parseInt(machine.memory_info["memory_total_kibibytes"])*1024, 0)}</dd>
+                        <dd className="font-medium">{bytesToSize(parseInt(machine.memory_info["memory_total_kibibytes"])*1024, 0)}</dd>
                     </div>
                     { 'gpus' in machine && machine.gpus.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.gpus.length, "GPU")}</dt>
-                            <dd className="font-semibold">
+                            <dd className="font-medium">
                                 <ol start={0}>
                                     {machine.gpus.length ? machine.gpus.map((gpu, index) => {
                                         return (
@@ -249,7 +249,7 @@ export function MachineCard({
                     { 'hosted_storage' in machine && machine.hosted_storage.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">Hosted Storage</dt>
-                            <dd className="font-semibold">
+                            <dd className="font-medium">
                                 <ol start={0}>
                                     {machine.hosted_storage.length ? machine.hosted_storage.map((storage, index) => {
                                         return (
