@@ -95,6 +95,19 @@ Examples of software that we do not install on the general-use machines include:
 
 If there is a piece of software that you think should be installed on the general-use machines, please reach out to a WATcloud team member.
 
+### `OMP_NUM_THREADS`
+
+On general-use machines, we set the `OMP_NUM_THREADS` environment variable to `1` by default. This is to prevent system overload when running
+programs that use OpenMP[^openmp]. This default is consistent with the
+[default behaviour of PyTorch Distributed](https://github.com/pytorch/pytorch/blob/4b494d075093096d822b9d614e2719a0e821c6af/torch/distributed/run.py#L758-L763).
+If you'd like to change this default, simply set the `OMP_NUM_THREADS` environment variable to the desired value, for example:
+
+```bash copy
+export OMP_NUM_THREADS=4
+```
+
+[^openmp]: [OpenMP](https://www.openmp.org/) is an API that supports multi-platform shared memory multiprocessing programming in C, C++, and Fortran.
+
 ## Maintenance and Outages
 
 We try to keep the machines in the cluster up and running at all times. However, we do need to perform regular maintenance to keep the machines
