@@ -125,7 +125,7 @@ def generate_fixtures(host_config_path, data_path):
     
     for host in host_config["hosts"]:
         group_names = [g["name"] for g in host["groups"]]
-        if "ubuntu_dev_vm_nodes" in group_names:
+        if "login_nodes" in group_names:
             name = host["name"]
             properties = {
                 "name": name,
