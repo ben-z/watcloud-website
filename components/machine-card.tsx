@@ -49,10 +49,8 @@ import { hostnameSorter } from '@/lib/wato-utils'
 
 export function MachineCard({
     machine,
-    isVM,
 }: {
     machine: UnionOfElementTypes<MachineInfo>,
-    isVM: boolean,
 }) {
     const { data, error, isLoading } : {
         data?: HealthchecksioCheckProcessed[],
@@ -133,7 +131,7 @@ export function MachineCard({
     return (
         <Card>
             <CardHeader>
-            <CardTitle>
+            <CardTitle className="mb-1">
                 {machine.name}
                 <Popover>
                     <PopoverTrigger>
@@ -144,12 +142,16 @@ export function MachineCard({
                         {machineHealthSummary}
                     </PopoverContent>
                 </Popover>
-                { isVM ? (
-                    <Popover>
-                        <PopoverTrigger><Badge className="mx-2 my-1 align-text-top">VM</Badge></PopoverTrigger>
-                        <PopoverContent side="top">{machine.name} is a virtual machine</PopoverContent>
-                    </Popover>
-                ): undefined}
+                {
+                    machine.tags.map(({name, description}) => (
+                        <span key={name} className="ml-2 mr-1">
+                            <Popover>
+                                <PopoverTrigger><Badge className="align-bottom">{name}</Badge></PopoverTrigger>
+                                <PopoverContent side="top">{description}</PopoverContent>
+                            </Popover>
+                        </span>
+                    ))
+                }
             </CardTitle>
             <CardDescription>{
                 `${pluralizeWithCount(parseInt(machine.cpu_info['logical_processors']), "CPU")}`
@@ -159,7 +161,7 @@ export function MachineCard({
             </CardHeader>
             <CardContent className="grid text-sm">
                 <dl className="text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700 overflow-hidden">
-                    { 'hostnames' in machine && machine.hostnames.length ? (
+                    { 'hostnames' in machine && machine.hostnames?.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.hostnames.length, "Hostname")}
                                 <Popover>
@@ -198,16 +200,7 @@ export function MachineCard({
                     ) : undefined}
                     <div className="flex flex-col py-3 first:pt-0">
                         <dt className="mb-1 text-gray-500 dark:text-gray-400">
-                            {isVM ? (
-                                <Popover>
-                                    <span>CPU{<PopoverTrigger><HelpCircle className="ml-1 mr-1 h-3 w-3 text-muted-foreground" /></PopoverTrigger>}</span>
-                                    <PopoverContent side="top">
-                                        <p>{machine.name} is a virtual machine. The CPU model is the model of the emulated CPU (usually the same as the host CPU).</p>
-                                    </PopoverContent>
-                                </Popover>
-                            ): (
-                                <span>CPU</span>
-                            )}
+                            <span>CPU</span>
                         </dt>
                         <dd className="font-medium">{machine.cpu_info['model']}</dd>
                     </div>
@@ -216,11 +209,7 @@ export function MachineCard({
                             <Popover>
                                 <span>Logical Processors{<PopoverTrigger><HelpCircle className="ml-1 mr-1 h-3 w-3 text-muted-foreground" /></PopoverTrigger>}</span>
                                 <PopoverContent side="top">
-                                    {isVM ? (
-                                        <p>{"The total number of logical processors available to the machine. In virtual machines, this number may be lower than the CPU's specs."}</p>
-                                    ) : (
-                                        <p>The total number of logical processors available to the machine. This is often <Code>num_physical_cores * num_threads_per_core.</Code></p>
-                                    )}
+                                    <p>The total number of logical processors available to the machine. This is often <Code>num_physical_cores * num_threads_per_core.</Code></p>
                                 </PopoverContent>
                             </Popover>
                         </dt>

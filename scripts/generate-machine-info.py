@@ -3,6 +3,11 @@ import csv
 import json
 import yaml
 from pathlib import Path
+import sys
+
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
+from directory.scripts.host_utils import get_host_config, get_group_config
 
 def parse_colon_separated_file(s: str):
     lines = s.split("\n")
@@ -115,20 +120,52 @@ def get_mounts_with_quotas(host):
             })
     return mounts_with_quotas
 
-def generate_fixtures(host_config_path, data_path):
-    with open(host_config_path, 'r') as file:
-        host_config = yaml.safe_load(file)
+def get_lshw_info(data_path, host_name):
+    lshw_json_path = Path(data_path, "general", host_name, "lshw.json")
+    if not lshw_json_path.exists():
+        return {}
+    
+    with open(lshw_json_path, 'r') as file:
+        lshw_info = json.load(file)
+
+    # if is list
+    if isinstance(lshw_info, list):
+        assert len(lshw_info) == 1, f"Expected 1 lshw info, got {len(lshw_info)}. File: {lshw_json_path}"
+        lshw_info = lshw_info[0]
+
+    return lshw_info
+
+def generate_fixtures(data_path):
+    host_config = get_host_config()
     
     dev_vms = []
+    slurm_compute_nodes = []
     bare_metals = []
     bastions = []
     
     for host in host_config["hosts"]:
+        name = host["name"]
         group_names = [g["name"] for g in host["groups"]]
+        tags = []
+        lshw_info = get_lshw_info(data_path, name)
+        if lshw_info.get("vendor") == "QEMU":
+            tags.append({
+                "name": "VM",
+                "description": f"{name} is a virtual machine",
+            })
+        if "slurmd_nodes" in group_names and get_group_config(host, "slurmd_nodes")["slurm_role"] == "login":
+            tags.append({
+                "name": "SL",
+                "description": f"{name} is a SLURM login node",
+            })
+
+        properties = {
+            "name": name,
+            "tags": tags,
+        }
+
         if "login_nodes" in group_names:
-            name = host["name"]
-            properties = {
-                "name": name,
+            properties.update({
                 "cpu_info": get_cpu_info(data_path, name),
                 "memory_info": get_memory_info(data_path, name),
                 "gpus": get_gpu_info(data_path, name),
@@ -136,40 +173,48 @@ def generate_fixtures(host_config_path, data_path):
                 "lsb_release_info": get_lsb_release_info(data_path, name),
                 "ssh_host_keys": get_file_lines(data_path, name, "ssh-host-keys.log"),
                 "mounts_with_quotas": get_mounts_with_quotas(host),
-            }
+            })
             dev_vms.append(properties)
+        if "slurmd_nodes" in group_names:
+            slurmd_config = get_group_config(host, "slurmd_nodes")
+            if slurmd_config["slurm_role"] == "compute":
+                properties.update({
+                    "cpu_info": get_cpu_info(data_path, name),
+                    "memory_info": get_memory_info(data_path, name),
+                    "gpus": get_gpu_info(data_path, name),
+                    "lsb_release_info": get_lsb_release_info(data_path, name),
+                    "ssh_host_keys": get_file_lines(data_path, name, "ssh-host-keys.log"),
+                    "mounts_with_quotas": get_mounts_with_quotas(host),
+                })
+                slurm_compute_nodes.append(properties)
         if "bare_metal_nodes" in group_names:
-            name = host["name"]
-            properties = {
-                "name": name,
+            properties.update({
                 "cpu_info": get_cpu_info(data_path, name),
                 "memory_info": get_memory_info(data_path, name),
                 "hosted_storage": get_hosted_storage(data_path, name),
-            }
+            })
             bare_metals.append(properties)
         if "bastion_nodes" in group_names:
-            name = host["name"]
-            properties = {
-                "name": name,
+            properties.update({
                 "cpu_info": get_cpu_info(data_path, name),
                 "memory_info": get_memory_info(data_path, name),
                 "hostnames": [r["name"] for n in host["networks"] for r in n.get("dns_records",[])],
                 "ssh_host_keys_bastion": get_file_lines(data_path, name, "ssh-host-keys-bastion.log"),
-            }
+            })
             bastions.append(properties)
     
     return {
-        "dev_vms": sorted(dev_vms, key=lambda m: int(m["cpu_info"]["logical_processors"]), reverse=True),
-        "bare_metals": sorted(bare_metals, key=lambda m: int(m["cpu_info"]["logical_processors"]), reverse=True),
-        "bastions": sorted(bastions, key=lambda m: int(m["cpu_info"]["logical_processors"]), reverse=True),
+        "dev_vms": sorted(dev_vms, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
+        "slurm_compute_nodes": sorted(slurm_compute_nodes, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
+        "bare_metals": sorted(bare_metals, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
+        "bastions": sorted(bastions, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
     }
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate machine info from gathered data')
-    parser.add_argument('host_config_path', type=str, help='Path to host config')
     parser.add_argument('data_path', type=str, help='Path to data')
     parser.add_argument('fixtures_path', type=str, help='Path to fixtures')
     args = parser.parse_args()
-    fixtures = generate_fixtures(args.host_config_path, args.data_path)
+    fixtures = generate_fixtures(args.data_path)
     with open(Path(args.fixtures_path, "machine-info.json"), 'w') as file:
         json.dump(fixtures, file, indent=2)

@@ -19,7 +19,7 @@ const DEFAULT_MACHINE_NAME = machineInfo.dev_vms[0].name
 const ACCESSIBLE_MACHINES = Object.fromEntries([...machineInfo.dev_vms, ...machineInfo.bastions].map(m => [m.name, m]))
 const BASTION_NAMES = machineInfo.bastions.map(m => m.name)
 const ACCESSIBLE_MACHINE_LIST = Object.keys(ACCESSIBLE_MACHINES).map(m => ({value: m, label: m}))
-const HOSTNAME_TO_MACHINE_NAME = Object.fromEntries(Object.entries(ACCESSIBLE_MACHINES).flatMap(([machineName, machine]) => machine.hostnames.map(hostname => [hostname, machineName])))
+const HOSTNAME_TO_MACHINE_NAME = Object.fromEntries(Object.entries(ACCESSIBLE_MACHINES).flatMap(([machineName, machine]) => machine.hostnames?.map(hostname => [hostname, machineName]) || []))
 const ALL_ENTRYPOINTS: Map<string,string> = new Map(Object.entries({
     "direct": "Direct",
     "uw-vpn": "UW VPN",
@@ -68,7 +68,7 @@ export function SSHCommandGenerator() {
     const [sshKeyPath, _setSSHKeyPath] = useState("")
 
     const machineName = _machineName || HOSTNAME_TO_MACHINE_NAME[queryHostname] || DEFAULT_MACHINE_NAME
-    const machineHostnames = useMemo(() => ACCESSIBLE_MACHINES[machineName]?.hostnames.toSorted(hostnameSorter) || [], [machineName])
+    const machineHostnames = useMemo(() => ACCESSIBLE_MACHINES[machineName]?.hostnames?.toSorted(hostnameSorter) || [], [machineName])
     const entrypointToHostnamesMap = useMemo(() => getEntrypointToHostnamesMap(machineName, machineHostnames), [machineName, machineHostnames])
     const entrypoint = _entrypoint || entrypointToHostnamesMap.keys().next()?.value || ""
     const hostname = entrypointToHostnamesMap.get(entrypoint)?.has(_hostname || queryHostname) ? (_hostname || queryHostname) : (entrypointToHostnamesMap.get(entrypoint)?.values().next()?.value || "")
@@ -147,7 +147,10 @@ export function SSHCommandGenerator() {
         `).trim()
     } else if (BASTION_NAMES.includes(entrypoint)) {
         const jump_host = ACCESSIBLE_MACHINES[entrypoint]
-        const jump_host_hostname = jump_host.hostnames[0]
+        const jump_host_hostname = jump_host.hostnames?.[0]
+        if (!jump_host_hostname) {
+            console.error(`Error generating SSH command! Jump host ${entrypoint} has no hostnames.`)
+        }
         sshCommand = stripIndent(`
             # Connect to ${machineName} via ${jump_host.name} (${jump_host_hostname})
             ssh -v -o ProxyCommand="ssh -W %h:%p -i \\"${displaySSHKeyPath}\\" \\"${displayUsername}@${jump_host_hostname}\\"" -i "${displaySSHKeyPath}" "${displayUsername}@${displayHostname}"

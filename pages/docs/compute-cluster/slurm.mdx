@@ -1,0 +1,168 @@
+# SLURM
+
+SLURM (Simple Linux Utility for Resource Management)[^slurm] is an open-source job scheduler that handles the allocation of resources in a compute cluster.
+It is commonly used in HPC (High Performance Computing) environments. WATcloud uses SLURM to manage most of its compute resources.
+
+[^slurm]: https://slurm.schedmd.com/
+
+
+## Quick Start
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info">WATcloud SLURM is currently in beta. If you encounter any issues, please [let us know](/docs/compute-cluster/support-resources).</Callout>
+
+To submit jobs to the SLURM cluster, you will need to log into one of the SLURM login nodes.
+During the beta, they are labelled `SL` in the [machine list](/machines).
+After the beta, all general-use machines will be SLURM login nodes.
+
+### Interactive shell
+
+Execute the following command to submit a job to the SLURM cluster:
+
+```bash
+srun --pty bash
+```
+
+This will start an interactive shell session on a compute node with the default resources.
+You can view the resources allocated to your job by running:
+
+```bash
+scontrol show job $SLURM_JOB_ID
+```
+
+An example output is shown below:
+
+```text {6,17}
+JobId=1305 JobName=bash
+   UserId=ben(1507) GroupId=ben(1507) MCS_label=N/A
+   Priority=1 Nice=0 Account=watonomous-watcloud QOS=normal
+   JobState=RUNNING Reason=None Dependency=(null)
+   Requeue=1 Restarts=0 BatchFlag=0 Reboot=0 ExitCode=0:0
+   RunTime=00:00:04 TimeLimit=00:30:00 TimeMin=N/A
+   SubmitTime=2024-03-16T06:39:57 EligibleTime=2024-03-16T06:39:57
+   AccrueTime=Unknown
+   StartTime=2024-03-16T06:39:57 EndTime=2024-03-16T07:09:57 Deadline=N/A
+   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2024-03-16T06:39:57 Scheduler=Main
+   Partition=compute AllocNode:Sid=10.1.100.128:1060621
+   ReqNodeList=(null) ExcNodeList=(null)
+   NodeList=wato2-slurm1
+   BatchHost=wato2-slurm1
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=512M,node=1,billing=1,gres/tmpdisk=100
+   AllocTRES=cpu=1,mem=512M,node=1,billing=1,gres/tmpdisk=100
+   Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=*
+   MinCPUsNode=1 MinMemoryCPU=512M MinTmpDiskNode=0
+   Features=(null) DelayBoot=00:00:00
+   OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null)
+   Command=bash
+   WorkDir=/home/ben
+   Power=
+   TresPerNode=gres/tmpdisk:100
+```
+
+In this example, the job is allocated 1 CPU, 512MiB of memory, and 100MiB of temporary disk space (mounted at `/tmp`),
+and is allowed to run for up to 30 minutes.
+
+To request for more resources, you can use the `--cpus-per-task`, `--mem`, `--gres`, and `--time` flags.
+For example, to request 4 CPUs, 4GiB of memory, 20GiB of temporary disk space, and 2 hours of runtime, you can run:
+
+```bash
+srun --cpus-per-task 4 --mem 4G --gres tmpdisk:20480 --time 2:00:00 --pty bash
+```
+
+### Using Docker
+
+Unlike general use machines, the SLURM environment does not provide user-space systemd for managing background processes like the Docker daemon.
+To use Docker, you will need to start the Docker daemon manually. We have provided a convenience script to do this:
+
+```bash
+slurm-start-dockerd.sh
+```
+
+If successful, you should see the following output:
+
+```text
+Dockerd started successfully! Execute the following command to use it:
+
+export DOCKER_HOST=unix:///tmp/run/docker.sock
+docker run --rm hello-world
+```
+
+Follow the instructions to set the `DOCKER_HOST` environment variable accordingly.
+
+### Using GPUs
+
+You can request access to GPUs by using the `--gres mps` flag. For example, if your workload requires 4 GiB of VRAM, you can run:
+
+```bash
+srun --gres mps:4096 --pty bash
+```
+
+This will allocate GPU resources to your job using the NVIDIA Multi-Process Service (MPS)[^mps].
+Using MPS is the preferred way to request for GPU resources because it allows multiple jobs to
+share the same GPU.
+
+[^mps]: https://docs.nvidia.com/deploy/mps/index.html
+
+If your workload requires exclusive access to a GPU, you can use the `--gres gpu` flag instead:
+
+<Callout type="warning">Because the cluster is GPU-constrained, requesting whole GPUs is not recommended unless your workload can
+make efficient use of the entire GPU.</Callout>
+
+```bash
+srun --gres gpu:1 --pty bash
+```
+
+This will allocate a whole GPU to your job. Note that this will prevent other jobs from using the GPU until your job is finished.
+
+
+## Extra details
+
+### SLURM v.s. general-use machines
+
+The SLURM environment is configured to be as close to the general-use environment as possible.
+All of the same network drives and software are available. However, there are some differences:
+
+- The SLURM environment uses a `/tmp` drive for temporary storage instead of `/mnt/scratch` on general-use machines.
+    Temporary storage can be requested using the `--gres tmpdisk:<size_in_MiB>` flag.
+- The SLURM environment does not have a user-space systemd for managing background processes like the Docker daemon.
+    Please follow the instructions in the [Using Docker](#using-docker) section to start the Docker daemon.
+
+### `gres/tmpdisk`
+
+`tmpdisk` is a generic resource (GRES)[^gres] that represents temporary disk space. This resource is provisioned using a combination
+of `job_container/tmpfs`[^job-container-tmpfs] and custom scripts. The temporary disk space is mounted at `/tmp` and is automatically
+cleaned up when the job finishes. You can request for temporary disk space using the `--gres tmpdisk:<size_in_MiB>` flag.
+
+[^gres]: https://slurm.schedmd.com/gres.html
+[^job-container-tmpfs]: https://slurm.schedmd.com/job_container_tmpfs.html
+
+### `gres/mps` and `gres/gpu`
+
+`mps` and `gpu` are GRES that represent GPU resources.
+Allocation of these resources is managed by built-in SLURM plugins that interface with various GPU libraries.
+
+The `mps` GRES is used to request access to a portion of a GPU[^mps-management].
+In the WATcloud cluster, the amount of allocable `mps` equals the amount of VRAM (in MiB) on each GPU.
+This representation is chosen because it is a concrete metric that is the same across different GPU models.
+In reality, the amount of `mps` represents the share of the GPU's *compute* resources that the job can use,
+and the VRAM usage is not enforced. Please ensure that the mps requested is appropriate for your workload.
+To request for `mps`, use the `--gres mps:<size_in_MiB>` flag.
+
+[^mps-management]: For more information on MPS, please refer to the [MPS Management](https://slurm.schedmd.com/gres.html#MPS_Management) SLURM documentation.
+
+The `gpu` GRES is used to request exclusive access to GPUs[^gpu-management].
+This is not recommended unless your workload can make efficient use of the entire GPU.
+If you are unsure, please use the `mps` GRES instead.
+To request for `gpu`, use the `--gres gpu:<number_of_gpus>` flag.
+
+[^gpu-management]: For more information on GPU management, please refer to the [GPU Management](https://slurm.schedmd.com/gres.html#GPU_Management) SLURM documentation.
+
+
+{
+// Separate footnotes from the main content
+}
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />

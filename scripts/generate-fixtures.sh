@@ -45,7 +45,6 @@ fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-HOST_CONFIG_FILE="$PROJECT_DIR/../directory/hosts/host-config.yml"
 
 echo "Preparing workspace..."
 # Clean up any previous fixtures
@@ -66,7 +65,7 @@ else
     # Create a new worktree
     git worktree add "$PROJECT_DIR/build/data" origin/data
     # Generate fixtures
-    python3 "$SCRIPT_DIR/generate-machine-info.py" "$HOST_CONFIG_FILE" "$PROJECT_DIR/build/data" "$PROJECT_DIR/build/fixtures"
+    python3 "$SCRIPT_DIR/generate-machine-info.py" "$PROJECT_DIR/build/data" "$PROJECT_DIR/build/fixtures"
     python3 "$SCRIPT_DIR/generate-website-config.py" "$PROJECT_DIR/../outputs" "$PROJECT_DIR/build/fixtures"
     cp "$PROJECT_DIR/../directory/affiliations/affiliation.schema.json" "$PROJECT_DIR/build/fixtures"
     cp "$PROJECT_DIR/../outputs/directory/users/user.schema.json" "$PROJECT_DIR/build/fixtures"
