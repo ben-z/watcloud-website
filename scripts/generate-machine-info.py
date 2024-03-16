@@ -183,8 +183,6 @@ def generate_fixtures(data_path):
                     "memory_info": get_memory_info(data_path, name),
                     "gpus": get_gpu_info(data_path, name),
                     "lsb_release_info": get_lsb_release_info(data_path, name),
-                    "ssh_host_keys": get_file_lines(data_path, name, "ssh-host-keys.log"),
-                    "mounts_with_quotas": get_mounts_with_quotas(host),
                 })
                 slurm_compute_nodes.append(properties)
         if "bare_metal_nodes" in group_names:
