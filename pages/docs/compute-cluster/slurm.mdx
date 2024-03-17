@@ -116,6 +116,52 @@ srun --gres gpu:1 --pty bash
 
 This will allocate a whole GPU to your job. Note that this will prevent other jobs from using the GPU until your job is finished.
 
+### Using CUDA
+
+If your workload requires CUDA, you have a few options (not exhaustive):
+
+#### Using the `nvidia/cuda` Docker image
+
+You can use the `nvidia/cuda` Docker image to run CUDA workloads.
+Assuming you have started the Docker daemon (see [Using Docker](#using-docker)), you can run the following command to start a CUDA container:
+
+```bash
+docker run --rm -it --gpus all -v $(pwd):/workspace nvidia/cuda:12.0.0-devel-ubuntu22.04 nvcc --version
+```
+
+Note that the version of the Docker image must be compatible (usually this means lower than or equal to) with the driver version installed on the compute node.
+You can check the driver version by running `nvidia-smi`. If the driver version is not compatible with the Docker image, you will get an error that looks like this:
+
+```text
+> docker run --rm -it --gpus all -v $(pwd):/workspace nvidia/cuda:12.1.0-runtime-ubuntu22.04
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: error running hook #0: error running hook: exit status 1, stdout: , stderr: Auto-detected mode as 'legacy'
+nvidia-container-cli: requirement error: unsatisfied condition: cuda>=12.1, please update your driver to a newer version, or use an earlier cuda container: unknown.
+```
+
+#### Using the Compute Canada CUDA module
+
+The Compute Canada CVMFS[^cc-cvmfs] is mounted on the compute nodes. You can access CUDA by loading the appropriate module:
+
+```bash
+# Set up the module environment
+source /cvmfs/soft.computecanada.ca/config/profile/bash.sh
+# Load the appropriate environment
+module load StdEnv/2023
+# Load the CUDA module
+module load cuda/12.2
+# Check the nvcc version
+nvcc --version
+```
+
+Compute Canada only provides select versions of CUDA, and does not provide an easy way to list all available versions.
+A trick you can use is to run `which nvcc{:bash}` and trace back along the directory tree to find sibling directories
+that contain other CUDA versions.
+
+Note that the version of CUDA must be compatible with the driver version installed on the compute node.
+You can check the driver version by running `nvidia-smi`.
+You can find the CUDA compatibility matrix [here](https://docs.nvidia.com/deploy/cuda-compatibility/index.html).
+
+[^cc-cvmfs]: The [Compute Canada CVMFS](https://docs.alliancecan.ca/wiki/Accessing_CVMFS) is mounted at `/cvmfs/soft.computecanada.ca` on the compute nodes. It provides access to a wide variety of software via [Lmod modules](https://docs.alliancecan.ca/wiki/Utiliser_des_modules/en).
 
 ## Extra details
 
@@ -159,6 +205,15 @@ To request for `gpu`, use the `--gres gpu:<number_of_gpus>` flag.
 
 [^gpu-management]: For more information on GPU management, please refer to the [GPU Management](https://slurm.schedmd.com/gres.html#GPU_Management) SLURM documentation.
 
+### CVMFS
+
+CVMFS (CernVM File System)[^cvmfs] is a software distribution system that is widely adopted in the HPC community.
+It provides a way to distribute software to compute nodes without having to install them on the nodes themselves.
+
+We make use of the [Compute Canada CVMFS](https://docs.alliancecan.ca/wiki/Accessing_CVMFS) to provide access to software available on Compute Canada clusters.
+For example, you can access CUDA by loading the appropriate module (see [Using CUDA](#using-cuda)).
+
+[^cvmfs]: https://cvmfs.readthedocs.io/en/stable/
 
 {
 // Separate footnotes from the main content
