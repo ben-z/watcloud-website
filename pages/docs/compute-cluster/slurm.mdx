@@ -10,7 +10,10 @@ It is commonly used in HPC (High Performance Computing) environments. WATcloud u
 
 import { Callout } from 'nextra/components'
 
-<Callout type="info">WATcloud SLURM is currently in beta. If you encounter any issues, please [let us know](/docs/compute-cluster/support-resources).</Callout>
+<Callout type="info">
+WATcloud SLURM is currently in beta. If you encounter any issues, Please review the [troubleshooting](#troubleshooting) section
+or [let us know](/docs/compute-cluster/support-resources).
+</Callout>
 
 To submit jobs to the SLURM cluster, you will need to log into one of the SLURM login nodes.
 During the beta, they are labelled `SL` in the [machine list](/machines).
@@ -20,14 +23,14 @@ After the beta, all general-use machines will be SLURM login nodes.
 
 Execute the following command to submit a job to the SLURM cluster:
 
-```bash
+```bash copy
 srun --pty bash
 ```
 
 This will start an interactive shell session on a compute node with the default resources.
 You can view the resources allocated to your job by running:
 
-```bash
+```bash copy
 scontrol show job $SLURM_JOB_ID
 ```
 
@@ -67,7 +70,7 @@ and is allowed to run for up to 30 minutes.
 To request for more resources, you can use the `--cpus-per-task`, `--mem`, `--gres`, and `--time` flags.
 For example, to request 4 CPUs, 4GiB of memory, 20GiB of temporary disk space, and 2 hours of runtime, you can run:
 
-```bash
+```bash copy
 srun --cpus-per-task 4 --mem 4G --gres tmpdisk:20480 --time 2:00:00 --pty bash
 ```
 
@@ -76,7 +79,7 @@ srun --cpus-per-task 4 --mem 4G --gres tmpdisk:20480 --time 2:00:00 --pty bash
 Unlike general use machines, the SLURM environment does not provide user-space systemd for managing background processes like the Docker daemon.
 To use Docker, you will need to start the Docker daemon manually. We have provided a convenience script to do this:
 
-```bash
+```bash copy
 slurm-start-dockerd.sh
 ```
 
@@ -95,7 +98,7 @@ Follow the instructions to set the `DOCKER_HOST` environment variable accordingl
 
 You can request access to GPUs by using the `--gres mps` flag. For example, if your workload requires 4 GiB of VRAM, you can run:
 
-```bash
+```bash copy
 srun --gres mps:4096 --pty bash
 ```
 
@@ -110,7 +113,7 @@ If your workload requires exclusive access to a GPU, you can use the `--gres gpu
 <Callout type="warning">Because the cluster is GPU-constrained, requesting whole GPUs is not recommended unless your workload can
 make efficient use of the entire GPU.</Callout>
 
-```bash
+```bash copy
 srun --gres gpu:1 --pty bash
 ```
 
@@ -125,7 +128,7 @@ If your workload requires CUDA, you have a few options (not exhaustive):
 You can use the `nvidia/cuda` Docker image to run CUDA workloads.
 Assuming you have started the Docker daemon (see [Using Docker](#using-docker)), you can run the following command to start a CUDA container:
 
-```bash
+```bash copy
 docker run --rm -it --gpus all -v $(pwd):/workspace nvidia/cuda:12.0.0-devel-ubuntu22.04 nvcc --version
 ```
 
@@ -214,6 +217,39 @@ We make use of the [Compute Canada CVMFS](https://docs.alliancecan.ca/wiki/Acces
 For example, you can access CUDA by loading the appropriate module (see [Using CUDA](#using-cuda)).
 
 [^cvmfs]: https://cvmfs.readthedocs.io/en/stable/
+
+## Troubleshooting
+
+### Invalid Account
+
+You may encounter the following error when trying to submit a job:
+
+```text
+srun: error: Unable to allocate resources: Invalid account or account/partition combination specified
+```
+
+This error usually occurs when your user does not have an associated account. You can verify this by running:
+
+```bash copy
+sacctmgr show user $(whoami)
+```
+
+If the output is empty (as shown below), then you do not have an associated account.
+
+```text
+      User   Def Acct     Admin
+---------- ---------- ---------
+```
+
+A common reason for this is that your WATcloud profile is not associated with a registered affiliation[^registered-affiliation].
+You can confirm this by requesting a copy of your profile using the [Profile Editor](/docs/utilities/profile-editor) and
+checking whether the `general.affiliations` field contains a registered affiliation.
+If your affiliation is not registered, please have your group lead fill out the [registration form](/docs/registered-affiliations#registering-a-group).
+
+[^registered-affiliation]: Registered affiliations are distinct from "legacy" affiliations[^legacy-affiliation]. More information
+    about registered affiliations can be found [here](/docs/registered-affiliations).
+[^legacy-affiliation]: Legacy affiliations have the prefix `[Legacy]`. We don't have sufficient information from these affiliations
+    to support them in the SLURM environment.
 
 {
 // Separate footnotes from the main content
