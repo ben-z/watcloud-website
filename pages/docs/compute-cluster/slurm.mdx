@@ -129,7 +129,7 @@ Assuming you have started the Docker daemon (see [Using Docker](#using-docker)),
 docker run --rm -it --gpus all -v $(pwd):/workspace nvidia/cuda:12.0.0-devel-ubuntu22.04 nvcc --version
 ```
 
-Note that the version of the Docker image must be compatible (usually this means lower than or equal to) with the driver version installed on the compute node.
+Note that the version of the Docker image must be compatible with (usually this means lower than or equal to) the driver version installed on the compute node.
 You can check the driver version by running `nvidia-smi`. If the driver version is not compatible with the Docker image, you will get an error that looks like this:
 
 ```text
