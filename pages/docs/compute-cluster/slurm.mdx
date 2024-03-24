@@ -178,16 +178,64 @@ All of the same network drives and software are available. However, there are so
 - The SLURM environment does not have a user-space systemd for managing background processes like the Docker daemon.
     Please follow the instructions in the [Using Docker](#using-docker) section to start the Docker daemon.
 
-### `gres/tmpdisk`
+### View available resources
 
-`tmpdisk` is a generic resource (GRES)[^gres] that represents temporary disk space. This resource is provisioned using a combination
-of `job_container/tmpfs`[^job-container-tmpfs] and custom scripts. The temporary disk space is mounted at `/tmp` and is automatically
-cleaned up when the job finishes. You can request for temporary disk space using the `--gres tmpdisk:<size_in_MiB>` flag.
+To view all available resources, you can run the following command:
+
+```bash copy
+scontrol show node
+```
+
+Here's some example output:
+
+```text
+NodeName=trpro-slurm1 Arch=x86_64 CoresPerSocket=1 
+   CPUAlloc=0 CPUEfctv=98 CPUTot=100 CPULoad=0.06
+   AvailableFeatures=(null)
+   ActiveFeatures=(null)
+   Gres=gpu:rtx_3090:4(S:0),mps:rtx_3090:96K(S:0),tmpdisk:300K
+   NodeAddr=trpro-slurm1.cluster.watonomous.ca NodeHostName=trpro-slurm1 Version=23.11.4
+   OS=Linux 5.15.0-101-generic #111-Ubuntu SMP Tue Mar 5 20:16:58 UTC 2024 
+   RealMemory=423020 AllocMem=0 FreeMem=419161 Sockets=100 Boards=1
+   CoreSpecCount=2 CPUSpecList=98-99 MemSpecLimit=2048
+   State=IDLE ThreadsPerCore=1 TmpDisk=0 Weight=1 Owner=N/A MCS_label=N/A
+   Partitions=compute 
+   BootTime=2024-03-24T00:17:08 SlurmdStartTime=2024-03-24T02:27:46
+   LastBusyTime=2024-03-24T02:27:46 ResumeAfterTime=None
+   CfgTRES=cpu=98,mem=423020M,billing=98,gres/gpu=4,gres/mps=98304,gres/tmpdisk=307200
+   AllocTRES=
+   CapWatts=n/a
+   CurrentWatts=0 AveWatts=0
+   ExtSensorsJoules=n/a ExtSensorsWatts=0 ExtSensorsTemp=n/a
+```
+
+In this example, the node `trpro-slurm1` has the following allocable resources:
+98 CPUs, around 413 GiB of RAM, 4 RTX 3090 GPUs, 98304 MiB of VRAM, and 300GiB of temporary disk space.
+
+### GRES
+
+GRES (Generic Resource)[^gres] is a SLURM feature that allows for arbitrary resources to be allocated to jobs.
+The WATcloud cluster provides the following GRES:
 
 [^gres]: https://slurm.schedmd.com/gres.html
+
+#### `gres/tmpdisk`
+
+`tmpdisk` is a GRES that represents temporary disk space. This resource is provisioned using a combination
+of `job_container/tmpfs`[^job-container-tmpfs] and custom scripts. The temporary disk space is mounted at `/tmp` and is automatically
+cleaned up when the job finishes. You can request for temporary disk space using the `--gres tmpdisk:<size_in_MiB>` flag.
+Below is an example:
+
+```bash
+# Request 1 GiB of temporary disk space
+srun --gres tmpdisk:1024 --pty bash
+```
+
+To see the total amount of temporary disk space available on a node, please refer to the [View available resources](#view-available-resources) section.
+
 [^job-container-tmpfs]: https://slurm.schedmd.com/job_container_tmpfs.html
 
-### `gres/mps` and `gres/gpu`
+#### `gres/mps` and `gres/gpu`
 
 `mps` and `gpu` are GRES that represent GPU resources.
 Allocation of these resources is managed by built-in SLURM plugins that interface with various GPU libraries.
@@ -197,14 +245,40 @@ In the WATcloud cluster, the amount of allocable `mps` equals the amount of VRAM
 This representation is chosen because it is a concrete metric that is the same across different GPU models.
 In reality, the amount of `mps` represents the share of the GPU's *compute* resources that the job can use,
 and the VRAM usage is not enforced. Please ensure that the mps requested is appropriate for your workload.
-To request for `mps`, use the `--gres mps:<size_in_MiB>` flag.
+To request for `mps`, use the `--gres mps[:type]:<size_in_MiB>`[^mps-restriction] flag, where `type` is optional and can be used
+to specify a specific GPU type. Below are some examples:
+
+```bash
+# Request 2 GiB of VRAM on any available GPU
+srun --gres mps:2048 --pty bash
+
+# Request 4 GiB of VRAM on an RTX 3090 GPU
+srun --gres mps:rtx_3090:4096 --pty bash
+```
+
+To see a list of available GPU types, please refer to the [View available resources](#view-available-resources) section.
 
 [^mps-management]: For more information on MPS, please refer to the [MPS Management](https://slurm.schedmd.com/gres.html#MPS_Management) SLURM documentation.
+
+[^mps-restriction]: Note that `size_in_MiB` must not exceed the amount of VRAM on a single GPU
+(can be determined by dividing the amount of `mps` available on a node by the number of GPUs on that node).
+If you require more VRAM than a single GPU can provide, please use the `--gres gpu` flag instead (see below).
 
 The `gpu` GRES is used to request exclusive access to GPUs[^gpu-management].
 This is not recommended unless your workload can make efficient use of the entire GPU.
 If you are unsure, please use the `mps` GRES instead.
-To request for `gpu`, use the `--gres gpu:<number_of_gpus>` flag.
+To request for `gpu`, use the `--gres gpu[:type]:<number_of_gpus>` flag, where `type` is optional and can be used
+to specify a specific GPU type. Below are some examples:
+
+```bash
+# Request access to any available GPU
+srun --gres gpu:1 --pty bash
+
+# Request access to a whole RTX 3090 GPU
+srun --gres gpu:rtx_3090:1 --pty bash
+```
+
+To see a list of available GPU types, please refer to the [View available resources](#view-available-resources) section.
 
 [^gpu-management]: For more information on GPU management, please refer to the [GPU Management](https://slurm.schedmd.com/gres.html#GPU_Management) SLURM documentation.
 
