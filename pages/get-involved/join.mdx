@@ -37,15 +37,35 @@ The best way to join WATcloud is to start contributing! We have a backlog of pro
 
 If you can complete one of the projects below, you are guaranteed a spot on the team!
 
+import { Callout } from 'nextra/components'
+
+<Callout type="info">
+All of the projects below have been taken. We are working on polishing more project descriptions
+and adding them here!
+In the mean time, please feel free to read the source code of existing projects and suggest improvements,
+or [reach out](../docs/compute-cluster/support-resources) to the WATcloud team to get a sneak peak of
+upcoming projects.
+</Callout>
+
 ### File Auto-Expiration Tool
 
 {/* Internal reference: https://github.com/WATonomous/infra-config/issues/1143 */}
+
+<Callout type="info">
+This project is currently in the deployment stage. The source code will be made available once deployment is complete.
+</Callout>
 
 At WATcloud, we have many shared drives that are used by our users to store files. Some drives, like the [scratch drive](../docs/compute-cluster/machine-usage-guide#mntscratch-directory), is meant for temporary storage. However, users often forget to delete their files, and drives quickly fills up. We need a tool that can give us a list of files that have not been accessed in a long time, so that we can take appropriate action (e.g. notify the user, then delete the file). This tool should be a lightweight script that we can run on a schedule.
 
 Assume that the drive is 2-5 TiB, backed by NVMe SSD. The filesystem type is flexible, but preferrably ext4 or xfs. The tool should have minimal impact on drive lifespan. Please be aware of the different timestamp types (e.g. access time, modification time, inode change time), and how they are accounted for by different filesystems and access methods.
 
 ### Automatic DNS failover
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/2541 */}
+
+<Callout type="info">
+This project is currently in the deployment stage. The source code will be made available once deployment is complete.
+</Callout>
 
 We host a Kubernetes cluster on our infrastructure and run a number of services. The services are exposed via [nginx-ingress](https://github.com/kubernetes/ingress-nginx). Different machines are assigned the same DNS name. For example, we could have `s3.watonomous.ca` point to all Kubernetes hosts in the cluster (using multiple DNS A records), and the client accessing `s3.watonomous.ca` would send requests to one of the hosts, and nginx-ingress would route the request to the appropriate service. This is a simple way to reduce downtime, since if one of the hosts goes down, there's only a `1/n` chance that the client will be affected[^assume-round-robin]. However, this is still not ideal. Most clients are not designed with a retry mechanism, and certainly rarer to have a retry mechanism that re-issues DNS lookups. We would like to have a tool that can automatically detect when a host goes down, and remove its DNS record from the DNS server. This way, clients will be less likely to be affected by a host going down.
 
@@ -57,6 +77,10 @@ We use Cloudflare as our DNS provider. Cloudflare was generous enough to give us
 ### Broken Internal Link Detector
 
 {/* Internal reference: https://github.com/WATonomous/infra-config/issues/996#issuecomment-1875748581 */}
+
+<Callout type="info">
+This project is currently in the deployment stage. The source code will be made available once deployment is complete.
+</Callout>
 
 We have a statically-generated Next.js website[^website]. Sometimes, we make typos in our hyperlinks. We would like to have a tool that can detect broken internal links. This should be a tool that runs at build-time and fails the build if it detects a broken link. The tool should be able to handle links to hashes (e.g. `#section`) in addition to links to pages. An initial brainstorm of how this could be implemented is available [here](https://chat.openai.com/share/0e0ffb40-1110-4bd5-8a1a-dd22a0e6483d).
 
