@@ -19,14 +19,17 @@ Choose your preferred machine and entrypoint[^entrypoint] below. Your personaliz
 because the cluster is behind a [firewall](./firewall) and you cannot connect to it directly.
 
 import { SSHCommandGenerator } from '@/components/ssh-command-generator'
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />
 
 <div className="mt-2">
     <SSHCommandGenerator />
 </div>
 
-The above is your personalized SSH command. Copy and paste it into your terminal to connect to the cluster.
+<Separator className="mt-6" />
 
-The generated command does *not* require setting up ssh agent[^ssh-agent] or ssh config[^ssh-config].
+The generated commands do *not* require setting up ssh agent[^ssh-agent] or ssh config[^ssh-config].
 However, you may soon find that setting them up will make your life easier. If you are interested in learning more about these
 tools, please check out [Tips and Tricks](#tips-and-tricks) and the official documentation linked in the footnotes.
 
@@ -143,6 +146,4 @@ ssh -v trpro-ubuntu2
 {
 // Separate footnotes from the main content
 }
-import { Separator } from "@/components/ui/separator"
-
 <Separator className="mt-6" />

@@ -168,26 +168,20 @@ export function MachineCard({
                                     <PopoverTrigger><HelpCircle className="ml-1 mr-1 h-3 w-3 text-muted-foreground" /></PopoverTrigger>
                                     <PopoverContent side="top">
                                         <p><Code>*.cluster.watonomous.ca</Code> hostnames resolve to internal IP addresses in the cluster. They are accessible only from within the cluster.</p>
-                                        <p><Code>*.watonomous.ca</Code> hostnames resolve to external IP addresses. They are accessible from anywhere. However, they may be behind the UWaterloo firewall. To access them, you may need to use a VPN or a bastion server.</p>
+                                        <p><Code>*.ext.watonomous.ca</Code> hostnames resolve to external IP addresses. They are accessible from anywhere. However, they may be behind the UWaterloo firewall. To access them, you may need to use a VPN or a bastion server.</p>
+                                        <p>There may be other hostnames that resolve to this machine. For example, mesh networks may have additional hostnames.</p>
                                     </PopoverContent>
                                 </Popover>
                             </dt>
                             <dd className="font-medium">
                                 <ul className="list-none">
-                                    <TooltipProvider>
-                                        {machine.hostnames.length ? machine.hostnames.sort(hostnameSorter).map((hostname, index) => {
-                                            return (
-                                                <li key={index} className="my-0">
-                                                    <Tooltip key={index}>
-                                                        <TooltipTrigger className='text-start'><Link className="text-inherit decoration-dashed" href={`/docs/compute-cluster/ssh?hostname=${hostname}#command-generator`}>{hostname}</Link></TooltipTrigger>
-                                                        <TooltipContent side="top">
-                                                            <p className='font-normal'>Click to see SSH instructions for accessing <Code>{machine.name}</Code> via <Code>{hostname}</Code></p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </li>
-                                            )
-                                        }) : "None"}
-                                    </TooltipProvider>
+                                    {machine.hostnames.length ? machine.hostnames.sort(hostnameSorter).map((hostname, index) => {
+                                        return (
+                                            <li key={index} className="my-0">
+                                                {hostname}
+                                            </li>
+                                        )
+                                    }) : "None"}
                                 </ul>
                             </dd>
                         </div>
