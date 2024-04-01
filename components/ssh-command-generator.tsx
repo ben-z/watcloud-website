@@ -89,7 +89,7 @@ export function SSHCommandGenerator() {
 
     return (
         <>
-            <dl className="text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700 overflow-hidden">
+            <dl className="text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
                 <dt className="mb-1 mt-2 text-gray-500 dark:text-gray-400 border-none">Machine</dt>
                 <dd className='border-none'>
                     <ComboBox
