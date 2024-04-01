@@ -5,34 +5,45 @@ title: "Getting Access"
 # Getting Access to the Compute Cluster
 
 import { Steps } from 'nextra/components'
+import { affiliationInfo } from '@/lib/data'
+import { AffiliationList } from '@/components/affiliation-list'
  
 <Steps>
 ### Determine your WATcloud contact
 
-Every compute cluster user must have a WATcloud contact. Your WATcloud contact is responsible for approving your access request and helping
-you with any issues you may have with the compute cluster.
+Every WATcloud compute cluster user has a WATcloud contact. Your WATcloud contact is a designated person within your group (usually your group lead)
+who is responsible for approving your access request and assisting you during the onboarding process.
 
-If you are a member of a group in the following categories, your WATcloud contact is your group lead:
-- [WUSA clubs](https://wusa.ca/clubs/)
-- [SSDC teams](https://uwaterloo.ca/sedra-student-design-centre/directory-teams)
-- UWaterloo research groups
-- [UWaterloo capstone design teams](https://uwaterloo.ca/capstone-design/)
+The following groups are registered with WATcloud:
 
-If you are the lead of a group and would like to request access for your group, please email infra-outreach@watonomous.ca.
+<AffiliationList affiliationInfo={affiliationInfo} />
+
+If your group is not listed or shows up as `[Legacy]`[^legacy-affiliation], please ask your group lead to [register the group][registered-affiliations] with WATcloud.
+
+[registered-affiliations]: ../registered-affiliations
+[^legacy-affiliation]: A legacy affiliation is a group that was onboarded before the current [registered affiliations][registered-affiliations] system was in place.
+    Members of legacy affiliations can still access the compute cluster, but in order to use newer features like [SLURM](./slurm), the group must be registered.
 
 ### Fill out the onboarding form
  
-Please fill out the [Onboarding form](https://cloud.watonomous.ca/docs/utilities/onboarding-form) and make sure to enable the "Compute Cluster" option.
+Please fill out the [onboarding form](../utilities/onboarding-form) and make sure to enable the "Compute Cluster" option.
  
 ### Get approval from your WATcloud contact
 
-Reach out to your WATcloud contact and ask them to approve your request. Your WATcloud contact is trained to help you with this process.
+Reach out to your WATcloud contact and ask them to approve your request.
 
 ### Wait for your access to be provisioned
 
 After your request is approved, it usually takes about 15 minutes for your access to be provisioned. Your WATcloud contact has visibility
-into the provisioning process and can work with the WATcloud team to resolve any technical issues that may arise.
+into the provisioning pipeline and can work with the WATcloud team to resolve any technical issues that may arise.
 
 Once your access is provisioned, you will receive a welcome email.
  
 </Steps>
+
+{
+// Separate footnotes from the main content
+}
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />

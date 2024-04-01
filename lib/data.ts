@@ -10,6 +10,12 @@ export const sshInfo = SshInfoConvert.toSSHInfo(JSON.stringify(sshInfoJSON))
 import sshInfoStrings from '@/build/fixtures/ssh-info-strings/strings'
 export { sshInfoStrings }
 
+import affiliationInfoJSON from '@/build/fixtures/affiliation-info.json'
+import { Convert as AffiliationInfoConvert } from '@/build/fixtures/affiliation-info'
+export type { AffiliationInfo } from '@/build/fixtures/affiliation-info'
+export const affiliationInfo = AffiliationInfoConvert.toAffiliationInfo(JSON.stringify(affiliationInfoJSON))
+
+
 import websiteConfigJSON from '@/build/fixtures/website-config.json'
 import { Convert as WebsiteConfigConvert } from '@/build/fixtures/website-config'
 export type { WebsiteConfig } from '@/build/fixtures/website-config'
