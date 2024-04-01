@@ -7,14 +7,27 @@ import sshInfoJSON from '@/build/fixtures/ssh-info.json'
 import { Convert as SshInfoConvert } from '@/build/fixtures/ssh-info'
 export type { SSHInfo } from '@/build/fixtures/ssh-info'
 export const sshInfo = SshInfoConvert.toSSHInfo(JSON.stringify(sshInfoJSON))
+import sshInfoStrings from '@/build/fixtures/ssh-info-strings/strings'
+export { sshInfoStrings }
 
 import websiteConfigJSON from '@/build/fixtures/website-config.json'
 import { Convert as WebsiteConfigConvert } from '@/build/fixtures/website-config'
 export type { WebsiteConfig } from '@/build/fixtures/website-config'
 export const websiteConfig = WebsiteConfigConvert.toWebsiteConfig(JSON.stringify(websiteConfigJSON))
 
-import { hashCode } from './wato-utils'
-export function lookupStringMDX(str: string) {
-    const basename = `${hashCode(str)}.mdx`
-    return import(`@/build/fixtures/strings/${basename}`)
+import userSchemaStrings from '@/build/fixtures/user-schema-strings/strings'
+export { userSchemaStrings }
+
+import { hashCode } from './utils'
+export function lookupStringMDX(strings: Record<string, any>, str: string) {
+    if (!str) {
+        return null
+    }
+    const h = hashCode(str)
+    const mdxComponent = strings[String(h)]
+    if (!mdxComponent) {
+        console.error(`No MDX component found for string: "${str}"`)
+        return null
+    }
+    return mdxComponent
 }

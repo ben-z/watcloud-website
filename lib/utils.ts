@@ -3,6 +3,8 @@ import { twMerge } from "tailwind-merge"
 import dayjs from "dayjs";
 import dayjsUTC from "dayjs/plugin/utc";
 import dayjsTimezone from "dayjs/plugin/timezone";
+import { JSONSchema7 } from "json-schema";
+import { sha512crypt } from 'sha512crypt-node';
  
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
@@ -164,4 +166,165 @@ export function dayjsTz(date: string, timezone: string) {
 
 export function slugify(text: string) {
   return text.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "")
+}
+
+/**
+ * Returns a hash code from a string
+ * @param  {String} str The string to hash.
+ * @return {Number}    A 32bit integer
+ * @reference http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+ * @reference https://stackoverflow.com/a/8831937
+ * @reference https://chat.openai.com/share/e5c82401-fd23-4546-ab8e-464a8d956ffc
+ */
+export function hashCode(str: string) {
+  let hash = 0;
+    for (let i = 0, len = str.length; i < len; i++) {
+      // Use codePointAt to properly handle characters outside the BMP
+      let chr = str.codePointAt(i);
+      if (chr !== undefined) {
+        hash = (hash << 5) - hash + chr;
+        hash |= 0; // Convert to 32bit integer
+
+        // When a surrogate pair is encountered, skip the next code unit
+        if (chr > 0xffff) i++;
+      }
+    }
+
+  // Convert to unsigned integer
+  // https://stackoverflow.com/a/47612303
+  return hash >>> 0;
+}
+
+
+// Derived from https://stackoverflow.com/a/18750001
+export function htmlEncode(str: string) {
+    return str.replace(/[\u00A0-\u9999<>\&]/g, (i) => "&#" + i.charCodeAt(0) + ";");
+}
+
+// Returns all strings from a JSON object
+// Derived from: https://chat.openai.com/share/41d568ff-b124-4144-a19e-b51938adf7ce
+export function getAllStringsFromDict(data: any): string[] {
+  function extractStrings(element: any, result: string[]): void {
+    if (typeof element === "string") {
+      result.push(element);
+    } else if (Array.isArray(element)) {
+      element.forEach((item) => extractStrings(item, result));
+    } else if (typeof element === "object" && element !== null) {
+      Object.values(element).forEach((value) => extractStrings(value, result));
+    }
+  }
+
+  const strings: string[] = [];
+  extractStrings(data, strings);
+  return strings;
+}
+
+// takes in a search criteria, outputs all object paths that meet that criteria.
+// Derived from https://stackoverflow.com/a/54190347/4527337
+export function getObjectPaths({ properties, allOf = [], anyOf = [], oneOf = [], then, else: _else, items }: JSONSchema7, selectProperty: (a: JSONSchema7) => boolean): string[][] {
+    let results = [];
+
+    // indexed properties
+    for (const propertyName in properties) {
+        const property = properties[propertyName];
+        if (typeof property !== 'object' || property === null) {
+            // not something that we can query into
+            continue;
+        }
+
+        if (selectProperty(property)) {
+            results.push([propertyName]);
+        }
+
+        results.push(...getObjectPaths(property, selectProperty).map(r => [propertyName, ...r]));
+    }
+
+    // non-indexed properties
+    for (const property of [...allOf, ...anyOf, ...oneOf, then, _else].filter(x => x)) {
+        if (typeof property !== 'object' || property === null) {
+            // not something that we can query into
+            continue;
+        }
+
+        results.push(...getObjectPaths(property, selectProperty));
+    }
+
+    // array items
+    if (items && typeof items === 'object' && items !== null) {
+        results.push(...getObjectPaths(items as JSONSchema7, selectProperty).map(r => ['[]', ...r]));
+    }
+
+    return results;
+}
+
+export function encryptUnixPassword(password: string): string {
+  const genRanHex = (size: number) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+  return sha512crypt(password, genRanHex(16));
+}
+
+export function isCryptFormat(s: string) {
+  // Regular expression for crypt format
+  var pattern = new RegExp(
+    "^\\$([1-6a-z])\\$([a-zA-Z0-9./]+)\\$([a-zA-Z0-9./]+)$"
+  );
+  var match = pattern.test(s);
+  return match;
+}
+
+export function flatMap<T, U>(arr: T[], f: (t: T, index: number) => U[]): U[] {
+  return arr.reduce<U[]>((acc, val, index) => acc.concat(f(val, index)), []);
+}
+
+export function getValuesFromPath(
+  obj: Object,
+  path: string[],
+  currentPath: string[] = []
+): { value: any, path: string[] }[] {
+  if (path.length === 0) {
+    return [{ value: obj, path: currentPath }];
+  }
+
+  if (obj === undefined || obj === null) {
+    return [];
+  }
+
+  if (path[0] === "[]") {
+    return flatMap(obj as any, (o, index) =>
+      getValuesFromPath(o as Object, path.slice(1), [...currentPath, `${index}`])
+    );
+  }
+
+  return getValuesFromPath((obj as Record<string, any>)[path[0]], path.slice(1), [
+    ...currentPath,
+    path[0],
+  ]);
+}
+
+export function deepGet(obj: Record<string, any>, path: string[]): any {
+  return path.reduce((acc, key) => acc?.[key], obj);
+}
+
+export function deepSet(
+  obj: Record<string, any>,
+  path: string[],
+  value: any
+): void {
+  // Start from the root object and iterate through the path, except for the last key.
+  path.reduce((acc, key, index) => {
+    // If we're at the last key, set the value.
+    if (index === path.length - 1) {
+      acc[key] = value;
+      return;
+    }
+    // If the next key doesn't exist or isn't an object, create it as an object.
+    if (
+      acc[key] === undefined ||
+      typeof acc[key] !== "object" ||
+      acc[key] === null
+    ) {
+      acc[key] = {};
+    }
+    // Move to the next level in the path.
+    return acc[key];
+  }, obj);
 }

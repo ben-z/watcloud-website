@@ -12,17 +12,8 @@ import {
 } from "@/components/ui/popover"
 import { ComboBox } from '@/components/ui/combo-box'
 import { Input } from "@/components/ui/input"
-import { lookupStringMDX, sshInfo } from '@/lib/data'
-import { htmlEncode } from '@/lib/wato-utils'
-
-const STRING_TO_MDX: Record<string, React.ReactElement> = {}
-for (const { paths } of Object.values(sshInfo)) {
-    for (const { instructions } of paths) {
-        for (const instruction of instructions) {
-            STRING_TO_MDX[instruction] = React.createElement((await lookupStringMDX(instruction)).default)
-        }
-    }
-}
+import { lookupStringMDX, sshInfo, sshInfoStrings } from '@/lib/data'
+import { htmlEncode } from '@/lib/utils'
 
 export function SSHCommandGenerator() {
     const router = useRouter()
@@ -161,11 +152,14 @@ export function SSHCommandGenerator() {
                     <div key={hops.join(" -> ")} className="mt-8">
                         <h4 className="text-lg font-semibold">{hops.length === 1 ? "Direct Connection" : hops.join(" -> ")}</h4>
                         <ol className='list-decimal ltr:ml-6 rtl:mr-6 mt-6'>
-                            {instructions.map((instruction, i) => (
-                                <li key={i} className="my-2">
-                                    {STRING_TO_MDX[instruction]}
-                                </li>
-                            ))}
+                            {instructions.map((instruction, i) => {
+                                const MDXComponent = lookupStringMDX(sshInfoStrings, instruction)
+                                return (
+                                    <li key={i} className="my-2">
+                                        <MDXComponent />
+                                    </li>
+                                )
+                            })}
                         </ol>
                     </div>
                 ))

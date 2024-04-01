@@ -2,6 +2,7 @@ import affiliationSchemaJSON from "@/build/fixtures/affiliation.schema.json";
 import affiliationSchemaValidate from "@/build/fixtures/affiliation.schema.validate";
 import RJSFFields from "@/components/rjsf-fields";
 import RJSFTemplates from "@/components/rjsf-templates";
+import RJSFWidgets from "./rjsf-widgets";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -102,6 +103,7 @@ export default function AffiliationForm() {
         focusOnFirstError={true}
         templates={RJSFTemplates}
         fields={RJSFFields}
+        widgets={RJSFWidgets}
       />
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>

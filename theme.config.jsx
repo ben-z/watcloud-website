@@ -100,7 +100,7 @@ const themeConfig = {
             </Link>
           </li>
           <li>
-            <Link href="https://cloud.watonomous.ca/onboarding-form" className="text-inherit no-underline hover:underline decoration-auto">
+            <Link href="https://cloud.watonomous.ca/docs/utilities/onboarding-form" className="text-inherit no-underline hover:underline decoration-auto">
               Onboarding
             </Link>
           </li>

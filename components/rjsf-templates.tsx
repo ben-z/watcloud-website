@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -49,7 +50,17 @@ function CustomFieldTemplate(props: FieldTemplateProps) {
     errors,
     rawErrors,
     children,
+    formContext: {
+      showAdvancedFields = true,
+    },
+    schema,
   } = props;
+
+  const isAdvanced = schema["$advanced"];
+  if (!showAdvancedFields && isAdvanced) {
+    return null;
+  }
+
   return (
     <div className={cn("space-y-2 w-full grid", classNames)} style={style}>
       {displayLabel && (
@@ -70,12 +81,30 @@ function CustomFieldTemplate(props: FieldTemplateProps) {
 }
 
 function CustomDescriptionFieldTemplate(props: DescriptionFieldProps) {
-  const { description, id } = props;
-  return (
-    <p id={id} className={cn("text-sm text-muted-foreground")}>
-      {description}
-    </p>
-  );
+  const { description: rawDescription, id, registry } = props;
+  const { formContext: { string_to_mdx } } = registry
+
+  let description: JSX.Element | string = rawDescription;
+  if (string_to_mdx && typeof rawDescription === "string") {
+    const MDXComponent = string_to_mdx(rawDescription);
+    if (MDXComponent) {
+      description = (
+        <div id={id} className={cn("form-description text-sm text-muted-foreground")}>
+          {createElement(MDXComponent)}
+        </div>
+      )
+    }
+  }
+
+  if (typeof description === "string") {
+    return (
+      <p id={id} className={cn("form-description text-sm text-muted-foreground")}>
+        {description}
+      </p>
+    );
+  }
+
+  return description;
 }
 
 function CustomArrayFieldTemplate({
@@ -103,6 +132,7 @@ function CustomArrayFieldTemplate({
     registry,
     uiOptions
   );
+  const description = uiOptions.description || schema.description;
   return (
     <fieldset className={cn("space-y-2 grid", className)} id={idSchema.$id}>
       <Label
@@ -115,7 +145,7 @@ function CustomArrayFieldTemplate({
       </Label>
       <ArrayFieldDescriptionTemplate
         idSchema={idSchema}
-        description={uiOptions.description || schema.description}
+        description={description}
         schema={schema}
         uiSchema={uiSchema}
         registry={registry}
@@ -125,9 +155,6 @@ function CustomArrayFieldTemplate({
           <ArrayFieldItemTemplate
             key={key}
             {...itemProps}
-            className={cn(
-              !["string"].includes(String(itemProps.schema.type)) && "ml-3"
-            )}
           />
         ))}
       {canAdd && (
@@ -160,9 +187,11 @@ function CustomArrayFieldItemTemplate(props: ArrayFieldTemplateItemType) {
     readonly,
     registry,
     uiSchema,
+    schema,
   } = props;
+  const isObject = schema.type === "object";
   return (
-    <div className={cn("flex space-x-2", className)}>
+    <div className={cn("flex space-x-2", isObject && "my-2 p-4 ring-1 ring-ring rounded-md", className)}>
       {children}
       {hasToolbar && hasRemove && (
         <Button
@@ -190,6 +219,10 @@ function CustomObjectFieldTemplate({
   schema,
   title,
   uiSchema,
+  formContext: {
+    showRootTitle = true,
+    showRootDescription = true,
+  },
 }: ObjectFieldTemplateProps) {
   const options = getUiOptions(uiSchema);
   const TitleFieldTemplate = getTemplate(
@@ -202,24 +235,31 @@ function CustomObjectFieldTemplate({
     registry,
     options
   );
+
+  const isObject = schema.type === "object";
+  const isRoot = idSchema.$id === "root";
+  const isArrayElement = /_\d$/.test(idSchema.$id);
+  const displayTitle = !isArrayElement && !(isRoot && !showRootTitle) && title;
+  const displayDescription = !isArrayElement && !(isRoot && !showRootDescription) && description;
+
   return (
-    <fieldset id={idSchema.$id} className="space-y-8">
-      {(title || description) && (
+    <fieldset id={idSchema.$id} className={cn("space-y-8", !isRoot && !isArrayElement && isObject && "p-4 pb-6 ring-1 ring-ring rounded-md")}>
+      {(displayTitle || displayDescription) && (
         <div>
-          {title && (
+          {displayTitle && (
             <TitleFieldTemplate
               id={titleId(idSchema)}
-              title={title}
+              title={(<h2 className="text-2xl font-bold">{displayTitle}</h2>) as any}
               required={required}
               schema={schema}
               uiSchema={uiSchema}
               registry={registry}
             />
           )}
-          {description && (
+          {displayDescription && (
             <DescriptionFieldTemplate
               id={descriptionId(idSchema)}
-              description={description}
+              description={displayDescription}
               schema={schema}
               uiSchema={uiSchema}
               registry={registry}
@@ -306,6 +346,11 @@ function CustomBaseInputTemplate(props: BaseInputTemplateProps) {
     console.log("No id for", props);
     throw new Error(`no id for props ${JSON.stringify(props)}`);
   }
+
+  if (schema && schema['$autocomplete'] && !options.autocomplete) {
+    options.autocomplete = schema['$autocomplete'];
+  }
+
   const inputProps = {
     ...rest,
     ...getInputProps(schema, type, options),

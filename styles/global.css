@@ -90,3 +90,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+.form-description p.nx-leading-7 {
+  /* Change the styling of generated MDX content that are embedded in forms */
+  line-height: 1.375;
+}
+
+/* Ensure mobile browsers don't auto-zoom: https://stackoverflow.com/a/6394497 */
+input[type="color"],
+input[type="date"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="email"],
+input[type="month"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="text"],
+input[type="time"],
+input[type="url"],
+input[type="week"],
+select:focus,
+textarea {
+  font-size: 16px;
+}
