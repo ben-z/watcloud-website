@@ -155,6 +155,7 @@ This section contains some common issues that users may encounter when using the
 You may encounter this error when trying to run Docker commands:
 
 ```
+> docker ps
 permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/containers/json": dial unix /var/run/docker.sock: connect: permission denied
 ```
 
@@ -168,11 +169,46 @@ export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/docker.sock
 
 Remember to restart your shell or source the rc file after making the change.
 
+### Disk quota exceeded when running Docker commands
+
+You may encounter the following error when running Docker commands:
+
+```
+> docker pull hello-world
+...
+open /var/lib/cluster/users/$UID/docker/tmp/GetImageBlob3112047691: disk quota exceeded
+```
+
+This means that you have exceeded your allocated storage quota[^quota-more-info].
+Here are some commands[^docker-prune] you can use to free up disk space:
+
+```bash
+# remove dangling images (images without tags)
+docker image prune
+# remove all images without an existing container
+docker image prune --all
+# remove stopped containers
+docker container prune
+# remove all volumes not used by at least one container
+docker volume prune
+# remove all stopped containers, dangling images, unused networks, and unused build cache
+docker system prune
+# same as above, but also removes unused volumes
+docker system prune --volumes
+# same as above, but also removes unused images
+docker system prune --volumes --all
+```
+
+[^docker-prune]: For more information about the Docker prune commands, please refer to the [Docker manual](https://docs.docker.com/config/pruning/)
+[^quota-more-info]: For more information about storage quotas, including how to check your current quota usage, please see the [Quotas](./quotas) page.
+
+
 ### Cannot connect to the Docker daemon
 
 You may encounter this error when trying to run Docker commands:
 
 ```
+> docker ps
 Cannot connect to the Docker daemon at unix:///run/user/$UID/docker.sock. Is the docker daemon running?
 ```
 
@@ -261,7 +297,7 @@ If you would prefer to use Docker tools to clean up your Docker installation (e.
 Once you have freed up enough space, you can restart the Docker daemon by running:
 
 ```bash copy
-systemctl --user start docker-rootless
+systemctl --user restart docker-rootless
 ```
 
 
