@@ -96,17 +96,16 @@ Follow the instructions to set the `DOCKER_HOST` environment variable accordingl
 
 ### Using GPUs
 
-You can request access to GPUs by using the `--gres mps` flag. For example, if your workload requires 4 GiB of VRAM, you can run:
+You can request access to GPUs by using the `--gres shard:<size_in_MiB>` flag. For example, if your workload requires 4 GiB of VRAM, you can run:
 
 ```bash copy
-srun --gres mps:4096 --pty bash
+srun --gres shard:4096 --pty bash
 ```
 
-This will allocate GPU resources to your job using the NVIDIA Multi-Process Service (MPS)[^mps].
-Using MPS is the preferred way to request for GPU resources because it allows multiple jobs to
-share the same GPU.
+Your job will be allocated a GPU with at least 4 GiB of unreserved VRAM.
+Please note that the amount of VRAM requested is not enforced, and you should ensure that the amount requested is appropriate for your workload.
 
-[^mps]: https://docs.nvidia.com/deploy/mps/index.html
+Using `shard` is the preferred way to request for GPU resources because it allows multiple jobs to share the same GPU.
 
 If your workload requires exclusive access to a GPU, you can use the `--gres gpu` flag instead:
 
@@ -193,7 +192,7 @@ NodeName=trpro-slurm1 Arch=x86_64 CoresPerSocket=1
    CPUAlloc=0 CPUEfctv=98 CPUTot=100 CPULoad=0.06
    AvailableFeatures=(null)
    ActiveFeatures=(null)
-   Gres=gpu:rtx_3090:4(S:0),mps:rtx_3090:96K(S:0),tmpdisk:300K
+   Gres=gpu:rtx_3090:4(S:0),shard:rtx_3090:96K(S:0),tmpdisk:300K
    NodeAddr=trpro-slurm1.cluster.watonomous.ca NodeHostName=trpro-slurm1 Version=23.11.4
    OS=Linux 5.15.0-101-generic #111-Ubuntu SMP Tue Mar 5 20:16:58 UTC 2024 
    RealMemory=423020 AllocMem=0 FreeMem=419161 Sockets=100 Boards=1
@@ -202,7 +201,7 @@ NodeName=trpro-slurm1 Arch=x86_64 CoresPerSocket=1
    Partitions=compute 
    BootTime=2024-03-24T00:17:08 SlurmdStartTime=2024-03-24T02:27:46
    LastBusyTime=2024-03-24T02:27:46 ResumeAfterTime=None
-   CfgTRES=cpu=98,mem=423020M,billing=98,gres/gpu=4,gres/mps=98304,gres/tmpdisk=307200
+   CfgTRES=cpu=98,mem=423020M,billing=98,gres/gpu=4,gres/shard=98304,gres/tmpdisk=307200
    AllocTRES=
    CapWatts=n/a
    CurrentWatts=0 AveWatts=0
@@ -235,38 +234,35 @@ To see the total amount of temporary disk space available on a node, please refe
 
 [^job-container-tmpfs]: https://slurm.schedmd.com/job_container_tmpfs.html
 
-#### `gres/mps` and `gres/gpu`
+#### `gres/shard` and `gres/gpu`
 
-`mps` and `gpu` are GRES that represent GPU resources.
+`shard` and `gpu` are GRES that represent GPU resources.
 Allocation of these resources is managed by built-in SLURM plugins that interface with various GPU libraries.
 
-The `mps` GRES is used to request access to a portion of a GPU[^mps-management].
-In the WATcloud cluster, the amount of allocable `mps` equals the amount of VRAM (in MiB) on each GPU.
-This representation is chosen because it is a concrete metric that is the same across different GPU models.
-In reality, the amount of `mps` represents the share of the GPU's *compute* resources that the job can use,
-and the VRAM usage is not enforced. Please ensure that the mps requested is appropriate for your workload.
-To request for `mps`, use the `--gres mps[:type]:<size_in_MiB>`[^mps-restriction] flag, where `type` is optional and can be used
+The `shard` GRES is used to request access to a portion of a GPU.
+In the WATcloud cluster, the amount of allocable `shard` equals the amount of VRAM (in MiB) on each GPU.
+This representation is chosen because it is a concrete metric that works across different GPU models.
+The amount of resources requested using `shard` is not enforced, so please ensure that the `shard` requested is appropriate for your workload.
+To request for `shard`, use the `--gres shard[:type]:<size_in_MiB>`[^shard-restriction] flag, where `type` is optional and can be used
 to specify a specific GPU type. Below are some examples:
 
 ```bash
 # Request 2 GiB of VRAM on any available GPU
-srun --gres mps:2048 --pty bash
+srun --gres shard:2048 --pty bash
 
 # Request 4 GiB of VRAM on an RTX 3090 GPU
-srun --gres mps:rtx_3090:4096 --pty bash
+srun --gres shard:rtx_3090:4096 --pty bash
 ```
 
 To see a list of available GPU types, please refer to the [View available resources](#view-available-resources) section.
 
-[^mps-management]: For more information on MPS, please refer to the [MPS Management](https://slurm.schedmd.com/gres.html#MPS_Management) SLURM documentation.
-
-[^mps-restriction]: Note that `size_in_MiB` must not exceed the amount of VRAM on a single GPU
-(can be determined by dividing the amount of `mps` available on a node by the number of GPUs on that node).
+[^shard-restriction]: Note that `size_in_MiB` must not exceed the amount of VRAM on a single GPU
+(can be determined by dividing the amount of `shard` available on a node by the number of GPUs on that node).
 If you require more VRAM than a single GPU can provide, please use the `--gres gpu` flag instead (see below).
 
 The `gpu` GRES is used to request exclusive access to GPUs[^gpu-management].
 This is not recommended unless your workload can make efficient use of the entire GPU.
-If you are unsure, please use the `mps` GRES instead.
+If you are unsure, please use the `shard` GRES instead.
 To request for `gpu`, use the `--gres gpu[:type]:<number_of_gpus>` flag, where `type` is optional and can be used
 to specify a specific GPU type. Below are some examples:
 
