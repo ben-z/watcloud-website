@@ -107,6 +107,12 @@ Please note that the amount of VRAM requested is not enforced, and you should en
 
 Using `shard` is the preferred way to request for GPU resources because it allows multiple jobs to share the same GPU.
 
+It's common to request extra tmpdisk space along with GPUs. To do this, you can append `,tmpdisk:<size_in_MiB>` to the `--gres` flag. For example:
+
+```bash copy
+srun --gres shard:4096,tmpdisk:20480 --pty bash
+```
+
 If your workload requires exclusive access to a GPU, you can use the `--gres gpu` flag instead:
 
 <Callout type="warning">Because the cluster is GPU-constrained, requesting whole GPUs is not recommended unless your workload can
@@ -390,6 +396,14 @@ srun --gres gpu:rtx_3090:1 --pty bash
 To see a list of available GPU types, please refer to the [View available resources](#view-available-resources) section.
 
 [^gpu-management]: For more information on GPU management, please refer to the [GPU Management](https://slurm.schedmd.com/gres.html#GPU_Management) SLURM documentation.
+
+#### Requesting multiple GRES
+
+You can request multiple GRES by separating them with a comma. For example, to request 1 GiB of `shard` and 2 GiB of `tmpdisk`, you can run:
+
+```bash copy
+srun --gres shard:1024,tmpdisk:2048 --pty bash
+```
 
 ### CVMFS
 
