@@ -165,6 +165,119 @@ You can find the CUDA compatibility matrix [here](https://docs.nvidia.com/deploy
 
 [^cc-cvmfs]: The [Compute Canada CVMFS](https://docs.alliancecan.ca/wiki/Accessing_CVMFS) is mounted at `/cvmfs/soft.computecanada.ca` on the compute nodes. It provides access to a wide variety of software via [Lmod modules](https://docs.alliancecan.ca/wiki/Utiliser_des_modules/en).
 
+### Batch jobs
+
+The real power of SLURM comes from batch jobs.
+Batch jobs are non-interactive jobs that start automatically when resources are available and release the resources when the job is finished.
+This helps to maximize resource utilization and allows you to easily run large numbers of jobs (e.g. parameter sweeps).
+
+To submit a batch job, create a script that looks like this:
+
+```bash copy filename="slurm_job.sh"
+#!/bin/bash
+#SBATCH --job-name=my_job
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=1G
+#SBATCH --gres tmpdisk:1024
+#SBATCH --time=00:10:00
+#SBATCH --output=logs/%j-%x.out  # %j: job ID, %x: job name. Reference: https://slurm.schedmd.com/sbatch.html#lbAH
+
+echo "Hello, world! I'm running on $(hostname)"
+echo "Counting to 60..."
+for i in $(seq 60); do
+    echo $i
+    sleep 1
+done
+echo "Done!"
+```
+
+The `#SBATCH` lines are SLURM directives that specify the resources required by the job[^sbatch].
+They are the same as the flags you would pass to `srun`.
+
+To submit the job, run:
+
+```bash copy
+sbatch slurm_job.sh
+```
+
+This submits the job to the SLURM cluster, and you will receive a job ID in return.
+After the job is submitted, it will be queued until resources are available.
+
+You can also the status of your job by running[^squeue]:
+
+```bash copy
+squeue -u $(whoami) --format="%.18i %.9P %.30j %.20u %.10T %.10M %.9l %.6D %R"
+```
+
+After the job starts, the output of the job is written to the file specified in the `--output` directive.
+In the example above, you can view the output of the job by running:
+
+```bash copy
+tail -f logs/*-my_job.out
+```
+
+After the job finishes, it disappears from the queue.
+You can retrieve useful information about the job (exit status, running time, etc.) by running[^sacct]:
+
+```bash copy
+sacct --format=JobID,JobName,State,ExitCode
+```
+
+[^sbatch]: `sbatch` is used to submit batch jobs to the SLURM cluster. For a full list of SLURM directives for `sbatch`, see the [sbatch documentation](https://slurm.schedmd.com/sbatch.html).
+[^squeue]: `squeue` displays information about jobs in the queue. For a full list of formatting options, see the [squeue documentation](https://slurm.schedmd.com/squeue.html#OPT_format).
+[^sacct]: `sacct` displays accounting data for jobs and job steps. For more information, see the [sacct documentation](https://slurm.schedmd.com/sacct.html).
+
+#### Job arrays
+
+Job arrays are a way to submit multiple jobs with similar parameters.
+This is useful for running parameter sweeps or other tasks that require running the same job multiple times with potentially different inputs.
+
+To submit a job array, create a script that looks like this:
+
+```bash copy filename="slurm_job_array.sh" {7-8,10}
+#!/bin/bash
+#SBATCH --job-name=my_job_array
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=1G
+#SBATCH --gres tmpdisk:1024
+#SBATCH --time=00:10:00
+#SBATCH --output=logs/%A-%a-%x.out # %A: job array master job allocation number, %a: Job array index, %x: job name. Reference: https://slurm.schedmd.com/sbatch.html#lbAH
+#SBATCH --array=1-10
+
+echo "Hello, world! I'm job $SLURM_ARRAY_TASK_ID, running on $(hostname)"
+echo "Counting to 60..."
+for i in $(seq 60); do
+    echo $i
+    sleep 1
+done
+echo "Done!"
+```
+
+The `--array` directive specifies the range of the job array (in this case, from 1 to 10, inclusive).
+
+To submit the job array, run:
+
+```bash copy
+sbatch slurm_job_array.sh
+```
+
+This will submit 10 jobs with IDs ranging from 1 to 10.
+You can view the status of the job array by running:
+
+```bash copy
+squeue -u $(whoami) --format="%.18i %.9P %.30j %.20u %.10T %.10M %.9l %.6D %R"
+```
+
+After jobs in the array start, the output of each job is written to a file specified in the `--output` directive.
+In the example above, you can view the output of each job by running:
+
+```bash copy
+tail -f logs/*-my_job_array.out
+```
+
+To learn more about job arrays, including environment variables available to job array scripts,
+see the [official documentation](https://slurm.schedmd.com/job_array.html).
+
 ## Extra details
 
 ### SLURM v.s. general-use machines
