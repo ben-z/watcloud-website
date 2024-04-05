@@ -92,6 +92,10 @@ Test it with:
 docker run --rm hello-world
 ```
 
+Note that `slurm-start-dockerd.sh` places the Docker data directory in `/tmp`.
+You can request for more space using the `--gres tmpdisk:<size_in_MiB>` flag.
+
+
 ### Using GPUs
 
 You can request access to GPUs by using the `--gres shard:<size_in_MiB>` flag. For example, if your workload requires 4 GiB of VRAM, you can run:
