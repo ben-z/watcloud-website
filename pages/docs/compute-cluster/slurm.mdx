@@ -86,13 +86,11 @@ slurm-start-dockerd.sh
 If successful, you should see the following output:
 
 ```text
-Dockerd started successfully! Execute the following command to use it:
+Dockerd started successfully!
 
-export DOCKER_HOST=unix:///tmp/run/docker.sock
+Test it with:
 docker run --rm hello-world
 ```
-
-Follow the instructions to set the `DOCKER_HOST` environment variable accordingly.
 
 ### Using GPUs
 
