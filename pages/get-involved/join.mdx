@@ -38,6 +38,8 @@ The best way to join WATcloud is to start contributing! We have a backlog of pro
 If you can complete one of the projects below, you are guaranteed a spot on the team!
 
 import { Callout } from 'nextra/components'
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { CheckSquareIcon } from "lucide-react"
 
 <Callout type="info">
 All of the projects below have been taken. We are working on polishing more project descriptions
@@ -78,9 +80,14 @@ We use Cloudflare as our DNS provider. Cloudflare was generous enough to give us
 
 {/* Internal reference: https://github.com/WATonomous/infra-config/issues/996#issuecomment-1875748581 */}
 
-<Callout type="info">
-This project is currently in the deployment stage. The source code will be made available once deployment is complete.
-</Callout>
+<Alert variant="success" className="mt-6">
+  <CheckSquareIcon className='h-5 w-5'/>
+  <AlertTitle>Completed</AlertTitle>
+  <AlertDescription>
+    This project has been completed and the initial version is available [here](https://github.com/WATonomous/watcloud-website/blob/9772e79a0d775ec80e7b2a3ac791d0e280ffef02/scripts/validate-internal-links.py).
+    Please don't hesitate to reach out if you have any comments or suggestions!
+  </AlertDescription>
+</Alert>
 
 We have a statically-generated Next.js website[^website]. Sometimes, we make typos in our hyperlinks. We would like to have a tool that can detect broken internal links. This should be a tool that runs at build-time and fails the build if it detects a broken link. The tool should be able to handle links to hashes (e.g. `#section`) in addition to links to pages. An initial brainstorm of how this could be implemented is available [here](https://chat.openai.com/share/0e0ffb40-1110-4bd5-8a1a-dd22a0e6483d).
 
@@ -94,11 +101,7 @@ Internal references:
 - https://github.com/WATonomous/infra-config/issues/1834
 */}
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { CheckSquareIcon } from "lucide-react"
-
 <Alert variant="success" className="mt-6">
-  {/* <Terminal className="h-4 w-4" /> */}
   <CheckSquareIcon className='h-5 w-5'/>
   <AlertTitle>Completed</AlertTitle>
   <AlertDescription>
