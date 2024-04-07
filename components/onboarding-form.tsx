@@ -40,6 +40,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { deepEquals } from "@rjsf/utils"
 import { useRouter } from "next/router";
+import { encodeURI as b64EncodeURI, decode as b64Decode } from "js-base64";
 
 const INITIAL_FORM_DATA_QUERY_PARAM = "initialformdatab64";
 const FORM_STATE_KEY = "onboarding-form-state";
@@ -127,7 +128,7 @@ export default function OnboardingForm() {
       savedFormState.initialFormDataB64FromParam;
 
     const initialFormDataFromParam = initialFormDataB64FromParam
-      ? JSON.parse(atob(initialFormDataB64FromParam as string))
+      ? JSON.parse(b64Decode(initialFormDataB64FromParam as string))
       : null;
 
     // Choose initial form data:
@@ -204,7 +205,7 @@ export default function OnboardingForm() {
     resetAlert();
     setAlertTitle("Edit link");
     setAlertDescription("Below is a link to the form with the current data pre-filled. You can send this to others as a template.");
-    const editLink = `${window.location.origin}${window.location.pathname}?${INITIAL_FORM_DATA_QUERY_PARAM}=${btoa(JSON.stringify(postprocessFormData(formData)))}`;
+    const editLink = `${window.location.origin}${window.location.pathname}?${INITIAL_FORM_DATA_QUERY_PARAM}=${b64EncodeURI(JSON.stringify(postprocessFormData(formData)))}`;
     setAlertBody(
       <>
         <Pre hasCopyCode>
