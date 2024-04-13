@@ -154,8 +154,8 @@ export function MachineCard({
                 }
             </CardTitle>
             <CardDescription>{
-                `${pluralizeWithCount(parseInt(machine.cpu_info['logical_processors']), "CPU")}`
-                + `, ${bytesToSize(parseInt(machine.memory_info["memory_total_kibibytes"])*1024, 0)} RAM`
+                `${pluralizeWithCount(parseInt(machine.cpu_info['logical_processors'] || "0"), "CPU")}`
+                + `, ${bytesToSize(parseInt(machine.memory_info["memory_total_kibibytes"] || "0")*1024, 0)} RAM`
                 + ('gpus' in machine && machine.gpus?.length ? `, ${pluralizeWithCount(machine.gpus.length, "GPU")}` : "")
             }</CardDescription>
             </CardHeader>
@@ -211,7 +211,7 @@ export function MachineCard({
                     </div>
                     <div className="flex flex-col py-3 first:pt-0">
                         <dt className="mb-1 text-gray-500 dark:text-gray-400">RAM</dt>
-                        <dd className="font-medium">{bytesToSize(parseInt(machine.memory_info["memory_total_kibibytes"])*1024, 0)}</dd>
+                        <dd className="font-medium">{bytesToSize(parseInt(machine.memory_info["memory_total_kibibytes"] || "0")*1024, 0)}</dd>
                     </div>
                     { 'gpus' in machine && machine.gpus.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
@@ -237,7 +237,7 @@ export function MachineCard({
                                     {machine.hosted_storage.length ? machine.hosted_storage.map((storage, index) => {
                                         return (
                                             <li key={index} className="my-0">
-                                                {storage['mountpoint']} ({bytesToSize(parseInt(storage['size_bytes']), 0)})
+                                                {storage['mountpoint']} ({bytesToSize(parseInt(storage['size_bytes'] || "0"), 0)})
                                             </li>
                                         )
                                     }) : "None"}

@@ -14,9 +14,9 @@ const DEV_MACHINES = [
 ]
 
 export function Hero() {
-    const vCPUs = DEV_MACHINES.reduce((acc, m) => acc + parseInt(m.cpu_info.logical_processors), 0)
-    const ramBytes = DEV_MACHINES.reduce((acc, m) => acc + parseInt(m.memory_info.memory_total_kibibytes) * 1024, 0)
-    const redundantStorageBytes = machineInfo.bare_metals.flatMap(m => m.hosted_storage.map(s => parseInt(s.size_bytes))).reduce((acc, size) => acc + size, 0)
+    const vCPUs = DEV_MACHINES.reduce((acc, m) => acc + parseInt(m.cpu_info.logical_processors || "0"), 0)
+    const ramBytes = DEV_MACHINES.reduce((acc, m) => acc + parseInt(m.memory_info.memory_total_kibibytes || "0") * 1024, 0)
+    const redundantStorageBytes = machineInfo.bare_metals.flatMap(m => m.hosted_storage.map(s => parseInt(s.size_bytes || "0"))).reduce((acc, size) => acc + size, 0)
     const gpuCount = DEV_MACHINES.reduce((acc, m) => acc + m.gpus.length, 0)
 
     return (
