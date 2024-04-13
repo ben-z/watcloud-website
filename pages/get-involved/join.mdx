@@ -41,13 +41,59 @@ import { Callout } from 'nextra/components'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckSquareIcon } from "lucide-react"
 
-<Callout type="info">
-All of the projects below have been taken. We are working on polishing more project descriptions
-and adding them here!
-In the mean time, please feel free to read the source code of existing projects and suggest improvements,
-or [reach out](../docs/compute-cluster/support-resources) to the WATcloud team to get a sneak peak of
-upcoming projects.
-</Callout>
+### Blog Comment/Vote System
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/1663 */}
+
+As we prepare to launch the [WATcloud blog](/blog), we would like to integrate a comment/vote system that allows readers to engage with the content.
+Some requirements for this system are:
+- Easy to deploy and maintain: We want a system where almost all components can be automatically deployed (Infrastructure as Code).
+- Minimal infrastructure requirements: We want to avoid running servers/databases if possible[^current-website].
+- No paid subscriptions: We want to avoid services that require a paid subscription to use. This is because our funding does not allow for recurring costs.
+
+[^current-website]: The current website is a statically-generated Next.js site, hosted on GitHub Pages. We would like to keep the infrastructure requirements similar to the current website.
+
+Currently, we are considering the following options:
+
+1. [**Giscus**](https://giscus.app/):
+    - A lightweight commenting system that uses GitHub Discussions to manage and store comments.
+    - Supports comments and reactions.
+    - Examples: [1](https://the-guild.dev/blog/nextra-3), [2](https://cep.dev/posts/every-infrastructure-decision-i-endorse-or-regret-after-4-years-running-infrastructure-at-a-startup/), [3]( https://jjtech.dev/reverse-engineering/imessage-explained/)
+
+2. [**Utterances**](https://github.com/utterance/utterances):
+    - A similar system to Giscus, but uses GitHub Issues to store comments.
+    - Examples: [1](https://www.swyx.io/the-upload-short-story)
+
+3. A simple like button:
+    - Simple, but often involves running a (minimal) server/database or using an external service that may require a paid subscription.
+    - Examples: [1](https://lyket.dev/blog/posts/gatsby-like-button), [2](https://www.madeinsparetime.com/2022/08/06/making-a-like.html)
+
+Some other options are described in these articles:
+- https://darekkay.com/blog/static-site-comments/
+- https://getshifter.io/static-site-comments/
+
+The blog is a part of our website. The website source code can be found [here](https://github.com/WATonomous/watcloud-website).
+
+### Azure Cost Estimator
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/2057 */}
+
+We use an Azure nonprofit subscription for several projects, with an annual credit limit.
+Tracking our usage effectively is challenging due to these limitations in Azure:
+1. The Azure portal only displays current usage without projections or historical trends.
+2. Access to the Azure sponsorship portal is restricted to a single user.
+
+To better manage our resources, we need a tool that provides detailed insights into our Azure credit usage. The ideal tool would:
+1. Display current usage and remaining credits.
+2. Chart historical usage trends.
+3. Project future usage based on past data.
+4. Provide detailed breakdowns by resource for all the above metrics.
+
+We are considering using [CAnalyzer](https://gitlab.com/indimin/canalyzer), but are open to any other suggestions.
+
+If you don't have access to an Azure subscription, we can give you read-only access to our Azure portal.
+Please fill out the [onboarding-form](/docs/utilities/onboarding-form) (make sure to enable the `Azure` section)
+and [let us know](https://cloud.watonomous.ca/docs/compute-cluster/support-resources).
 
 ### File Auto-Expiration Tool
 
