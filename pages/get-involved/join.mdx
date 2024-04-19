@@ -41,6 +41,17 @@ import { Callout } from 'nextra/components'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckSquareIcon } from "lucide-react"
 
+### Terraform Provider Rate Limiting
+
+{/* Public reference: https://github.com/WATonomous/terraform-provider-email/issues/1 */}
+
+We use a [custom Terraform provider](https://github.com/WATonomous/terraform-provider-email/) for managing outgoing emails.
+Currently, the provider is a simple wrapper around an SMTP client.
+The SMTP server we use appears to have a rate limit.
+It errors out when we try to send more than a few emails in quick succession.
+
+We would like to add rate limiting to the provider. [Here's the ticket for this feature](https://github.com/WATonomous/terraform-provider-email/issues/1).
+
 ### Blog Comment/Vote System
 
 {/* Internal reference: https://github.com/WATonomous/infra-config/issues/1663 */}
