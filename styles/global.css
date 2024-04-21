@@ -91,6 +91,14 @@
   }
 }
 
+.nextra-nav-container {
+  /*
+    Uppy uses a max z-index of 1005:
+    https://github.com/transloadit/uppy/blob/68af8a3c0f96a0fc37f6b2aa844df81e6f218fb4/packages/%40uppy/core/src/_variables.scss#L50-L56
+  */
+  z-index: 1020; 
+} 
+
 .form-description p.nx-leading-7 {
   /* Change the styling of generated MDX content that are embedded in forms */
   line-height: 1.375;

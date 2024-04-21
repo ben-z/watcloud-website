@@ -1,0 +1,33 @@
+# Assets
+
+WATcloud Assets is a system for managing files[^example-uses].
+This page contains tools for interacting with the assets system.
+
+[^example-uses]: Some use cases are storing files that are too large for git (e.g. images, videos, etc.), or files that need to be shared between multiple projects.
+
+import { AssetUploader, AssetResolver } from '@/components/assets'
+
+## Resolver
+
+The resolver is a tool for resolving `watcloud://` URIs to the actual URL of the asset.
+
+<div className="mt-6">
+    <AssetResolver />
+</div>
+
+## Uploader
+
+The uploader is a tool for uploading assets to the assets system.
+
+<div className="mt-6">
+    <AssetUploader />
+</div>
+
+
+{
+// Separate footnotes from the main content
+}
+
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />
