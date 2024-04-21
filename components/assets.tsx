@@ -5,7 +5,7 @@ import AwsS3 from '@uppy/aws-s3';
 import { useEffect, useState } from 'react';
 import { sha256 } from 'js-sha256';
 import { useTheme } from 'nextra-theme-docs';
-import { bytesToSize } from '@/lib/utils';
+import { bytesToSize, parseAttributes, maxBy, getDayjsRelative } from '@/lib/utils';
 import { Code, Pre } from 'nextra/components';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -20,16 +20,19 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 
 import '@uppy/core/dist/style.min.css';
 import '@uppy/dashboard/dist/style.min.css';
+import { Textarea } from './ui/textarea';
+import { Separator } from "@/components/ui/separator";
+
+const dayjs = getDayjsRelative();
 
 const sha256Cache = new Map<string, string>();
 
 const RESOLVER_URL_PREFIXES = [
-    "https://rgw.watonomous.ca/asset-perm",
     "https://rgw.watonomous.ca/asset-temp",
+    "https://rgw.watonomous.ca/asset-perm",
 ]
 
 const extractSha256FromURI = (uri: string) => {
@@ -40,48 +43,74 @@ const extractSha256FromURI = (uri: string) => {
     return sha256Match[1];
 }
 
-const assetResolverFormSchema = z.object({
-  uri: z.string(),
+const assetInspectorFormSchema = z.object({
+  uris: z.string(),
 });
 
-export function AssetResolver() {
+async function resolveURI(uri: string) {
+    if (!uri.startsWith('watcloud://v1/')) {
+        throw new Error(`Invalid URI: must start with "watcloud://v1/". Got: "${uri}"`);
+    }
+
+    const hash = extractSha256FromURI(uri);
+
+    const results = await Promise.all(RESOLVER_URL_PREFIXES.map(async (prefix) => {
+        const r = `${prefix}/${hash}`;
+        const res = await fetch(r, { method: 'HEAD' });
+        if (res.ok) {
+            const headers = new Map(res.headers);
+            const xAmzExpiration = headers.get('x-amz-expiration');
+            const expiresAt = xAmzExpiration ? parseAttributes(xAmzExpiration)['expiry-date'] : undefined;
+            const lastModified = headers.get('last-modified');
+            return {
+                url: r,
+                headers,
+                expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+                lastModified: lastModified ? new Date(lastModified) : undefined,
+            };
+        }
+    }));
+
+    // find the result with the latest expiry date
+    const result = maxBy(results, res => res?.expiresAt?.getTime() || 0);
+    if (!result) {
+        throw new Error('Asset not found.');
+    }
+
+    return {
+        uri,
+        result,
+    };
+}
+
+export function AssetInspector() {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [resolvedURL, setResolvedURL] = useState<string>("");
+    const [resolvedResults, setResolvedResults] = useState<(Awaited<ReturnType<typeof resolveURI>> | {
+        uri: string,
+        error: Error,
+    })[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
 
-    const form = useForm<z.infer<typeof assetResolverFormSchema>>({
-        resolver: zodResolver(assetResolverFormSchema),
+    const form = useForm<z.infer<typeof assetInspectorFormSchema>>({
+        resolver: zodResolver(assetInspectorFormSchema),
         defaultValues: {
-            uri: "",
+            uris: "",
         },
     });
 
-    async function onSubmit({ uri }: z.infer<typeof assetResolverFormSchema>) {
-        setResolvedURL("");
+    async function onSubmit({ uris: urisString }: z.infer<typeof assetInspectorFormSchema>) {
+        setResolvedResults([]);
         setErrorMessage("");
         setIsSubmitting(true);
 
+        const uris = urisString.split('\n').map((uri) => uri.trim()).filter((uri) => uri.length > 0);
+
         try {
-            if (!uri.startsWith('watcloud://v1/')) {
-                throw new Error(`Invalid URI: must start with "watcloud://v1/". Got: "${uri}"`);
-            }
+            const results = await Promise.all(uris.map(uri => 
+                resolveURI(uri).catch((error: Error) => ({ uri: uri, error: error }))
+            ));
 
-            const hash = extractSha256FromURI(uri);
-
-            const urls = await Promise.all(RESOLVER_URL_PREFIXES.map(async (prefix) => {
-                const r = `${prefix}/${hash}`;
-                const res = await fetch(r, { method: 'HEAD' });
-                if (res.ok) {
-                    return r;
-                }
-            }));
-
-            const url = urls.find((url) => url !== undefined);
-            if (!url) {
-                throw new Error('Asset not found.');
-            }
-
-            setResolvedURL(url);
+            setResolvedResults(results);
         } catch (error: any) {
             console.error('Error while resolving asset:', error);
             setErrorMessage(`Error while resolving asset: ${error.message}`);
@@ -95,15 +124,15 @@ export function AssetResolver() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <FormField
                         control={form.control}
-                        name="uri"
+                        name="uris"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>URI</FormLabel>
+                                <FormLabel>URIs</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="watcloud://..." {...field} />
+                                    <Textarea placeholder="watcloud://..." {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    The URI of the asset you want to resolve.
+                                    WATcloud URIs, one per line.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -114,20 +143,51 @@ export function AssetResolver() {
                     </Button>
                 </form>
             </Form>
-            <h4 className="mt-8 mb-4 text-md">Result</h4>
-            {resolvedURL && (
-                <div>
-                    <span className="text-sm text-gray-500">You can access the asset at this URL:</span>
-                    <Pre hasCopyCode className="-mt-5"><Code>{resolvedURL}</Code></Pre>
-                </div>
+            <h4 className="mt-8 mb-4 text-md">Results</h4>
+            {resolvedResults.length > 0 && (
+                resolvedResults.map((res, i) => (
+                    <div key={res.uri}>
+                        {i !== 0 && (<Separator className="my-6" />)}
+                        <span className="text-sm text-gray-500">URI</span>
+                        <Pre hasCopyCode className="-mt-5"><Code>{res.uri}</Code></Pre>
+                        {'result' in res && (
+                            <>
+                                <span className="text-sm text-gray-500">Resolved</span>
+                                <Pre hasCopyCode className="-mt-5"><Code>{res.result.url}</Code></Pre>
+                                {res.result.lastModified && (
+                                    <>
+                                        <span className="text-sm text-gray-500 block">Last Modified</span>
+                                        <Pre hasCopyCode className="-mt-5"><Code>{dayjs().to(res.result.lastModified)} ({res.result.lastModified.toISOString()})</Code></Pre>
+                                    </>
+
+                                )}
+                                {res.result.expiresAt && (
+                                    <>
+                                        <span className="text-sm text-gray-500 block">Expires</span>
+                                        <Pre hasCopyCode className="-mt-5"><Code>{dayjs().to(res.result.expiresAt)} ({res.result.expiresAt.toISOString()})</Code></Pre>
+                                    </>
+                                )}
+                                {res.result.headers && (
+                                    <>
+                                        <span className="text-sm text-gray-500 block">Raw Headers</span>
+                                        <Pre hasCopyCode className="-mt-5"><Code>{JSON.stringify(Object.fromEntries(res.result.headers), null, 2)}</Code></Pre>
+                                    </>
+                                )}
+                            </>
+                        )}
+                        {'error' in res && (
+                            <span className="text-red-500">{res.error.message}</span>
+                        )}
+                    </div>
+                ))
             )}
             {errorMessage && (
                 <div>
                     <span className="text-red-500">{errorMessage}</span>
                 </div>
             )}
-            {!resolvedURL && !errorMessage && (
-                <p className="text-sm text-gray-500">No result yet. Submit a URI to get started!</p>
+            {resolvedResults.length === 0 && !errorMessage && (
+                <p className="text-sm text-gray-500">No results yet. Submit a URI to get started!</p>
             )}
         </>
     );

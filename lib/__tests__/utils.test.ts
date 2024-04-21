@@ -2,6 +2,7 @@ import {
     bytesToSize,
     pluralize,
     debounce,
+    parseAttributes,
 } from '../utils';
 
 describe('bytesToSize', () => {
@@ -175,5 +176,35 @@ describe('debounce', () => {
 
         const result = await promise;
         expect(result).toBe('result');
+    });
+});
+
+describe('parseAttributes', () => {
+    test('should parse attributes correctly', () => {
+        const input = 'id="myId" class="myClass" data-value="123"';
+        const expected = {
+            id: 'myId',
+            class: 'myClass',
+            'data-value': '123',
+        };
+
+        expect(parseAttributes(input)).toEqual(expected);
+    });
+
+    test('should handle empty input', () => {
+        const input = '';
+        const expected = {};
+
+        expect(parseAttributes(input)).toEqual(expected);
+    });
+
+    test('should handle attributes with special characters', () => {
+        const input = 'data-name="John Doe" data-age="30"';
+        const expected = {
+            'data-name': 'John Doe',
+            'data-age': '30',
+        };
+
+        expect(parseAttributes(input)).toEqual(expected);
     });
 });

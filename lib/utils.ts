@@ -3,12 +3,10 @@ import { twMerge } from "tailwind-merge"
 import dayjs from "dayjs";
 import dayjsUTC from "dayjs/plugin/utc";
 import dayjsTimezone from "dayjs/plugin/timezone";
+import dayjsRelativeTime from "dayjs/plugin/relativeTime";
 import { JSONSchema7 } from "json-schema";
 import { sha512crypt } from 'sha512crypt-node';
- 
-dayjs.extend(dayjsUTC);
-dayjs.extend(dayjsTimezone);
- 
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -161,7 +159,16 @@ export function debounce<T extends (...args: any[]) => any>(func: T, waitForMs: 
 }
 
 export function dayjsTz(date: string, timezone: string) {
+  dayjs.extend(dayjsUTC);
+  dayjs.extend(dayjsTimezone);
+
   return dayjs.tz(date, timezone)
+}
+
+export function getDayjsRelative() {
+  dayjs.extend(dayjsRelativeTime);
+
+  return dayjs;
 }
 
 export function slugify(text: string) {
@@ -327,4 +334,53 @@ export function deepSet(
     // Move to the next level in the path.
     return acc[key];
   }, obj);
+}
+
+/**
+ * Parses attribute-value pairs from a provided input string and returns an object where each key-value pair corresponds to one attribute and its associated value.
+ * 
+ * The function expects the input string to contain multiple attribute definitions formatted as `name="value"` or `name='value'`, where `name` can include hyphens. It handles both single and double-quoted values.
+ *
+ * @param input A string representation of attribute-value pairs, where pairs are separated by commas and each pair follows the format `attributeName="attributeValue"`.
+ * @returns An object where each key is the name of an attribute and each value is the corresponding attribute value parsed from the input string.
+ */
+export function parseAttributes(input: string): Record<string, string> {
+    const attributeValueRegex = /(\w+-?\w*)=["']([^"']*)["']/g;
+    const attributes: Record<string, string> = {};
+
+    let match: RegExpExecArray | null;
+    while ((match = attributeValueRegex.exec(input)) !== null) {
+        attributes[match[1]] = match[2];
+    }
+
+    return attributes;
+}
+
+/**
+ * Finds the element with the maximum value in an array based on a provided iteratee function.
+ * 
+ * @param {T[]} array - The array of elements to process.
+ * @param {(element: T) => number} iteratee - A function that returns a numeric value for each element, which determines how elements are compared.
+ * @returns {T | undefined} The element with the maximum value according to the iteratee function. Returns `undefined` if the array is empty.
+ * @template T - The type of elements in the array.
+ */
+export function maxBy<T>(array: T[], iteratee: (element: T) => number): T | undefined {
+  if (array.length === 0) return undefined;
+
+  let maxElement = array[0];
+  let maxValue = iteratee(maxElement);
+
+  array.forEach((element) => {
+    const value = iteratee(element);
+    if (value > maxValue) {
+      maxValue = value;
+      maxElement = element;
+    }
+  });
+
+  return maxElement;
+}
+
+export function minBy<T>(array: T[], iteratee: (element: T) => number): T | undefined {
+  return maxBy(array, (element) => -iteratee(element));
 }
