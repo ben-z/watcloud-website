@@ -95,6 +95,11 @@ const themeConfig = {
         </span>
         <ul className="flex flex-wrap justify-center items-start mt-8 lg:mt-0 text-sm font-medium text-gray-500 lg:flex-nowrap dark:text-gray-400 gap-6">
           <li>
+            <Link href="https://github.com/WATonomous/infrastructure-support/discussions" className="text-inherit no-underline hover:underline decoration-auto">
+              Announcements
+            </Link>
+          </li>
+          <li>
             <Link href="https://status.watonomous.ca" className="text-inherit no-underline hover:underline decoration-auto">
               Status
             </Link>
@@ -102,11 +107,6 @@ const themeConfig = {
           <li>
             <Link href="https://cloud.watonomous.ca/docs/utilities/onboarding-form" className="text-inherit no-underline hover:underline decoration-auto">
               Onboarding
-            </Link>
-          </li>
-          <li>
-            <Link href="https://github.com/WATonomous" className="text-inherit no-underline hover:underline decoration-auto">
-              GitHub
             </Link>
           </li>
         </ul>
