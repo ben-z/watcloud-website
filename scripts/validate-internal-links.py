@@ -80,48 +80,57 @@ def crawl_and_fetch_links_wrapper(url):
     crawl_and_fetch_links(url, visited_links, internal_links_tuples, external_links)
     return internal_links_tuples, external_links
 
-def check_link_validity(full_url, check_fragment=True):
-    """Check if a URL, including its fragment, is valid."""
+def get_response_code(full_url) -> int:
+    """Check if a URL, including its fragment, is valid. 
+    Returns: The request status code if the link isn't valid
+    """
     # Parse the URL to separate it from the fragment
     parsed_url = urlparse(full_url)
-    base_url = parsed_url._replace(fragment='').geturl()
-    fragment = parsed_url.fragment
+    url = parsed_url._replace(fragment='').geturl()
 
-    # First, check if the base URL is reachable
     try:
-        response = requests.get(base_url, timeout=5)
-        if response.status_code != 200:
-            return False  
-    except requests.RequestException:
-        return False  
+        response = requests.get(url, timeout=15)
+        return response.status_code  
+    except requests.RequestException as e:
+        print(f"Request for {url} failed: {e}")
+        return -1  
 
-    # If there's no fragment, the base URL being reachable is sufficient
-    if not fragment or not check_fragment:
-        return True
+def check_fragment_validity(full_url) -> bool:
+    """Check if a fragment in a URL is valid."""
+    parsed_url = urlparse(full_url)
+    fragment = parsed_url.fragment 
+    response = requests.get(parsed_url._replace(fragment='').geturl())
 
     # If there's a fragment, check if it corresponds to an id in the HTML
     soup = BeautifulSoup(response.text, 'html.parser')
     if soup.find(id=fragment) or soup.find_all(attrs={"name": fragment}):
-        return True  # Fragment is valid
+        return True # Fragment is valid
 
     # Fragment not found
-    return False
+    return False 
 
-def validate_links(links):
-    """Check if links are valid."""
-    invalid_links = []
-    for link in links:
-        if not check_link_validity(link):
-            invalid_links.append(link)
-    return invalid_links
+def link_has_fragment(full_url) -> bool:
+    return urlparse(full_url).fragment != ''
 
-def validate_internal_links(links):
+def validate_internal_links(internal_links_tuples):
     """Check if internal links are valid."""
     invalid_links = []
-    for link in links:
-        if not check_link_validity(link[1]):
-            invalid_links.append(link)
+    for link in internal_links_tuples:
+        _, destination, _ = link
+        status_code = get_response_code(destination)
+        if status_code != 200:
+            invalid_links.append([link, status_code])
     return invalid_links
+
+def validate_internal_link_fragments(internal_links_tuples):
+    """Check if internal link fragments are valid."""
+    invalid_fragment_links = []
+    for link in internal_links_tuples:
+        _, destination, _ = link
+        if link_has_fragment(destination):
+            if not check_fragment_validity(destination):
+                invalid_fragment_links.append(link)
+    return invalid_fragment_links
 
 if __name__ == '__main__':
     print("Collecting links...")
@@ -129,16 +138,23 @@ if __name__ == '__main__':
     print(f"Found {len(internal_links_tuples)} internal links")
     print(f"Found {len(external_links)} external links")
     invalid_internal_links = validate_internal_links(internal_links_tuples) 
+    invalid_fragment_links = validate_internal_link_fragments(internal_links_tuples)
 
-    if len(invalid_internal_links) == 0:
+    if len(invalid_internal_links) == 0 and len(invalid_fragment_links) == 0:
         print(f"All {len(internal_links_tuples)} internal links are valid.")
-        sys.exit(0)
-    else:
-        fail_build = True
+        sys.exit(0) # Exit with success
 
-    print("ERROR with internal links")
-    for link in invalid_internal_links:
-        print(f"On page: {link[0]} \nto: \n{link[1]} \nwith XPath: {link[2]}\n")
+    print("ERROR with the following internal links:")
+    for item in invalid_internal_links:
+        link = item[0]
+        status_code = item[1]
+        print(f"On page: {link[0]} \nto: {link[1]} \nwith XPath: {link[2]}")
+        print(f"Status code: {status_code} \n")
+    
+    for link in invalid_fragment_links:
+        print(f"On page: {link[0]} \nto: {link[1]} \nwith XPath: {link[2]}")
+        print(f"Fragment #{urlparse(link[1]).fragment} not found in the HTML. \n")
+    
     print('Hint: Use $x("XPath") in the browser console to find the element.')
-    if fail_build:
-        sys.exit(1)
+    
+    sys.exit(1) # Fail the build if there are invalid links
