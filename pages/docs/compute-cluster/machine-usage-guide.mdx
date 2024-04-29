@@ -1,6 +1,25 @@
 # Machine Usage Guide
 
-This page contains information about how to use the machines in the cluster.
+This document provides an overview of the machines in the WATcloud compute cluster, including their hardware, networking, operating system, services, and software.
+It also includes guidelines for using the machines, troubleshoot instructions for common issues, and information about maintenance and outages.
+
+## Types of Machines
+
+There are two main types of machines in the cluster: [general-use machines](/machines#general-use-machines) and [SLURM compute nodes](/machines#slurm-compute-nodes).
+
+General-use machines are meant for interactive use and are shared among all users in the cluster.
+You can access them via [SSH](./ssh).
+
+SLURM compute nodes are meant for running resource-intensive jobs.
+They are managed by a popular HPC[^hpc] job scheduler called SLURM[^slurm].
+Instructions for submitting jobs to the SLURM cluster can be found [here](./slurm).
+
+[^hpc]: [High-performance computing](https://en.wikipedia.org/wiki/High-performance_computing) (HPC) is the use of supercomputers and parallel processing
+  techniques to solve complex computational problems. Examples of HPC clusters include [Cedar](https://docs.computecanada.ca/wiki/Cedar) and
+  [Graham](https://docs.computecanada.ca/wiki/Graham).
+
+[^slurm]: Simple Linux Utility for Resource Management (SLURM) is an open-source job scheduler that allocates resources to jobs on a cluster of computers.
+  It is widely used in HPC environments. Learn more about SLURM [here](https://slurm.schedmd.com/quickstart.html).
 
 ## Hardware
 
@@ -19,8 +38,8 @@ and a cluster network (over 40Gbps or 10Gbps Ethernet). The IP address range for
 
 ## Operating System
 
-All general-use machines are virtual machines (VMs)[^hypervisor]. This setup allows us to easily manage the machines remotely
-and reduce the complexity of the bare-metal OSes.
+All general-use machines and SLURM compute nodes are virtual machines (VMs)[^hypervisor].
+This setup allows us to easily manage the machines remotely and reduce the complexity of the bare-metal OSes.
 
 [^hypervisor]: We use [Proxmox](https://www.proxmox.com/en/) as our hypervisor.
 
@@ -46,11 +65,14 @@ on all general-use machines at the `/mnt/wato-drive*` directories. You can use t
 
 ### `/mnt/scratch` Directory
 
-On some high-performance machines, we have an NVMe/SATA SSD-backed local storage pool that is mounted at the `/mnt/scratch` directory.
-These local storage pools are meant for temporary storage for long-running jobs that require fast and reliable filesystem access,
+Every general-use machine has an SSD-backed local storage pool that is mounted at the `/mnt/scratch` directory.
+These storage pools are meant for temporary storage for long-running jobs that require fast and reliable filesystem access,
 such as storing training data and model checkpoints for ML workloads.
 
 The space on `/mnt/scratch` is limited. Please make sure to clean up your files after you are done with them.
+
+An equivalent of `/mnt/scratch` is available on the SLURM compute nodes as well.
+They can be requested by following the instructions [here](./slurm#grestmpdisk).
 
 ### Docker
 
@@ -77,23 +99,21 @@ Currently, it's enabled for the WATonomous organization. If you require this fun
 
 ## Software
 
-We try to keep the general-use machines lean. We generally refrain from installing software that make sense for rootless installation or running in
+We try to keep the machines lean. We generally refrain from installing software that make sense for rootless installation or running in
 containerized environments.
 
-Examples of software that we install on the general-use machines include:
+Examples of software that we install:
 - Docker (rootless)
 - NVIDIA Container Toolkit
 - zsh
 - various CLI tools (e.g. `vifm`, `iperf`, `moreutils`, `jq`, `ncdu`)
 
-Examples of software that we do not install on the general-use machines include:
+Examples of software that we do not install:
 - conda (use [miniconda](https://docs.conda.io/en/latest/miniconda.html) instead)
 - ROS (use [Docker](https://hub.docker.com/_/ros) instead)
-- CUDA (use [Docker](https://hub.docker.com/r/nvidia/cuda) instead)
-- PyTorch (use [Docker](https://hub.docker.com/r/pytorch/pytorch) instead)
-- TensorFlow (use [Docker](https://hub.docker.com/r/tensorflow/tensorflow) instead)
+- CUDA (use [Docker](https://hub.docker.com/r/nvidia/cuda) instead. Or use [CVMFS](./slurm#cvmfs) on the SLURM compute nodes.)
 
-If there is a piece of software that you think should be installed on the general-use machines, please reach out to a WATcloud team member.
+If there is a piece of software that you think should be installed on the machines, please reach out to a WATcloud team member.
 
 ### `OMP_NUM_THREADS`
 
@@ -138,13 +158,6 @@ a dashboard to monitor the health of the machines in the cluster.
   - `/mnt/wato-drive*` are large storage pools, but they are not infinite and can fill up quickly with today's large datasets.
     Please remove unneeded files from these directories.
   - Please clean up your Docker images and containers regularly. `docker system prune --all{:bash}` is your friend.
-- Resource allocation
-  - Currently, we don't have any resource allocation policies in place. However, if we notice that the cluster's resources are frequently exhausted,
-    we may need to implement a resource allocation system common in HPC[^hpc] clusters.
-
-[^hpc]: [High-performance computing](https://en.wikipedia.org/wiki/High-performance_computing) (HPC) is the use of supercomputers and parallel processing
-techniques to solve complex computational problems. Examples of HPC clusters include [Cedar](https://docs.computecanada.ca/wiki/Cedar) and
-[Graham](https://docs.computecanada.ca/wiki/Graham).
 
 ## Troubleshooting
 

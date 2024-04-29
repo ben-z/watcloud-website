@@ -3,8 +3,8 @@
         "display": "hidden"
     },
     "getting-access": "Getting Access",
-    "ssh": "SSH",
     "machine-usage-guide": "Machine Usage Guide",
+    "ssh": "SSH",
     "slurm": "SLURM",
     "firewall": "Firewall",
     "quotas": "Quotas",
