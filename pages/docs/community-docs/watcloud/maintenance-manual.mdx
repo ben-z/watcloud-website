@@ -62,10 +62,55 @@ The `Reason` field is an arbitrary user-specified string that can be set when pe
 
 ### Performing maintenance on a node
 
+#### Creating a reservation
 
-#### Putting a node into maintenance mode
+The first step to performing maintenance on a node is to create a reservation[^slurm-reservation].
+This ensures that user-submitted jobs do not get dispatched to the target nodes if they cannot be
+completed before the maintenance window starts.
 
-To put a node into maintenance mode, you can run:
+[^slurm-reservation]: The official documentation for reservations is at https://slurm.schedmd.com/reservations.html
+
+```bash copy
+scontrol create reservation starttime=<START_TIME> duration=<DURATION_IN_MINUTES> user=root flags=maint nodes=<NODE_NAMES>
+```
+
+The time zone for the `starttime` argument is the local time zone where the command is run.
+To see the local timezone, run `timedatectl`.
+
+Here's an example:
+
+```bash copy
+scontrol create reservation starttime=2024-04-30T21:00:00 duration=480 user=root flags=maint nodes=trpro-slurm1,trpro-slurm2
+```
+
+output:
+
+```text
+Reservation created: root_4
+```
+
+This command creates a reservation named `root_4`. The reservation starts on
+April 30, 2024, at 9:00 PM local time and lasts for
+8 hours (480 minutes) for the nodes `trpro-slurm1` and `trpro-slurm2`.
+During this time, only the root user can run jobs on these nodes.
+Jobs submitted by other users will be queued until the reservation is over.
+
+To see existing reservations, you can run:
+
+```bash copy
+scontrol show reservation
+```
+
+To delete a resservation, you can run:
+
+```bash copy
+scontrol delete reservation <RESERVATION_NAME>
+```
+
+
+#### Starting maintenance
+
+Before performing maintenance on a node, you should drain the node to ensure no jobs are running on it and no new jobs are scheduled to run on it.
 
 ```bash
 scontrol update nodename="<NODE_NAME>" state=drain reason="Performing maintenance for reason X"
@@ -164,3 +209,13 @@ scontrol update nodename="tr-slurm1" state=resume
 
 This will resume the node `tr-slurm1` (allow new jobs to run on it) and clear the reason.
 
+Also remember to delete any unexpired reservations (as outlined in [Creating a reservation](#creating-a-reservation)). 
+
+
+{
+// Separate footnotes from the main content
+}
+
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />
