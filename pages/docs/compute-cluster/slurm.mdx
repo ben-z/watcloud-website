@@ -223,7 +223,7 @@ sbatch slurm_job.sh
 This submits the job to the SLURM cluster, and you will receive a job ID in return.
 After the job is submitted, it will be queued until resources are available.
 
-You can also the status of your job by running[^squeue]:
+You can see a list of your queued and in-progress jobs by running[^squeue]:
 
 ```bash copy
 squeue -u $(whoami) --format="%.18i %.9P %.30j %.20u %.10T %.10M %.9l %.6D %R"
