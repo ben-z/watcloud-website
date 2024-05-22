@@ -15,6 +15,7 @@ The [website](https://cloud.watonomous.ca) for WATcloud.
 1. Clone the repo
 2. Install dependencies:
     ```bash
+    pip install -r requirements.txt
     npm install
     ```
 3. Run the development server:
