@@ -5,6 +5,12 @@ It is commonly used in HPC (High Performance Computing) environments. WATcloud u
 
 [^slurm]: https://slurm.schedmd.com/
 
+This page provides an introduction to SLURM and any WATcloud-specific details[^watcloud-specific] to get you started quickly.
+For more advanced usage beyond the basics, please refer to the [official SLURM documentation](https://slurm.schedmd.com/).
+
+[^watcloud-specific]: Some WATcloud-specific details include the available resources (e.g. how GPUs are requested using `shard` and `gpu` GRES),
+    the temporary disk setup (requested using the `tmpdisk` GRES, mounted at `/tmp`), and software availability (e.g. docker rootless and Compute Canada CVMFS).
+
 import { Callout } from 'nextra/components'
 
 <Callout type="info">
@@ -426,6 +432,7 @@ It provides a way to distribute software to compute nodes without having to inst
 
 We make use of the [Compute Canada CVMFS](https://docs.alliancecan.ca/wiki/Accessing_CVMFS) to provide access to software available on Compute Canada clusters.
 For example, you can access CUDA by loading the appropriate module (see [Using CUDA](#using-cuda)).
+A list of all availalbe modules can be found via the [official documentation](https://docs.alliancecan.ca/wiki/Available_software).
 
 [^cvmfs]: https://cvmfs.readthedocs.io/en/stable/
 
