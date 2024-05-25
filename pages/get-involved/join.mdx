@@ -52,39 +52,6 @@ It errors out when we try to send more than a few emails in quick succession.
 
 We would like to add rate limiting to the provider. [Here's the ticket for this feature](https://github.com/WATonomous/terraform-provider-email/issues/1).
 
-### Blog Comment/Vote System
-
-{/* Internal reference: https://github.com/WATonomous/infra-config/issues/1663 */}
-
-As we prepare to launch the [WATcloud blog](/blog), we would like to integrate a comment/vote system that allows readers to engage with the content.
-Some requirements for this system are:
-- Easy to deploy and maintain: We want a system where almost all components can be automatically deployed (Infrastructure as Code).
-- Minimal infrastructure requirements: We want to avoid running servers/databases if possible[^current-website].
-- No paid subscriptions: We want to avoid services that require a paid subscription to use. This is because our funding does not allow for recurring costs.
-
-[^current-website]: The current website is a statically-generated Next.js site, hosted on GitHub Pages. We would like to keep the infrastructure requirements similar to the current website.
-
-Currently, we are considering the following options:
-
-1. [**Giscus**](https://giscus.app/):
-    - A lightweight commenting system that uses GitHub Discussions to manage and store comments.
-    - Supports comments and reactions.
-    - Examples: [1](https://the-guild.dev/blog/nextra-3), [2](https://cep.dev/posts/every-infrastructure-decision-i-endorse-or-regret-after-4-years-running-infrastructure-at-a-startup/), [3]( https://jjtech.dev/reverse-engineering/imessage-explained/)
-
-2. [**Utterances**](https://github.com/utterance/utterances):
-    - A similar system to Giscus, but uses GitHub Issues to store comments.
-    - Examples: [1](https://www.swyx.io/the-upload-short-story)
-
-3. A simple like button:
-    - Simple, but often involves running a (minimal) server/database or using an external service that may require a paid subscription.
-    - Examples: [1](https://lyket.dev/blog/posts/gatsby-like-button), [2](https://www.madeinsparetime.com/2022/08/06/making-a-like.html)
-
-Some other options are described in these articles:
-- https://darekkay.com/blog/static-site-comments/
-- https://getshifter.io/static-site-comments/
-
-The blog is a part of our website. The website source code can be found [here](https://github.com/WATonomous/watcloud-website).
-
 ### Azure Cost Estimator
 
 {/* Internal reference: https://github.com/WATonomous/infra-config/issues/2057 */}
@@ -132,6 +99,49 @@ We use Cloudflare as our DNS provider. Cloudflare was generous enough to give us
 
 [^assume-round-robin]: We are assuming that there's perfect DNS round-robin or random selection.
 [^similar-reliability]: It's slightly less reliable than Cloudflare's Zero-Downtime Failover, since there's a delay between when the host goes down and when the DNS record is removed. However, this is still much better than the current situation, where the DNS record of a downed host is never removed.
+
+### Blog Comment/Vote System
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/1663 */}
+
+<Alert variant="success" className="mt-6">
+  <CheckSquareIcon className='h-5 w-5'/>
+  <AlertTitle>Completed</AlertTitle>
+  <AlertDescription>
+    This project has been completed and the initial version is available [here](https://github.com/WATonomous/watcloud-website/commit/624e95b330e0674c438df2f55f898d857f62dc6a).
+    Please don't hesitate to reach out if you have any comments or suggestions!
+  </AlertDescription>
+</Alert>
+
+As we prepare to launch the [WATcloud blog](/blog), we would like to integrate a comment/vote system that allows readers to engage with the content.
+Some requirements for this system are:
+- Easy to deploy and maintain: We want a system where almost all components can be automatically deployed (Infrastructure as Code).
+- Minimal infrastructure requirements: We want to avoid running servers/databases if possible[^current-website].
+- No paid subscriptions: We want to avoid services that require a paid subscription to use. This is because our funding does not allow for recurring costs.
+
+[^current-website]: The current website is a statically-generated Next.js site, hosted on GitHub Pages. We would like to keep the infrastructure requirements similar to the current website.
+
+Currently, we are considering the following options:
+
+1. [**Giscus**](https://giscus.app/):
+    - A lightweight commenting system that uses GitHub Discussions to manage and store comments.
+    - Supports comments and reactions.
+    - Examples: [1](https://the-guild.dev/blog/nextra-3), [2](https://cep.dev/posts/every-infrastructure-decision-i-endorse-or-regret-after-4-years-running-infrastructure-at-a-startup/), [3]( https://jjtech.dev/reverse-engineering/imessage-explained/)
+
+2. [**Utterances**](https://github.com/utterance/utterances):
+    - A similar system to Giscus, but uses GitHub Issues to store comments.
+    - Examples: [1](https://www.swyx.io/the-upload-short-story)
+
+3. A simple like button:
+    - Simple, but often involves running a (minimal) server/database or using an external service that may require a paid subscription.
+    - Examples: [1](https://lyket.dev/blog/posts/gatsby-like-button), [2](https://www.madeinsparetime.com/2022/08/06/making-a-like.html)
+
+Some other options are described in these articles:
+- https://darekkay.com/blog/static-site-comments/
+- https://getshifter.io/static-site-comments/
+
+The blog is a part of our website. The website source code can be found [here](https://github.com/WATonomous/watcloud-website).
+
 
 ### Broken Internal Link Detector
 
