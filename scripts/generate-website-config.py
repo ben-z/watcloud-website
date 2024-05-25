@@ -24,6 +24,12 @@ def generate_fixtures(outputs_path):
         "docs_repository_base": "https://github.com/WATonomous/watcloud-website/tree/master/",
         "default_locale": "en-US",
         "base_path": re.sub(r"/$", "", os.getenv("WEBSITE_BASE_PATH", "")),
+        # Giscus setup obtained from https://giscus.app/. Note: entering repo name may refresh the id strings
+        # The 'Blog' Discussion category was manually created on WATonomous/watcloud-website repo to store comments
+        "repo": "WATonomous/watcloud-website",
+        "repo_id": "R_kgDOKpbFkA",
+        "category": "Blog",
+        "category_id": "DIC_kwDOKpbFkM4CfjLn"
     }
 
 
