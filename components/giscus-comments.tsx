@@ -26,7 +26,7 @@ export default function CommentSection() {
           category={category}
           categoryId={category_id}
           strict="1"
-          mapping="pathname"
+          mapping="url"
           reactionsEnabled="1"
           emitMetadata="0"
           inputPosition="top"
