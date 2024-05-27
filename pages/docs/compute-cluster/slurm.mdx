@@ -24,6 +24,7 @@ Before we dive into the details, let's define some common terms used in SLURM:
 
 - **Login node**: A node that users log into to submit jobs to the SLURM cluster. This is where you will interact with the SLURM cluster.
 - **Compute node**: A node that runs jobs submitted to the SLURM cluster. This is where your job will run. Compute nodes are not directly accessible by users.
+- **Partition**: A logical grouping of nodes in the SLURM cluster. Partitions can have different properties (e.g. different resource limits) and are used to organize resources.
 - **Job**: A unit of work submitted to the SLURM cluster. A job can be interactive or batch.
 - **Interactive job**: A job that runs interactively on a compute node. This is useful for debugging or running short tasks.
 - **Batch job**: A job that runs non-interactively on a compute node. This is useful for running long-running tasks like simulations or ML training.
@@ -86,10 +87,39 @@ In this example, the job is allocated 1 CPU, 512MiB of memory, and 100MiB of tem
 and is allowed to run for up to 30 minutes.
 
 To request for more resources, you can use the `--cpus-per-task`, `--mem`, `--gres`, and `--time` flags.
-For example, to request 4 CPUs, 4GiB of memory, 20GiB of temporary disk space, and 2 hours of runtime, you can run:
+For example, to request 4 CPUs, 4GiB of memory, 20GiB of temporary disk space, and 2 hours of running time, you can run:
 
 ```bash copy
 srun --cpus-per-task 4 --mem 4G --gres tmpdisk:20480 --time 2:00:00 --pty bash
+```
+
+Note that the amount of requestable resources is limited by the resources available on the partition/node you are running on.
+You can view the available resources by referring to the [View available resources](#view-available-resources) section.
+
+### Cancelling a job
+
+To cancel a job, you can use the `scancel` command.
+You will need the job ID to cancel a job.
+You can find the job ID by running `squeue`.
+If you are in a job, you can also use the `$SLURM_JOB_ID` environment variable.
+
+For example, you can see a list of your jobs by running:
+
+```bash copy
+squeue -u $(whoami)
+```
+
+Example output:
+
+```text
+JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+4022   compute     bash      ben  R       0:03      1 thor-slurm1
+```
+
+To cancel the job with ID `4022`, you can run:
+
+```bash copy
+scancel 4022
 ```
 
 ### Using Docker
@@ -304,6 +334,44 @@ tail -f logs/*-my_job_array.out
 To learn more about job arrays, including environment variables available to job array scripts,
 see the [official documentation](https://slurm.schedmd.com/job_array.html).
 
+#### Long-running jobs
+
+Each job submitted to the SLURM cluster has a time limit.
+The time limit can be set using the `--time` directive.
+The maximum time limit is determined by the partition you are running on.
+You can view a list of partitions, including the default partition, by running `sinfo`[^view-available-resources]:
+
+```text
+> sinfo
+PARTITION     AVAIL  TIMELIMIT  NODES  STATE NODELIST
+compute*         up 1-00:00:00      5   idle thor-slurm1,tr-slurm1,trpro-slurm[1-2],wato2-slurm1
+compute_dense    up 7-00:00:00      5   idle thor-slurm1,tr-slurm1,trpro-slurm[1-2],wato2-slurm1
+```
+
+In the output above, the cluster has 2 partitions, `compute` (default) and `compute_dense`, with time limits of 1 day and 7 days, respectively.
+If your job requires more than the maximum time limit for the default partition, you can specify a different partition using the `--partition` flag.
+For example:
+
+```bash copy filename="slurm_compute_dense_partition.sh"
+#!/bin/bash
+#SBATCH --job-name=my_dense_job
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=1G
+#SBATCH --gres tmpdisk:1024
+#SBATCH --partition=compute_dense
+#SBATCH --time=2-00:00:00
+#SBATCH --output=logs/%j-%x.out  # %j: job ID, %x: job name. Reference: https://slurm.schedmd.com/sbatch.html#lbAH
+
+echo "Hello, world! I'm allowed to run for 2 days!"
+for i in $(seq $((60*60*24*2))); do
+    echo $i
+    sleep 1
+done
+echo "Done!"
+```
+
+[^view-available-resources]: For more information on viewing available resources, see the [View available resources](#view-available-resources) section.
+
 ## Extra details
 
 ### SLURM v.s. general-use machines
@@ -318,13 +386,65 @@ All of the same network drives and software are available. However, there are so
 
 ### View available resources
 
-To view all available resources, you can run the following command:
+There are a few ways to view the available resources on the SLURM cluster:
+
+#### View a summary of available resources
 
 ```bash copy
-scontrol show node
+sinfo
 ```
 
-Here's some example output:
+Example output:
+
+```text
+PARTITION     AVAIL  TIMELIMIT  NODES  STATE NODELIST
+compute*         up 1-00:00:00      5   idle thor-slurm1,tr-slurm1,trpro-slurm[1-2],wato2-slurm1
+compute_dense    up 7-00:00:00      5   idle thor-slurm1,tr-slurm1,trpro-slurm[1-2],wato2-slurm1
+```
+
+#### View available partitions
+
+```bash copy
+scontrol show partitions
+```
+
+Example output:
+
+```text
+PartitionName=compute
+   AllowGroups=ALL AllowAccounts=ALL AllowQos=ALL
+   AllocNodes=ALL Default=YES QoS=N/A
+   DefaultTime=00:30:00 DisableRootJobs=NO ExclusiveUser=NO GraceTime=0 Hidden=NO
+   MaxNodes=UNLIMITED MaxTime=1-00:00:00 MinNodes=0 LLN=NO MaxCPUsPerNode=UNLIMITED MaxCPUsPerSocket=UNLIMITED
+   Nodes=thor-slurm1,tr-slurm1,trpro-slurm[1-2],wato2-slurm1
+   PriorityJobFactor=1 PriorityTier=1 RootOnly=NO ReqResv=NO OverSubscribe=NO
+   OverTimeLimit=NONE PreemptMode=OFF
+   State=UP TotalCPUs=240 TotalNodes=5 SelectTypeParameters=NONE
+   JobDefaults=(null)
+   DefMemPerNode=UNLIMITED MaxMemPerNode=UNLIMITED
+   TRES=cpu=233,mem=707441M,node=5,billing=233,gres/gpu=10,gres/shard=216040,gres/tmpdisk=921600
+
+PartitionName=compute_dense
+   AllowGroups=ALL AllowAccounts=ALL AllowQos=ALL
+   AllocNodes=ALL Default=NO QoS=N/A
+   DefaultTime=00:30:00 DisableRootJobs=NO ExclusiveUser=NO GraceTime=0 Hidden=NO
+   MaxNodes=UNLIMITED MaxTime=7-00:00:00 MinNodes=0 LLN=NO MaxCPUsPerNode=UNLIMITED MaxCPUsPerSocket=UNLIMITED
+   Nodes=thor-slurm1,tr-slurm1,trpro-slurm[1-2],wato2-slurm1
+   PriorityJobFactor=1 PriorityTier=1 RootOnly=NO ReqResv=NO OverSubscribe=NO
+   OverTimeLimit=NONE PreemptMode=OFF
+   State=UP TotalCPUs=240 TotalNodes=5 SelectTypeParameters=NONE
+   JobDefaults=(null)
+   DefMemPerNode=UNLIMITED MaxMemPerNode=UNLIMITED
+   TRES=cpu=233,mem=707441M,node=5,billing=233,gres/gpu=10,gres/shard=216040,gres/tmpdisk=921600
+```
+
+#### View available nodes
+
+```bash copy
+scontrol show nodes
+```
+
+Example output:
 
 ```text
 NodeName=trpro-slurm1 Arch=x86_64 CoresPerSocket=1 
@@ -345,6 +465,8 @@ NodeName=trpro-slurm1 Arch=x86_64 CoresPerSocket=1
    CapWatts=n/a
    CurrentWatts=0 AveWatts=0
    ExtSensorsJoules=n/a ExtSensorsWatts=0 ExtSensorsTemp=n/a
+
+...
 ```
 
 In this example, the node `trpro-slurm1` has the following allocable resources:
