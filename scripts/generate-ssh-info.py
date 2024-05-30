@@ -77,7 +77,7 @@ def generate_network_graph():
         "UWaterloo VPN",
         "_entrypoint",
         instructions=[
-            "Connect to the [UWaterloo VPN](https://uwaterloo.ca/web-resources/resources/virtual-private-network-vpn)",
+            "Connect to the [UWaterloo VPN](https://uwaterloo.atlassian.net/wiki/spaces/ISTKB/pages/262012980/Virtual+Private+Network+VPN)",
         ],
     )
     G.add_edge("UWaterloo VPN", "university")
