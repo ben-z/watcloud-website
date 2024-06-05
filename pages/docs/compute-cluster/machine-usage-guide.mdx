@@ -7,19 +7,24 @@ It also includes guidelines for using the machines, troubleshoot instructions fo
 
 There are two main types of machines in the cluster: [general-use machines](/machines#general-use-machines) and [SLURM compute nodes](/machines#slurm-compute-nodes).
 
-General-use machines are meant for interactive use and are shared among all users in the cluster.
-You can access them via [SSH](./ssh).
+### SLURM Machines
 
-SLURM compute nodes are meant for running resource-intensive jobs.
-They are managed by a popular HPC[^hpc] job scheduler called SLURM[^slurm].
-Instructions for submitting jobs to the SLURM cluster can be found [here](./slurm).
+Simple Linux Utility for Resource Management (SLURM) is an open-source job scheduler that allocates resources to jobs on a cluster of computers.
+It is widely used in HPC[^hpc] environments.
+
+SLURM machines can be used for both interactive development as well as job scheduling. They provide fair, stable, and secure access to WATcloud's most precious resources (eg. GPUs).
+
+[Instructions for using our SLURM cluster can be found here.](./slurm)
 
 [^hpc]: [High-performance computing](https://en.wikipedia.org/wiki/High-performance_computing) (HPC) is the use of supercomputers and parallel processing
   techniques to solve complex computational problems. Examples of HPC clusters include [Cedar](https://docs.computecanada.ca/wiki/Cedar) and
   [Graham](https://docs.computecanada.ca/wiki/Graham).
 
-[^slurm]: Simple Linux Utility for Resource Management (SLURM) is an open-source job scheduler that allocates resources to jobs on a cluster of computers.
-  It is widely used in HPC environments. Learn more about SLURM [here](https://slurm.schedmd.com/quickstart.html).
+### General-Use Machines
+
+General-use machines are meant for interactive use only. They are an insecure and unstable resource shared amongst all users in the cluster. Going forward, WATcloud will be phasing out General-use Machines in favour of SLURM.
+
+[Instructions for using our General-Use Machines can be found here.](./ssh)
 
 ## Hardware
 
