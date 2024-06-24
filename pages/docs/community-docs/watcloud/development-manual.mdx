@@ -8,6 +8,89 @@ this document.
 
 This document is best read when cross-referenced with the code in the [infra-config](https://github.com/WATonomous/infra-config) repo.
 
+## Terminology
+
+We use the following terminology 
+
+- **Infrastructure**: The set of all hosts and services that we manage.
+- **Host**: A physical machine (bare-metal machine) or virtual machine (VM) that is managed by us. For example, our compute cluster is a set of hosts that are managed by us.
+- **Cluster**: A set of hosts that are managed together. For example, our compute cluster is a set of hosts that are managed together.
+- **User**: A person that is authorized to access our infrastructure. For example, a WATonomous member.
+- **Service**: Anything that we provide to our users. The compute cluster, VMs, GPUs, the CI pipeline, the Kubernetes cluster, the GitHub organization, the Google Workspace, etc. are all services.
+- **Directory**: The directory contains configurations for users and services. For example, `./directory/user` contains configurations for users and `./directory/hosts` contains configurations for hosts.
+- **Provisioning**: The process of setting up a service. For example, setting up a VM.
+- **Provisioner**: A tool that is used to provision a service. This can be low-level tools like Ansible or Terraform, or high-level tools like our GitHub provisioner and our Google Workspace provisioner.
+
+## Getting Started
+
+Many provisioners require access to the cluster network.
+For simplicity, we will assume that you are using one of the [machines](/machines) in the cluster.
+
+Clone the `infra-config` repo:
+
+```bash copy
+git clone git@github.com:WATonomous/infra-config.git
+```
+
+Start the development container. `git fetch` helps to check if the provisioner is up to date with master:
+
+```bash copy
+git fetch \
+&& docker compose build provisioner \
+&& docker compose run --rm provisioner /bin/bash
+```
+
+From now on, all commands should be run from within the container.
+
+All provisioners in the `infra-config` repo have the same self-documenting interface:
+
+```bash
+./<provisioner>/provision.sh
+# or 
+./scripts/provision-<provisioner>.sh
+```
+
+For example, to run the GitHub provisioner:
+
+```bash copy
+./github/provision.sh # `github` is just an example, please replace it with the provisioner you are working with.
+```
+
+When you're done, please exit the container. The container (and stored secrets) will be destroyed automatically:
+
+```bash copy
+exit
+```
+
+## Secrets
+
+We manage secrets using [Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html).
+All commands below should be run inside the provisioner development environment (see [Getting Started](#getting-started) above).
+
+### Authenticating with `ansible-vault`
+
+Before performing any encrypt/decrypt actions, authenticate with `ansible-vault`:
+
+```bash copy
+./scripts/ansible-vault-authenticate.sh
+```
+
+### Encrypting secrets using `ansible-vault`
+
+Add the output of the following command to `secrets/secrets.yml`:
+
+```bash copy
+printf "%s" 'super_s3cr3t_str1ng$$' | ./scripts/encrypt-secret.sh "name_of_secret"
+```
+
+### Decrypting secrets using `ansible-vault`
+
+Example:
+
+```bash copy
+./scripts/decrypt-secret.sh ansible_ssh_pass
+```
+
 ## Ansible
 
 ### Developing Ansible Roles
@@ -19,7 +102,7 @@ To develop a role, we can clone the role locally and mount it into our developme
 For example, to develop [ansible-role-microk8s](https://github.com/WATonomous/ansible-role-microk8s),
 we do the following:
 
-```bash
+```bash copy
 # Clone the role alongside the infra-config repo
 git clone git@github.com:WATonomous/infra-config.git
 git clone git@github.com:WATonomous/ansible-role-microk8s.git
@@ -38,7 +121,13 @@ import { FileTree } from 'nextra/components'
   <FileTree.Folder name="ansible-role-microk8s" />
 </FileTree>
 
-Then we can mount the role into our development environment by making the following changes to `docker-compose.yml`:
+We will work in the `infra-config` directory:
+
+```bash copy
+cd infra-config
+```
+
+We can mount the role into our development environment by making the following changes to `docker-compose.yml`:
 
 ```ansi
 [0;1mdiff --git a/docker-compose.yml b/docker-compose.yml[0m
@@ -78,3 +167,104 @@ as simple as:
      src: git+https://github.com/geerlingguy/ansible-role-filebeat
      version: 407a4c3cd31cc8f9c485b9177fb7287e71745efb
 ```
+
+## Terraform
+
+### Developing Terraform Providers
+
+We use Terraform providers extensively in our provisioners.
+Sometimes, we may need to develop new Terraform providers or fork existing ones to fix bugs or add features.
+This section describes how to develop Terraform providers.
+
+We will use the [Discord Provider](https://github.com/WATonomous/terraform-provider-discord) as an example.
+
+```bash copy
+# Clone the provider alongside the infra-config repo
+git clone git@github.com:WATonomous/infra-config.git
+git clone git@github.com:WATonomous/terraform-provider-discord.git
+```
+
+The resulting folder structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="infra-config" defaultOpen>
+    <FileTree.File name="docker-compose.yml" />
+    <FileTree.File name="... other files" />
+  </FileTree.Folder>
+  <FileTree.Folder name="terraform-provider-discord" />
+</FileTree>
+
+Prepare two terminal windows. In one terminal, we will build the provider binary:
+
+```bash copy
+cd terraform-provider-discord
+go build -o terraform-provider-discord
+```
+
+The above command creates a `terraform-provider-discord` binary that we will use later.
+
+In another terminal, we will work in the `infra-config` directory:
+
+```bash copy
+cd infra-config
+```
+
+We can mount the role into our development environment by making the following changes to `docker-compose.yml`:
+
+```diff
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 7b282d9b45..62e684128c 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -7,6 +7,7 @@ services:
+       # The output directory is mounted as rw so that the provisioner can write
+       # to it.
+       - ./outputs:/infra-config/outputs:rw
++      - ../terraform-provider-discord:/tf-dev/discord
+     tmpfs:
+       - /run:exec
+       - /tmp:exec
+```
+
+Start the development container as usual:
+
+```bash copy
+git fetch \
+&& docker compose build provisioner \
+&& docker compose run --rm provisioner /bin/bash
+```
+
+In the container, create `~/.terraformrc` with the following content:
+
+```ini filename="~/.terraformrc" {3} copy
+provider_installation {
+  dev_overrides {
+    "terraform.local/local/discord" = "/tf-dev/discord"
+  }
+
+  filesystem_mirror {
+    path    = "/usr/share/terraform/plugins"
+    include = ["terraform.local/*/*"]
+  }
+
+  direct {
+    exclude = ["terraform.local/*/*"]
+  }
+}
+```
+
+Note that `terraform.local/local/discord` is the provider's `source` in the `required_providers` block in the Terraform configuration
+and `/tf-dev/discord` is the path we mounted the provider to.
+
+The above configuration tells Terraform to search for a `/tf-dev/discord/terraform-provider-discord` binary when the `discord` provider is required,
+instead of using a provider installed in `/usr/share/terraform/plugins` or downloaded from the registry.
+
+Now, we can run the provisioner as usual. Terraform will use the local provider binary instead of the one installed in the container.
+
+```bash copy
+./discord/provision.sh
+```
+
+#### References
+- https://discuss.hashicorp.com/t/development-overrides-for-providers-under-development/18888/2
+- https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides-for-provider-developers
