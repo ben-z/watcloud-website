@@ -33,6 +33,7 @@ const sha256Cache = new Map<string, string>();
 const RESOLVER_URL_PREFIXES = [
     "https://rgw.watonomous.ca/asset-temp",
     "https://rgw.watonomous.ca/asset-perm",
+    "https://rgw.watonomous.ca/asset-off-perm",
 ]
 
 const extractSha256FromURI = (uri: string) => {
@@ -72,7 +73,15 @@ async function resolveURI(uri: string) {
     }));
 
     // find the result with the latest expiry date
-    const result = maxBy(results, res => res?.expiresAt?.getTime() || 0);
+    const result = maxBy(results, res => {
+        // No result
+        if (!res) return 0;
+
+        // No expiry date
+        if (!res.expiresAt) return Infinity;
+
+        return res.expiresAt.getTime();
+    });
     if (!result) {
         throw new Error('Asset not found.');
     }
@@ -161,12 +170,14 @@ export function AssetInspector() {
                                     </>
 
                                 )}
-                                {res.result.expiresAt && (
-                                    <>
-                                        <span className="text-sm text-gray-500 block">Expires</span>
-                                        <Pre hasCopyCode className="-mt-5"><Code>{dayjs().to(res.result.expiresAt)} ({res.result.expiresAt.toISOString()})</Code></Pre>
-                                    </>
-                                )}
+                                <>
+                                    <span className="text-sm text-gray-500 block">Expires</span>
+                                    <Pre hasCopyCode className="-mt-5"><Code>{
+                                        res.result.expiresAt ? 
+                                            `${dayjs().to(res.result.expiresAt)} (${res.result.expiresAt.toISOString()})` :
+                                            'Never'
+                                    }</Code></Pre>
+                                </>
                                 {res.result.headers && (
                                     <>
                                         <span className="text-sm text-gray-500 block">Raw Headers</span>
