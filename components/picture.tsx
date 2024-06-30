@@ -13,10 +13,12 @@ import { getImageBlurSvg } from "@/lib/image-blur-svg";
 export default function Picture({
   image,
   alt,
+  className = "",
   style = {},
 }: {
   image: WATcloudStaticImage;
   alt: string;
+  className?: string;
   style?: React.CSSProperties;
 }) {
   // The blur logic is derived from https://github.com/vercel/next.js/blob/98be3ba23ea65ac5b581999d79a1093f147b46f0/packages/next/src/shared/lib/get-img-props.ts#L626
@@ -54,6 +56,7 @@ export default function Picture({
         height={image.avif.height}
         decoding="async"
         loading="lazy"
+        className={className}
         style={{...style, ...placeholderStyle}}
       />
     </picture>

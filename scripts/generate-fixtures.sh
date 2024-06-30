@@ -63,6 +63,7 @@ if [ -n "$__fetch_from" ]; then
     wget --quiet -O "$PROJECT_DIR/build/fixtures/affiliation.schema.json" "$__fetch_from/affiliation.schema.json"
     wget --quiet -O "$PROJECT_DIR/build/fixtures/user.schema.json" "$__fetch_from/user.schema.json"
     wget --quiet -O "$PROJECT_DIR/build/fixtures/affiliation-info.json" "$__fetch_from/affiliation-info.json"
+    wget --quiet -O "$PROJECT_DIR/build/fixtures/user-profiles.json" "$__fetch_from/user-profiles.json"
 else
     echo "Generating fixtures..."
     # Create a new worktree
@@ -74,6 +75,7 @@ else
     cp "$PROJECT_DIR/../directory/affiliations/affiliation.schema.json" "$PROJECT_DIR/build/fixtures"
     cp "$PROJECT_DIR/../outputs/directory/users/user.schema.json" "$PROJECT_DIR/build/fixtures"
     python3 "$SCRIPT_DIR/generate-affiliation-info.py" "$PROJECT_DIR/build/fixtures"
+    python3 "$SCRIPT_DIR/generate-user-profiles.py" > "$PROJECT_DIR/build/fixtures/user-profiles.json"
 fi
 
 # Add typescript types
@@ -82,6 +84,7 @@ echo "Generating fixture types..."
 ./node_modules/.bin/quicktype -o "$PROJECT_DIR"/build/fixtures/ssh-info.{ts,json}
 ./node_modules/.bin/quicktype -o "$PROJECT_DIR"/build/fixtures/website-config.{ts,json}
 ./node_modules/.bin/quicktype -o "$PROJECT_DIR"/build/fixtures/affiliation-info.{ts,json}
+./node_modules/.bin/quicktype -o "$PROJECT_DIR"/build/fixtures/user-profiles.{ts,json}
 
 echo "Generating mdx files from data..."
 python3 "$SCRIPT_DIR/generate-mdx-strings.py" json-to-mdx "$PROJECT_DIR/build/fixtures/ssh-info.json" "$PROJECT_DIR/build/fixtures/ssh-info-strings"
@@ -91,4 +94,4 @@ echo "Compiling JSON schema validators..."
 node "$PROJECT_DIR/scripts/compile-json-schema-validators.js" "$PROJECT_DIR/build/fixtures"
 
 echo "Generating assets..."
-node "$PROJECT_DIR/scripts/generate-assets.js" "$PROJECT_DIR/build/fixtures" "$PROJECT_DIR/build/cache"
+node "$PROJECT_DIR/scripts/generate-assets.js" "$PROJECT_DIR/build/fixtures/user-profiles.json" "$PROJECT_DIR/build/fixtures" "$PROJECT_DIR/build/cache"

@@ -126,6 +126,8 @@ textarea {
 
 
 /* Fix margin issue for nested lists: https://github.com/shuding/nextra/issues/863#issuecomment-2068517369 */
+div > ul.first\:nx-mt-0:first-of-type,
+div > ol.first\:nx-mt-0:first-of-type,
 li > ul.first\:nx-mt-0:first-of-type,
 li > ol.first\:nx-mt-0:first-of-type {
   margin-top: 0;
