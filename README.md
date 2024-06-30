@@ -25,18 +25,11 @@ The [website](https://cloud.watonomous.ca) for WATcloud.
     npm run dev
     ```
 
-### Image optimization
+### Images
 
-Images should be added to `public/assets`. To reduce the size of the code base while we work on an image server, images should be optimized before being checked in. To do this, run:
+Images should be uploaded to [WATcloud Assets](https://cloud.watonomous.ca/docs/utilities/assets), and the `watcloud://` URI should be placed in `./scripts/generate-assets.js` to be resolved during the build process.
 
-```bash
-./node_modules/.bin/optimizt <path_to_image> --avif
-```
-
-this will create a `.avif` file next to the original image. Place the optimized image in `public/assets`.
-
-During the build process, the `.avif` file will be converted to a `.webp` file and a `.jpg` file, a Typescript file will be generated to
-statically import the images. In the code, images should be used like this:
+During the build process, multiple versions (e.g. WebP, AVIF, etc.) of the image are generated and a TypeScript file is created in `./build/fixtures/images.ts`. This file can be imported and used in the website:
 
 ```tsx
 import Picture from '@/components/picture'
