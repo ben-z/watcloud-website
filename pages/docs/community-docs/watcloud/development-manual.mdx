@@ -91,6 +91,91 @@ Example:
 ./scripts/decrypt-secret.sh ansible_ssh_pass
 ```
 
+## Provisioner Container
+
+The `provisioner` container is a development and provisioning environment with all the necessary tools installed.
+It is defined in `docker-compose.yml` and can be started with the following command:
+
+```bash copy
+docker compose run --rm provisioner /bin/bash
+```
+
+This section describes properties of the container and describes changes that can be made to it.
+
+### Read-Only Filesystem
+
+The `infra-config` directory is mounted as read-only in the container, with a few exceptions as described in `docker-compose.yml`.
+The read-only filesystem is useful for preventing accidental changes to the configuration during provisioning.
+However, sometimes we want to make changes from within the container.
+For example, we may want to allow a Terraform-based provisioner to update the dependency lock file.
+To make the filesystem writable, we can make the following changes to `docker-compose.yml`:
+
+```diff
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 0641ded10f..5290b02478 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -3,7 +3,7 @@ services:
+     build: .
+     image: ${COMPOSE_PROJECT_NAME:?A COMPOSE_PROJECT_NAME is required to prevent container collision}
+     volumes:
+-      - .:/infra-config:ro
++      - .:/infra-config:rw
+       # The output directory is mounted as rw so that the provisioner can write
+       # to it.
+       - ./outputs:/infra-config/outputs:rw
+```
+
+### Port forwarding
+
+Sometimes, we may need to access services running in the container from the host machine.
+For example, we may want to forward a Kubernetes service to the host machine for debugging.
+To forward a port from the container to the host machine, we can make the following changes to `docker-compose.yml`:
+
+```diff
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 0641ded10f..42300307d2 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -13,6 +13,8 @@ services:
+     working_dir: /infra-config
+     environment:
+       DRY_RUN: ${DRY_RUN:-}
++    ports:
++      - "1234:5678"
+     dns:
+       # In case the host's DNS is not working
+       - 1.1.1.1
+```
+
+The above configuration forwards port `5678` in the container to port `1234` on the host machine.
+Then we can run the following command to start the container:
+
+```bash copy
+docker compose run --rm --service-ports provisioner /bin/bash
+```
+
+Note that the `--service-ports` flag is required to forward the ports when using `docker compose run`[^docker-compose-run-service-ports].
+Also note that the host port range is shared between all users on the machine, and the command above may silently fail if the port is already in use.
+In that case, you can simply choose a different port.
+
+Then, from within the container, we can start any service on port `5678` to have it accessible on the host machine on port `1234`.
+For example, to start a simple HTTP server to serve files from the `outputs` directory:
+
+```bash copy
+npx serve -l 5678 ./outputs
+```
+
+Now, we can access the HTTP server from the host machine by visiting `http://localhost:1234` (e.g. `curl http://localhost:1234`).
+
+As a practical example, we can forward the Prometheus service running in the Kubernetes cluster:
+
+```bash copy
+./kubernetes/run.sh kubectl port-forward -n prometheus --address 0.0.0.0 service/prometheus-kube-prometheus-prometheus 5678:9090
+```
+
+[^docker-compose-run-service-ports]: https://docs.docker.com/compose/reference/run/#options
+
 ## Ansible
 
 ### Developing Ansible Roles
