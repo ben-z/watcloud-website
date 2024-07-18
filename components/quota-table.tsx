@@ -24,7 +24,7 @@ export default function QuotaTable({
 }) {
     const rows = []
     for (const machine of machineInfo.dev_vms) {
-        for (const mount of machine.mounts_with_quotas) {
+        for (const mount of (machine.mounts_with_quotas || [])) {
             rows.push(
                 <TableRow>
                     <TableCell>{machine.name}</TableCell>

@@ -245,7 +245,7 @@ export function MachineCard({
                             </dd>
                         </div>
                     ) : undefined}
-                    { 'ssh_host_keys' in machine && machine.ssh_host_keys.length ? (
+                    { 'ssh_host_keys' in machine && machine.ssh_host_keys?.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.ssh_host_keys.length, "SSH Host Key")}</dt>
                             <dd>

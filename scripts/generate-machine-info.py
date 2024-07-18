@@ -182,6 +182,7 @@ def generate_fixtures(data_path):
                     "cpu_info": get_cpu_info(data_path, name),
                     "memory_info": get_memory_info(data_path, name),
                     "gpus": get_gpu_info(data_path, name),
+                    "hostnames": [r["name"] for n in host["networks"] for r in n.get("dns_records",[])],
                     "lsb_release_info": get_lsb_release_info(data_path, name),
                 })
                 slurm_compute_nodes.append(properties)
