@@ -305,12 +305,12 @@ For more information about storage quotas, please see the [Quotas](./quotas) pag
 To free up space for Docker, you can selectively delete files from the `/var/lib/cluster/users/$(id -u)/docker` directory until you are no longer over quota. However, it could be difficult to determine which files to delete. If you would like to delete all your Docker files (including images, containers, volumes, etc.), which effectively resets your Docker installation, you can delete the entire directory:
 
 ```bash copy
-buildah unshare rm -r /var/lib/cluster/users/$(id -u)/docker
+rootlesskit rm -r /var/lib/cluster/users/$(id -u)/docker
 ```
 
-Here, `buildah unshare{:bash}` puts us in the USERNS[^buildah-unshare], which allows us to manage files created by `uidmap` (used by Docker rootless).
+Here, `rootlesskit{:bash}` puts us in the "fake root" environment used by Docker rootless[^rootlesskit], which allows us to manage files owned by subuid/subgid.
 
-[^buildah-unshare]: https://github.com/containers/podman/issues/1386#issuecomment-417640661
+[^rootlesskit]: Learn more about rootlesskit [here](https://github.com/rootless-containers/rootlesskit).
 
 If you would prefer to use Docker tools to clean up your Docker installation (e.g. `docker system prune --all{:bash}`), you can reach out to a WATcloud team member to temporarily increase your storage quota so that Docker daemon can be started.
 
