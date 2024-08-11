@@ -1,3 +1,5 @@
+import { GlobalQuotaTable, NodeLocalQuotaTable, CPURAMQuotaTable } from '@/components/quota-table'
+
 # Quotas
 
 To ensure that everyone has a fair share of resources, we enforce a set of quotas in the cluster.
@@ -17,8 +19,6 @@ To ensure that everyone has a fair share of resources, we enforce a set of quota
 ### Default disk quotas
 
 This section lists the default per-user disk quotas. These quotas are subject to change as we learn more about the usage patterns.
-
-import { GlobalQuotaTable, NodeLocalQuotaTable } from '@/components/quota-table'
 
 #### Global disk quotas
 
@@ -121,6 +121,15 @@ desired quota in your profile and have your WATcloud contact[^watcloud-contact] 
 profile using the [Profile Editor](../utilities/profile-editor).
 
 [^watcloud-contact]: Your WATcloud contact is the person as described in the [Getting Access](./getting-access#determine-your-watcloud-contact) section.
+
+## CPU and memory quotas
+
+On general-use machines, per-user CPU and memory quotas are enforced to ensure fair resource sharing.
+
+<CPURAMQuotaTable className="mt-4" />
+
+Unlike disk quotas, we don't allow users to request CPU and memory quota increases. Please use [SLURM](./slurm) to run resource-intensive jobs.
+
 
 {
 // Separate footnotes from the main content

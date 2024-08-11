@@ -166,6 +166,7 @@ def generate_fixtures(data_path):
         }
 
         if "login_nodes" in group_names:
+            login_nodes_config = get_group_config(host, "login_nodes")
             properties.update({
                 "cpu_info": get_cpu_info(data_path, name),
                 "memory_info": get_memory_info(data_path, name),
@@ -174,6 +175,8 @@ def generate_fixtures(data_path):
                 "lsb_release_info": get_lsb_release_info(data_path, name),
                 "ssh_host_keys": get_file_lines(data_path, name, "ssh-host-keys.log"),
                 "mounts_with_quotas": get_mounts_with_quotas(host),
+                "cpu_quota": login_nodes_config.get("cpu_quota"),
+                "memory_quota": login_nodes_config.get("memory_max"),
             })
             dev_vms.append(properties)
         if "slurmd_nodes" in group_names:

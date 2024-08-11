@@ -98,3 +98,33 @@ export function NodeLocalQuotaTable({
         </Table>
     )
 }
+
+export function CPURAMQuotaTable({
+    className = "",
+}: {
+    className?: string
+}) {
+    const rows = []
+    for (const machine of machineInfo.machines.dev_vms) {
+        rows.push(
+            <TableRow>
+                <TableCell>{machine.name}</TableCell>
+                <TableCell className='text-center'>{machine.cpu_quota}</TableCell>
+                <TableCell className='text-center'>{machine.memory_quota}</TableCell>
+            </TableRow>
+        )
+    }
+
+    return (
+        <Table className={className}>
+            <TableHeader>
+                <TableRow>
+                    <TableHead>Node</TableHead>
+                    <TableHead className='text-center'>CPU Quota (% of 1 core)</TableHead>
+                    <TableHead className='text-center'>Memory Quota (bytes)</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>{rows}</TableBody>
+        </Table>
+    )
+}
