@@ -5,10 +5,10 @@ import { machineInfo } from '@/lib/data'
 import { pluralizeWithCount } from '@/lib/utils'
 
 There are
-[{pluralizeWithCount(machineInfo['slurm_compute_nodes'].length, "SLURM compute node")}](#slurm-compute-nodes)
-, [{pluralizeWithCount(machineInfo['dev_vms'].length, "general-use machine")}](#general-use-machines)
-, [{pluralizeWithCount(machineInfo['bastions'].length, "bastion host")}](#bastion-hosts)
-, and [{pluralizeWithCount(machineInfo['bare_metals'].length, "bare-metal machine")}](#bare-metal-machines)
+[{pluralizeWithCount(machineInfo.machines['slurm_compute_nodes'].length, "SLURM compute node")}](#slurm-compute-nodes)
+, [{pluralizeWithCount(machineInfo.machines['dev_vms'].length, "general-use machine")}](#general-use-machines)
+, [{pluralizeWithCount(machineInfo.machines['bastions'].length, "bastion host")}](#bastion-hosts)
+, and [{pluralizeWithCount(machineInfo.machines['bare_metals'].length, "bare-metal machine")}](#bare-metal-machines)
 in the cluster.
 
 ### SLURM Compute Nodes
@@ -17,7 +17,7 @@ The following machines are used to run SLURM jobs. To use them, please follow th
 
 {
     <div className="items-start justify-center gap-6 rounded-lg p-8 grid md:grid-cols-2 xl:grid-cols-3">
-      { machineInfo['slurm_compute_nodes'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
+      { machineInfo.machines['slurm_compute_nodes'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
     </div>
 }
 
@@ -27,7 +27,7 @@ The following machines are available for general use. To access them, please fol
 
 {
     <div className="items-start justify-center gap-6 rounded-lg p-8 grid md:grid-cols-2 xl:grid-cols-3">
-      { machineInfo['dev_vms'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
+      { machineInfo.machines['dev_vms'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
     </div>
 }
 
@@ -37,7 +37,7 @@ The following machines are [bastions](/docs/compute-cluster/firewall#bastion). T
 
 {
     <div className="items-start justify-center gap-6 rounded-lg p-8 grid md:grid-cols-2 xl:grid-cols-3">
-      { machineInfo['bastions'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
+      { machineInfo.machines['bastions'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
     </div>
 }
 
@@ -48,6 +48,6 @@ They are accessible only to the cluster administrators.
 
 {
     <div className="items-start justify-center gap-6 rounded-lg p-8 grid md:grid-cols-2 xl:grid-cols-3">
-      { machineInfo['bare_metals'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
+      { machineInfo.machines['bare_metals'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
     </div>
 }

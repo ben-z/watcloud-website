@@ -9,14 +9,14 @@ import heroStyles from '@/styles/hero.module.css'
 import { machineInfo } from '@/lib/data'
 
 const DEV_MACHINES = [
-    ...machineInfo.slurm_compute_nodes,
-    ...machineInfo.dev_vms,
+    ...machineInfo.machines.slurm_compute_nodes,
+    ...machineInfo.machines.dev_vms,
 ]
 
 export function Hero() {
     const vCPUs = DEV_MACHINES.reduce((acc, m) => acc + parseInt(m.cpu_info.logical_processors || "0"), 0)
     const ramBytes = DEV_MACHINES.reduce((acc, m) => acc + parseInt(m.memory_info.memory_total_kibibytes || "0") * 1024, 0)
-    const redundantStorageBytes = machineInfo.bare_metals.flatMap(m => m.hosted_storage.map(s => parseInt(s.size_bytes || "0"))).reduce((acc, size) => acc + size, 0)
+    const redundantStorageBytes = machineInfo.machines.bare_metals.flatMap(m => m.hosted_storage.map(s => parseInt(s.size_bytes || "0"))).reduce((acc, size) => acc + size, 0)
     const gpuCount = DEV_MACHINES.reduce((acc, m) => acc + m.gpus.length, 0)
 
     return (

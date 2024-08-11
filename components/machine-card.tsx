@@ -50,7 +50,7 @@ import { hostnameSorter } from '@/lib/wato-utils'
 export function MachineCard({
     machine,
 }: {
-    machine: UnionOfElementTypes<MachineInfo>,
+    machine: UnionOfElementTypes<MachineInfo["machines"]>,
 }) {
     const { data, error, isLoading } : {
         data?: HealthchecksioCheckProcessed[],

@@ -1,7 +1,6 @@
 # Quotas
 
 To ensure that everyone has a fair share of resources, we enforce a set of quotas in the cluster.
-Currently, only disk quotas are enforced.
 
 ## Terminology
 
@@ -13,7 +12,78 @@ Currently, only disk quotas are enforced.
 
 [^7-day-grace]: The 7-day grace period is the default on most Linux quota implementations.
 
-## Checking your disk quota
+## Disk quotas
+
+### Default disk quotas
+
+This section lists the default per-user disk quotas. These quotas are subject to change as we learn more about the usage patterns.
+
+import { GlobalQuotaTable, NodeLocalQuotaTable } from '@/components/quota-table'
+
+#### Global disk quotas
+
+Global disk quotas are quotas on filesystems that are shared across all nodes.
+
+<GlobalQuotaTable className="mt-4" />
+
+#### Node-local disk quotas
+
+Node-local disk quotas are quotas on filesystems that are local to each node.
+
+<NodeLocalQuotaTable className="mt-4" />
+
+### Checking your disk quota
+
+The method for checking your disk quota depends on the filesystem type (`FS Type`).
+The filesystem type is listed in the [default disk quotas](#default-disk-quotas) section.
+This section describes how to check your disk quota for each filesystem type.
+
+#### `ceph`
+
+To check your disk quota, run the following command:
+
+```bash copy
+getfattr -n ceph.quota "<path>"
+```
+
+For example, to check the disk quota for your home directory, run the following command:
+
+```bash copy
+getfattr -n ceph.quota "$HOME"
+```
+
+In the output below, the user `ben` has a quota of 20 GiB and unlimited (represented by `0`) files in their home directory.
+
+```
+# file: home/ben
+ceph.quota="max_bytes=21474836480 max_files=0"
+```
+
+To check your current usage, run the following commands:
+
+```bash copy
+getfattr -n ceph.dir.rbytes "<path>"
+getfattr -n ceph.dir.rfiles "<path>"
+```
+
+For example, to check the current usage of your home directory, run the following commands:
+
+```bash copy
+getfattr -n ceph.dir.rbytes "$HOME"
+getfattr -n ceph.dir.rfiles "$HOME"
+```
+
+In the output below, the user `ben` has used 16.8 GiB of space across 210,104 files in their home directory.
+
+```
+# file: home/ben
+ceph.dir.rbytes="18056911629"
+
+# file: home/ben
+ceph.dir.rfiles="210104"
+```
+
+#### `xfs`
 
 To check your disk quota, run the following command[^quota-command]:
 
@@ -44,22 +114,13 @@ Filesystem      Size  Used Avail Use% Mounted on
 In this case, `/dev/sdc` is mounted on `/var/lib/cluster`. This drive is used to store docker-related data,
 as shown in the [Default disk quotas](#default-disk-quotas) section.
 
-## Requesting a disk quota increase
+### Requesting a disk quota increase
 
 If you find that you regularly exceed your quotas, you can request for a quota increase by specifying your
 desired quota in your profile and have your WATcloud contact[^watcloud-contact] approve it. You can edit your
 profile using the [Profile Editor](../utilities/profile-editor).
 
 [^watcloud-contact]: Your WATcloud contact is the person as described in the [Getting Access](./getting-access#determine-your-watcloud-contact) section.
-
-## Default disk quotas
-
-The table below lists the default disk quotas for each user. These quotas are subject to change as we learn more about the usage patterns.
-
-import QuotaTable from '@/components/quota-table'
-
-<QuotaTable className="mt-4" />
-
 
 {
 // Separate footnotes from the main content

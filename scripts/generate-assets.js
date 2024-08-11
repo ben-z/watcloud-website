@@ -95,7 +95,7 @@ async function processImage(image, preprocessSteps = []) {
         const buffer = await res.arrayBuffer();
         const sha256Hash = sha256(buffer);
         if (sha256Hash !== image.uri.sha256) {
-            throw new Error(`SHA-256 hash mismatch for ${image.name}`);
+            throw new Error(`SHA-256 hash mismatch for "${image.name}"! Expected ${image.uri.sha256}, got ${sha256Hash}`);
         }
         await fs.promises.writeFile(originalPath, Buffer.from(buffer));
     }

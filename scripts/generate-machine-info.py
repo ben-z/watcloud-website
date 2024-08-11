@@ -115,6 +115,7 @@ def get_mounts_with_quotas(host):
         if mount.get("user_quota"):
             mounts_with_quotas.append({
                 "name": mount["name"],
+                "fstype": mount["fstype"],
                 "mountpoint": mount["mountpoint"],
                 "user_quota": mount["user_quota"],
             })
@@ -203,10 +204,13 @@ def generate_fixtures(data_path):
             bastions.append(properties)
     
     return {
-        "dev_vms": sorted(dev_vms, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
-        "slurm_compute_nodes": sorted(slurm_compute_nodes, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
-        "bare_metals": sorted(bare_metals, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
-        "bastions": sorted(bastions, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
+        "machines": {
+            "dev_vms": sorted(dev_vms, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
+            "slurm_compute_nodes": sorted(slurm_compute_nodes, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
+            "bare_metals": sorted(bare_metals, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
+            "bastions": sorted(bastions, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
+        },
+        "global_user_disk_quotas": host_config["global_user_disk_quotas"],
     }
 
 if __name__ == "__main__":
