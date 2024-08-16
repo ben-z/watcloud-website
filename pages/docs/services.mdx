@@ -1,0 +1,59 @@
+# Services
+
+WATcloud offers a variety of services. This page provides an overview of the services available.
+
+## General Access instructions
+
+Access to most[^access-otherwise] services listed below can be requested via the [onboarding form](/docs/utilities/onboarding-form).
+Requests will be reviewed by your group's WATcloud contact.
+
+[^access-otherwise]: If a service requires a different access process, it will be mentioned in the service description.
+
+### WATcloud contact
+
+A WATcloud contact is a designated person within each group (usually the group lead) who is responsible for approving access request and assisting users during the onboarding process.
+The following groups are registered with WATcloud:
+
+import { affiliationInfo } from '@/lib/data'
+import { AffiliationList } from '@/components/affiliation-list'
+
+<AffiliationList affiliationInfo={affiliationInfo} />
+
+If your group is not listed or shows up as `[Legacy]`[^legacy-affiliation], please ask your group lead to [register the group][registered-affiliations] with WATcloud.
+
+[registered-affiliations]: /docs/registered-affiliations
+[^legacy-affiliation]: A legacy affiliation is a group that was onboarded before the current [registered affiliations][registered-affiliations] system was in place. Members of legacy affiliations can still access the compute cluster, but in order to use newer features like [SLURM](/docs/compute-cluster/slurm), the group must be registered.
+
+## Service Directory
+
+import userSchemaJSON from "@/build/fixtures/user.schema.json";
+import { lookupStringMDX, userSchemaStrings } from "@/lib/data";
+
+export function ServiceDescriptions() {
+    const ret = [];
+    for (const [serviceKey, service] of Object.entries(userSchemaJSON.properties)) {
+        if (service.properties?.enabled === undefined) {
+            // only list services that can be enabled/disabled
+            continue;
+        }
+
+        const Description = lookupStringMDX(userSchemaStrings, service["$services_description"] || service.description);
+
+        ret.push(
+            <div key={serviceKey}>
+                <h3>{service.title}</h3>
+                <Description />
+            </div>
+        );
+    }
+    return ret;
+}
+
+<ServiceDescriptions />
+
+{
+// Separate footnotes from the main content
+}
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />
