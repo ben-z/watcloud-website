@@ -21,6 +21,28 @@ We use the following terminology
 - **Provisioning**: The process of setting up a service. For example, setting up a VM.
 - **Provisioner**: A tool that is used to provision a service. This can be low-level tools like Ansible or Terraform, or high-level tools like our GitHub provisioner and our Google Workspace provisioner.
 
+## General Guidelines
+
+- Read and understand the [WATcloud Guidelines](./guidelines) before starting development.
+- Pull-request early and often. We have a lot of safe guards and automation in place to help you follow best practices.
+  When CI is run, look out for automated comments on and pull requests against your PR!
+- When writing commit messages and pull requests, start with a title that describes the change in imperative mood (e.g. "Add", "Fix", "Update")[^commit-message-convention],
+  followed by more information in the body of the message. Use [linking keywords][linking-keywords] like `Resolves #<issue_number>` to automatically close issues.
+  For example:
+
+  ```markdown
+  Create status-page Sentry project
+
+  This commit introduces a new Sentry project for the [status page][sp].
+
+  Resolves #123
+
+  [sp]: https://github.com/WATonomous/status
+  ```
+
+[^commit-message-convention]: Derived from https://github.com/joelparkerhenderson/git-commit-message/blob/d5bcb65e263217bfe47d898c69f9c6c0dfd6d413/README.md
+[linking-keywords]: https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue
+
 ## Getting Started
 
 Many provisioners require access to the cluster network.
@@ -353,3 +375,10 @@ Now, we can run the provisioner as usual. Terraform will use the local provider 
 #### References
 - https://discuss.hashicorp.com/t/development-overrides-for-providers-under-development/18888/2
 - https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides-for-provider-developers
+
+{
+// Separate footnotes from the main content
+}
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />

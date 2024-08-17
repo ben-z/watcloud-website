@@ -1,0 +1,112 @@
+# Observability
+
+Observability is the ability to understand the internal state of a system based on its external outputs.
+The term originated in control theory and has since been adopted by the software industry to describe the same concept in the context of software systems[^observability-software].
+
+[^observability-software]: See this [Wikipedia article](https://en.wikipedia.org/wiki/Observability_(software)) for more information.
+
+At WATcloud, we have a number of tools to help us understand the state of our systems, detect issues, and optimize processes.
+
+## Healthchecks
+
+Healthchecks are periodic checks that verify that a service is running as expected.
+Each healthcheck typically outputs a simple `up` or `down` status.
+This section describes the healthcheck infrastructure at WATcloud.
+
+### Quick Links
+- [Status Page][status-page]
+- [Healthchecks.io][healthchecks-io]
+- [Sentry Crons][sentry-crons]
+- [Alertmanager][alertmanager]
+
+[status-page]: https://status.watonomous.ca/
+[healthchecks-io]: https://healthchecks.io/
+[sentry-crons]: https://watonomous.sentry.io/crons
+[alertmanager]: https://prometheus.watonomous.teleport.sh/alerts
+
+### Status Page
+
+The [status page][status-page] is a collection of healthchecks from various sources.
+The goal of the status page is to provide a single source of truth for the status of all our services.
+We regularly use the status page as a troubleshooting tool to quickly identify the source of an issue.
+
+### Healthchecks.io
+
+[Healthchecks.io][healthchecks-io] is a [dead man's switch (DMS)](https://en.wikipedia.org/wiki/Dead_man%27s_switch) service that accepts periodic pings from services.
+When a service fails to ping the service within a specified time frame, Healthchecks.io marks the service as down.
+It can be configured to send alerts to various channels. Currently, we receive alerts on Discord.
+
+### Sentry Crons
+
+Similar to Healthchecks.io, [Sentry Crons][sentry-crons] is a DMS service.
+We receive alerts on Discord when a service fails to ping Sentry Crons within a specified time frame.
+
+### Alertmanager
+
+[Alertmanager][alertmanager] is a component of the Prometheus monitoring system.
+It uses [metrics](#metrics) collected by Prometheus to send alerts to various channels.
+Currently, we receive alerts on Discord.
+
+## Metrics
+
+Metrics are quantitative measurements of a system's status and performance.
+This section describes the metrics infrastructure at WATcloud.
+
+### Quick Links
+- [Prometheus][prometheus]
+
+[prometheus]: https://prometheus.watonomous.teleport.sh/
+
+### Prometheus
+
+[Prometheus][prometheus] is an open-source monitoring and alerting toolkit.
+It collects metrics from various sources and stores them in a time-series database.
+We use Prometheus to monitor the health of our systems and to set up alerts (via [Alertmanager](#alertmanager)) for potential issues.
+
+## Logs
+
+Logs are records of events that happen in a system.
+Examples of logs include Linux system logs and Kubernetes container logs.
+This section describes the logging infrastructure at WATcloud.
+
+### Quick Links
+- [Elastic Cloud][elastic-cloud]
+
+[elastic-cloud]: https://wato-elastic-cloud-deployment.kb.us-east4.gcp.elastic-cloud.com:9243/
+
+### Elastic Cloud
+
+[Elastic Cloud][elastic-cloud] is a managed Elasticsearch service.
+It is used to store logs from various sources, including Kubernetes clusters and Linux servers.
+
+## Error Tracking
+
+Error tracking is the practice of recording and monitoring errors that occur in a system.
+This section describes the error tracking infrastructure at WATcloud.
+
+### Quick Links
+- [Sentry][sentry]
+
+[sentry]: https://watonomous.sentry.io/
+
+### Sentry
+
+[Sentry][sentry] is an open-source error tracking tool.
+It captures and aggregates errors from various sources, including web applications and backend services.
+Use cases for Sentry at WATcloud include error monitoring for websites, APIs, and CI pipelines.
+
+## Tracing
+
+Tracing is the practice of recording the life cycle of an object.
+An example of tracing is recording the different stages of a CI pipeline (e.g. start/finish times of each job stage, stages passed/failed).
+
+Currently, WATcloud does not have a tracing system in place.
+You can following along [this internal issue](https://github.com/WATonomous/infra-config/issues/1795) for updates on the status of our tracing infrastructure.
+
+{
+// Separate footnotes from the main content
+}
+
+import { Separator } from "@/components/ui/separator"
+
+<Separator className="mt-6" />
