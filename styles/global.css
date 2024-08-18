@@ -132,3 +132,12 @@ li > ul.first\:nx-mt-0:first-of-type,
 li > ol.first\:nx-mt-0:first-of-type {
   margin-top: 0;
 }
+
+/*
+section.footnotes is created by the remark-gfm plugin:
+- https: //github.com/remarkjs/remark-gfm/blob/d8e110edf0799741e0954a92dd22fc143b803bdb/readme.md
+- https://github.com/micromark/micromark-extension-gfm-footnote/blob/533e041238c15e7995afbffa7721b0e8d427f68e/readme.md
+*/
+section.footnotes {
+  @apply border-t mt-6;
+}
