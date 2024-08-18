@@ -139,5 +139,5 @@ section.footnotes is created by the remark-gfm plugin:
 - https://github.com/micromark/micromark-extension-gfm-footnote/blob/533e041238c15e7995afbffa7721b0e8d427f68e/readme.md
 */
 section.footnotes {
-  @apply border-t mt-6;
+  @apply border-t mt-6 border-gray-400 border-opacity-20;
 }

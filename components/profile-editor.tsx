@@ -65,7 +65,7 @@ export function ProfileEditor() {
         form.reset();
       } else {
         setAlertTitle("Error");
-        setAlertDescription(`Something went wrong! Error code: ${res.status}. Error message: "${res.json()}".`);
+        setAlertDescription(`Something went wrong! Error code: ${res.status}. Error message: \`${await res.text()}\`.`);
       }
     } catch (e) {
       setAlertTitle("Error");

@@ -8,6 +8,8 @@ import { Link, useConfig } from "nextra-theme-docs";
 import React from 'react';
 import Picture from './picture';
 import { GithubIcon, LinkIcon, LinkedinIcon, MailIcon, XIcon } from 'lucide-react';
+import { Separator } from './ui/separator';
+import { SubscribeDialog } from './blog';
 
 // Reference for styling: https://github.com/vercel/turbo/blob/22585c9dcc23eb010ab01f177394358af03210d7/docs/pages/blog/turbo-1-10-0.mdx
 
@@ -131,5 +133,10 @@ export function BlogPostHeader() {
 }
 
 export function BlogPostFooter() {
-    return <CommentSection />
+    return <>
+        <Separator className="my-8" />
+        <SubscribeDialog />
+        <Separator className="my-8" />
+        <CommentSection />
+    </>
 }
