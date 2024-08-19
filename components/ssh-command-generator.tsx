@@ -140,9 +140,9 @@ export function SSHCommandGenerator() {
                 </dd>
             </dl>
             <div className="mt-8">
-                <h4 className="text-xl font-semibold">Results</h4>
+                <h4 className="text-xl font-semibold">Options</h4>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Below are options for connecting to <Code>{machineName}</Code>.
+                    Below are options for connecting to <span className="font-bold">{machineName}</span>.
                     Please choose the option that best fits your use case.
                 </p>
             </div>
@@ -150,7 +150,7 @@ export function SSHCommandGenerator() {
             {
                 sshInfo[machineName].paths.map(({hops, instructions}) => (
                     <div key={hops.join(" -> ")} className="mt-8">
-                        <h4 className="text-lg font-semibold">{hops.length === 1 ? "Direct Connection" : hops.join(" -> ")}</h4>
+                        <h4 className="text-lg font-semibold">{hops.length === 1 ? "Direct Connection" : hops.join(" → ")}</h4>
                         <ol className='list-decimal ltr:ml-6 rtl:mr-6 mt-6'>
                             {instructions.map((instruction, i) => {
                                 const MDXComponent = lookupStringMDX(sshInfoStrings, instruction)
