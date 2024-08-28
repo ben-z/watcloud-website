@@ -1,3 +1,4 @@
+import { allImages } from '@/build/fixtures/images';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -6,31 +7,32 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 import {
     Form,
     FormControl,
     FormField,
     FormItem,
     FormMessage
-} from "@/components/ui/form"
-import { websiteConfig } from '@/lib/data'
-import { dayjsTz } from '@/lib/utils'
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from 'next/router'
-import { MdxFile } from "nextra"
-import { Link } from "nextra-theme-docs"
-import { getPagesUnderRoute } from "nextra/context"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
+} from "@/components/ui/form";
+import { websiteConfig } from '@/lib/data';
+import { dayjsTz } from '@/lib/utils';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from 'next/router';
+import { MdxFile } from "nextra";
+import { Link } from "nextra-theme-docs";
+import { getPagesUnderRoute } from "nextra/context";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import Picture from "./picture";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 // Header and Index derived from https://github.com/vercel/turbo/blob/66196a70d02cddc8899ed1423684b1f716aa310e/docs/pages/blog.mdx
 export function BlogHeader() {
     return (
-        <div className="max-w-screen-lg mx-auto pt-4 pb-8 mb-16 border-b border-gray-400 border-opacity-20">
+        <div className="max-w-screen-lg mx-auto pt-4 pb-8 border-b border-gray-400 border-opacity-20">
             <h1>
                 <span className="font-bold leading-tight lg:text-5xl">Breadcrumbs</span>
             </h1>
@@ -44,37 +46,67 @@ export function BlogHeader() {
 export function BlogIndex() {
     const { locale = websiteConfig.default_locale } = useRouter()
 
-    return getPagesUnderRoute("/blog").map((page) => {
-        const frontMatter = (page as MdxFile).frontMatter
-        const { date, timezone } = frontMatter || {}
+    const items = getPagesUnderRoute("/blog").map((page) => {
+        const frontMatter = (page as MdxFile).frontMatter || {}
+        if (frontMatter.hidden) {
+            return null
+        }
+
+        const { date, timezone } = frontMatter
         const dateObj = date && timezone && dayjsTz(date, timezone).toDate()
 
+        let titleImageComponent;
+        if (frontMatter.title_image) {
+            const titleImage = allImages[frontMatter.title_image];
+            if (!titleImage) {
+                throw new Error(`No image found for title_image: ${frontMatter.title_image}`);
+            }
+            const titleImageAttribution = frontMatter.title_image_attribution;
+            if (!titleImageAttribution) {
+                throw new Error(`No attribution found for title_image: ${frontMatter.title_image}`);
+            }
+
+            titleImageComponent = (
+                <Picture
+                    image={titleImage}
+                    alt={titleImageAttribution}
+                    wrapperClassName='ml-4 block'
+                    imgClassName='max-h-40 max-w-40 w-40 h-auto object-contain'
+                />
+            )
+        }
+
         return (
-            <div key={page.route} className="mb-10">
-                <Link href={page.route} style={{ color: "inherit", textDecoration: "none" }} className="block font-semibold mt-8 text-2xl">
-                    {page.meta?.title || frontMatter?.title || page.name}
-                </Link>
-                <p className="opacity-80" style={{ marginTop: ".5rem" }}>
-                    {frontMatter?.description}{" "}
-                    <span className="inline-block">
-                        <Link href={page.route}>{"Read more →"}</Link>
-                    </span>
-                </p>
-                {dateObj ? (
-                    <p className="opacity-50 text-sm">
-                        {/* suppressHydrationWarning is used to prevent warnings due to differing server/client locales */}
-                        <time dateTime={dateObj.toISOString()} suppressHydrationWarning>
-                            {dateObj.toLocaleDateString(locale, {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric'
-                            })}
-                        </time>
+            <div key={page.route} className="flex items-center">
+                <div>
+                    <Link href={page.route} style={{ color: "inherit", textDecoration: "none" }} className="block font-semibold text-2xl">
+                        {page.meta?.title || frontMatter.title || page.name}
+                    </Link>
+                    <p className="opacity-80" style={{ marginTop: ".5rem" }}>
+                        {frontMatter.description}{" "}
+                        <span className="inline-block">
+                            <Link href={page.route}>{"Read more →"}</Link>
+                        </span>
                     </p>
-                ) : null}
+                    {dateObj ? (
+                        <p className="opacity-50 text-sm">
+                            {/* suppressHydrationWarning is used to prevent warnings due to differing server/client locales */}
+                            <time dateTime={dateObj.toISOString()} suppressHydrationWarning>
+                                {dateObj.toLocaleDateString(locale, {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric'
+                                })}
+                            </time>
+                        </p>
+                    ) : null}
+                </div>
+                <div className="hidden md:block">{titleImageComponent}</div>
             </div>
         );
-    });
+    })
+
+    return <div className="grid gap-y-10 my-16">{items}</div>
 }
 
 const subscribeFormSchema = z.object({

@@ -1,15 +1,19 @@
 import { allImages } from '@/build/fixtures/images';
-import { userProfiles } from '@/lib/data';
 import CommentSection from '@/components/giscus-comments';
-import { websiteConfig } from '@/lib/data';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { userProfiles, websiteConfig } from '@/lib/data';
 import { cn, dayjsTz } from '@/lib/utils';
+import { GithubIcon, LinkIcon, LinkedinIcon, MailIcon, XIcon } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Link, useConfig } from "nextra-theme-docs";
 import React from 'react';
-import Picture from './picture';
-import { GithubIcon, LinkIcon, LinkedinIcon, MailIcon, XIcon } from 'lucide-react';
-import { Separator } from './ui/separator';
 import { SubscribeDialog } from './blog';
+import Picture from './picture';
+import { Separator } from './ui/separator';
 
 // Reference for styling: https://github.com/vercel/turbo/blob/22585c9dcc23eb010ab01f177394358af03210d7/docs/pages/blog/turbo-1-10-0.mdx
 
@@ -41,7 +45,7 @@ export function Avatar({ username }: { username: string }) {
     return (
         <div className="flex items-center flex-shrink-0 md:justify-start">
             <div className="w-[32px] h-[32px]">
-                <Picture image={image} alt={username} className="w-full rounded-full" />
+                <Picture image={image} alt={username} imgClassName="w-full rounded-full" />
             </div>
             <dl className="ml-2 text-sm font-medium leading-4 text-left whitespace-no-wrap">
                 <dt className="sr-only">Name</dt>
@@ -90,8 +94,38 @@ export function BlogPostHeader() {
     const { locale = websiteConfig.default_locale } = useRouter()
     const dateObj = date && timezone && dayjsTz(date, timezone).toDate()
 
+    let titleImageComponent;
+    if (frontMatter.title_image) {
+        const titleImage = allImages[frontMatter.title_image];
+        if (!titleImage) {
+            throw new Error(`No image found for title_image: ${frontMatter.title_image}`);
+        }
+        const titleImageAttribution = frontMatter.title_image_attribution;
+        if (!titleImageAttribution) {
+            throw new Error(`No attribution found for title_image: ${frontMatter.title_image}`);
+        }
+
+        titleImageComponent = (
+            <Popover>
+                <PopoverTrigger className="block mx-auto my-8">
+                    <Picture
+                        image={titleImage}
+                        alt={titleImageAttribution}
+                        imgClassName='h-[33vh] min-h-64 max-h-96 w-auto object-contain'
+                    />
+                </PopoverTrigger>
+                <PopoverContent side='bottom' className="w-96 max-w-full">
+                    <div className="text-xs text-center text-gray-500 dark:text-gray-400">
+                        {titleImageAttribution}
+                    </div>
+                </PopoverContent>
+            </Popover>
+        )
+    }
+
     return (
         <>
+            {titleImageComponent}
             <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{title}</h1>
             <Date>
                 {/* suppressHydrationWarning is used to prevent warnings due to differing server/client locales */}

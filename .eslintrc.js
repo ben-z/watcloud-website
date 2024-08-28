@@ -3,7 +3,8 @@ module.exports = {
     "next/core-web-vitals",
     "prettier",
     "plugin:mdx/recommended",
-    "plugin:react/recommended"
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
   ],
   "ignorePatterns": [
     // imported components from shadcn
