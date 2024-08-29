@@ -101,7 +101,7 @@ export function BlogIndex() {
                         </p>
                     ) : null}
                 </div>
-                <div className="hidden md:block">{titleImageComponent}</div>
+                <div className="hidden md:block ml-auto">{titleImageComponent}</div>
             </div>
         );
     })
