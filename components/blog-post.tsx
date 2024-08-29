@@ -138,11 +138,11 @@ export function BlogPostHeader() {
                 </time>
             </Date>
             <div className="w-full border-b border-gray-400 authors border-opacity-20">
-                <div className="flex justify-between mt-8 mb-2 mx-auto gap-7">
+                <div className="flex justify-center mt-8 mb-2 mx-auto gap-14">
                     {authors && authors.length > 0 && (
-                        <div className={cn("text-center", reviewers?.length > 0 ? "w-1/2" : "w-full")}>
+                        <div className="text-center">
                             <div className="flex justify-center mb-2 text-sm text-gray-500 dark:text-gray-400">Written By</div>
-                            <div className={cn("flex flex-wrap justify-center mb-8 gap-7", authors.length > 4 && "max-w-3xl")}>
+                            <div className="flex flex-wrap justify-center mb-8 gap-7">
                                 {authors.map((author: string) => (
                                     <Avatar key={author} username={author} />
                                 ))}
@@ -151,9 +151,9 @@ export function BlogPostHeader() {
 
                     )}
                     {reviewers && reviewers.length > 0 && (
-                        <div className={cn("text-center", authors?.length > 0 ? "w-1/2": "w-full")}>
+                        <div className="text-center">
                             <div className="flex justify-center mb-2 text-sm text-gray-500 dark:text-gray-400">Reviewed By</div>
-                            <div className={cn("flex flex-wrap justify-center mb-8 gap-7", reviewers.length > 4 && "max-w-3xl")}>
+                            <div className="flex flex-wrap justify-center mb-8 gap-7">
                                 {reviewers.map((reviewer: string) => (
                                     <Avatar key={reviewer} username={reviewer} />
                                 ))}
