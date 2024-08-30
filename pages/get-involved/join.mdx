@@ -47,26 +47,45 @@ import { Callout } from 'nextra/components'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckSquareIcon } from "lucide-react"
 
-### Azure Cost Estimator
+### WATcloud CLI
 
-{/* Internal reference: https://github.com/WATonomous/infra-config/issues/2057 */}
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/3003 */}
 
-We use an Azure nonprofit subscription for several projects, with an annual credit limit.
-Tracking our usage effectively is challenging due to these limitations in Azure:
-1. The Azure portal only displays current usage without projections or historical trends.
-2. Access to the Azure sponsorship portal is restricted to a single user.
+As a WATcloud compute cluster user, there are a few things that you might want to do frequently, such as:
+- Checking your quota usage (disk, CPU, memory)
+- Checking the status of user daemons like Docker rootless
+- Checking the status of the cluster (whether nodes are up, whether the cluster is under maintenance)
 
-To better manage our resources, we need a tool that provides detailed insights into our Azure credit usage. The ideal tool would:
-1. Display current usage and remaining credits.
-2. Chart historical usage trends.
-3. Project future usage based on past data.
-4. Provide detailed breakdowns by resource for all the above metrics.
+All of these can be done in user space (no special privileges required) with commands documented in various places in [our documentation](/docs/compute-cluster).
+However, it can be tedious to run multiple commands to get this information.
+We would like to have a CLI (command-line interface) tool that can provide all of this information in a single command.
 
-We are considering using [CAnalyzer](https://gitlab.com/indimin/canalyzer), but are open to any other suggestions.
+Here are some initial commands the CLI tool should have:
+- `watcloud status`: Get the status of the cluster, show machines that are up/down and whether they are under maintenance.
+- `watcloud quota list`: List the quota usage of the user. Can be expanded in the future to submit quota edit requests.
+- `watcloud daemon status`: Get the status of user daemons like Docker rootless.
 
-If you don't have access to an Azure subscription, we can give you read-only access to our Azure portal.
-Please fill out the [onboarding-form](/docs/utilities/onboarding-form) (make sure to enable the `Azure` section)
-and [let us know](https://cloud.watonomous.ca/docs/compute-cluster/support-resources).
+### Grammar and Style Checker
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/1700 */}
+
+We have a lot of documentation, and we want to make sure that it is easy to read and understand.
+We would like to have a tool that can check our documentation for grammar and style issues.
+This tool should detect capitalization issues, such as those outlined in the [guidelines](/docs/community-docs/watcloud/guidelines#communicate-accurately).
+Additionally, it would be nice if this tool can check for common grammar mistakes, such as subject-verb agreement, punctuation, and sentence structure.
+This tool can be run as a part of our CI/CD pipeline and should be used to check all documentation and, optionally, code comments.
+
+### Broken External Link Detector
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/2837 */}
+
+In [broken internal link detector](#broken-internal-link-detector), we implemented a tool that can detect broken internal links in our website. We would like to extend this tool/develop a new tool that can detect broken external links.
+
+Special considerations:
+- What happens if the external link is down temporarily? We have no control over how long the link will be down.
+- How do we handle links that require authentication? For example, on some member-facing pages, we have links to private GitHub repos. These links will return a 404 if the user is not authenticated. Should we simply whitelist these links, or is there a better way to handle them?
+
+We don't know the answers to these questions, and we'd love to hear your thoughts!
 
 ### File Auto-Expiration Tool
 
@@ -199,4 +218,27 @@ At WATcloud, we use [Ansible](https://www.ansible.com/) for provisioning machine
 
 [^ansible-user-linear]: Ansible issues a separate command for each action for each user. Even with the [pipelining](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#ansible-pipelining) feature, the provisioning pipeline is unbearably slow.
 
+### Azure Cost Estimator
 
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/2057 */}
+
+<Callout type="info">
+This project is no longer needed because Azure has migrated our nonprofit subscription to a new model that includes cost management features.
+</Callout>
+
+We use an Azure nonprofit subscription for several projects, with an annual credit limit.
+Tracking our usage effectively is challenging due to these limitations in Azure:
+1. The Azure portal only displays current usage without projections or historical trends.
+2. Access to the Azure sponsorship portal is restricted to a single user.
+
+To better manage our resources, we need a tool that provides detailed insights into our Azure credit usage. The ideal tool would:
+1. Display current usage and remaining credits.
+2. Chart historical usage trends.
+3. Project future usage based on past data.
+4. Provide detailed breakdowns by resource for all the above metrics.
+
+We are considering using [CAnalyzer](https://gitlab.com/indimin/canalyzer), but are open to any other suggestions.
+
+If you don't have access to an Azure subscription, we can give you read-only access to our Azure portal.
+Please fill out the [onboarding-form](/docs/utilities/onboarding-form) (make sure to enable the `Azure` section)
+and [let us know](https://cloud.watonomous.ca/docs/compute-cluster/support-resources).
