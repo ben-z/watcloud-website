@@ -34,5 +34,8 @@
     "theme": {
       "timestamp": false
     }
+  },
+  "onboarding-form": {
+    "display": "hidden"
   }
 }

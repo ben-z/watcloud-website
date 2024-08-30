@@ -42,7 +42,7 @@ import { deepEquals } from "@rjsf/utils"
 import { useRouter } from "next/router";
 import { encodeURI as b64EncodeURI, decode as b64Decode } from "js-base64";
 
-const INITIAL_FORM_DATA_QUERY_PARAM = "initialformdatab64";
+export const INITIAL_FORM_DATA_QUERY_PARAM = "initialformdatab64";
 const FORM_STATE_KEY = "onboarding-form-state";
 
 function saveFormState(obj: Record<string, any>) {
