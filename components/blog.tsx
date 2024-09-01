@@ -57,13 +57,15 @@ export function BlogIndex() {
 
         let titleImageComponent;
         if (frontMatter.title_image) {
-            const titleImage = allImages[frontMatter.title_image];
+            // prefer square image, fallback to wide image
+            const titleImageKey = frontMatter.title_image.square || frontMatter.title_image.wide;
+            const titleImage = allImages[titleImageKey];
             if (!titleImage) {
-                throw new Error(`No image found for title_image: ${frontMatter.title_image}`);
+                throw new Error(`Cannot find image with key: ${titleImageKey}`);
             }
-            const titleImageAttribution = frontMatter.title_image_attribution;
+            const titleImageAttribution = frontMatter.title_image.attribution;
             if (!titleImageAttribution) {
-                throw new Error(`No attribution found for title_image: ${frontMatter.title_image}`);
+                throw new Error(`No attribution found for title_image: ${JSON.stringify(frontMatter.title_image) }`);
             }
 
             titleImageComponent = (
