@@ -10,17 +10,15 @@ There are two main types of machines in the cluster: [general-use machines](/mac
 ### General-Use Machines
 
 General-use machines are meant for interactive use and are shared among all users in the cluster.
-Additionally, SLURM compute nodes are accessible through general use machines marked as SLURM login
-nodes (`SL`) in the [machine list](/machines#general-use-machines).
+Additionally, general-use machines marked as SLURM login nodes (`SL`) in the [machine list](/machines#general-use-machines)
+can be used to submit jobs to the [SLURM cluster](./slurm).
 
 Instructions for accessing our general-use machines can be found in our [SSH documentation](./ssh).
 
 ### SLURM Compute Nodes
 
 Simple Linux Utility for Resource Management (SLURM) is an open-source job scheduler that allocates resources to jobs on a cluster of computers.
-It is widely used in HPC[^hpc] environments.
-
-SLURM machines can be used for both interactive development as well as job scheduling. They provide fair, stable, and secure access to WATcloud's most precious resources (eg. GPUs).
+It is widely used in HPC[^hpc] environments to provide a fair and efficient way to run jobs on a shared cluster.
 
 Instructions for accessing our SLURM cluster can be found in our [SLURM documentation](./slurm).
 
