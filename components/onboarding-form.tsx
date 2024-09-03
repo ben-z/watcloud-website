@@ -122,41 +122,47 @@ export default function OnboardingForm() {
       return;
     }
 
-    const savedFormState = getFormState();
-    const savedFormData = savedFormState.formData;
-    const savedInitialFormDataB64FromParam =
-      savedFormState.initialFormDataB64FromParam;
+    try {
+      const savedFormState = getFormState();
+      const savedFormData = savedFormState.formData;
+      const savedInitialFormDataB64FromParam =
+        savedFormState.initialFormDataB64FromParam;
 
-    const initialFormDataFromParam = initialFormDataB64FromParam
-      ? JSON.parse(b64Decode(initialFormDataB64FromParam as string))
-      : null;
+      const initialFormDataFromParam = initialFormDataB64FromParam
+        ? JSON.parse(b64Decode(initialFormDataB64FromParam as string))
+        : null;
 
-    // Choose initial form data:
-    // 1. If there's no form data from query param, use saved form data.
-    // 2. If there is form data from query param, and it's the same as before, use saved form data. This allows
-    //    restoring the form data after an (accidental) navigation.
-    // 3. If there is form data from query param, and it's different from before, the saved data is stale.
-    //    Use form data from query param.
-    let dataSource = "" as "sessionStorage" | "queryParam" | "";
-    let initialFormData = null;
-    if (!initialFormDataFromParam) {
-      initialFormData = savedFormData;
-      dataSource = "sessionStorage";
-    } else if (initialFormDataB64FromParam === savedInitialFormDataB64FromParam) {
-      initialFormData = savedFormData;
-      dataSource = "sessionStorage";
-    } else {
-      initialFormData = initialFormDataFromParam;
-      dataSource = "queryParam";
-    }
-
-    if (initialFormData) {
-      _setFormData(initialFormData);
-      if (dataSource === "sessionStorage") {
-        toast.success("Successfully restored form data from session storage.");
-      } else if (dataSource === "queryParam") {
-        toast.success("Successfully loaded form data from query params.");
+      // Choose initial form data:
+      // 1. If there's no form data from query param, use saved form data.
+      // 2. If there is form data from query param, and it's the same as before, use saved form data. This allows
+      //    restoring the form data after an (accidental) navigation.
+      // 3. If there is form data from query param, and it's different from before, the saved data is stale.
+      //    Use form data from query param.
+      let dataSource = "" as "sessionStorage" | "queryParam" | "";
+      let initialFormData = null;
+      if (!initialFormDataFromParam) {
+        initialFormData = savedFormData;
+        dataSource = "sessionStorage";
+      } else if (initialFormDataB64FromParam === savedInitialFormDataB64FromParam) {
+        initialFormData = savedFormData;
+        dataSource = "sessionStorage";
+      } else {
+        initialFormData = initialFormDataFromParam;
+        dataSource = "queryParam";
       }
+
+      if (initialFormData) {
+        _setFormData(initialFormData);
+        if (dataSource === "sessionStorage") {
+          toast.success("Successfully restored form data from session storage.");
+        } else if (dataSource === "queryParam") {
+          toast.success("Successfully loaded form data from query params.");
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load saved form data", e);
+
+      toast.error("Failed to load saved form data. Please see the browser console for more information.");
     }
   }, [isReady, initialFormDataB64FromParam]);
 
