@@ -5,23 +5,42 @@
 import * as Sentry from "@sentry/nextjs";
 import { websiteConfig } from '@/lib/data'
 
+// proportion of traces to send to Sentry
+const TRACES_SAMPLE_RATE = 1.0
+
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn: websiteConfig.sentry_dsn,
 
-    // Adjust this value in production, or use tracesSampler for greater control
-    tracesSampleRate: 1,
+    tracesSampler({ location }) {
+      // Not sure what traces don't have a location, but sample them just in case.
+      if (!location) {
+        return TRACES_SAMPLE_RATE;
+      }
+
+      // Only send traces to Sentry if the user is on the production domain
+      if (!location.host.endsWith('watonomous.ca')) {
+        return 0.0
+      }
+
+      // Do not send traces to Sentry if the user is in the preview environment
+      if (location.host === 'rgw-preview.watonomous.ca') {
+        return 0.0
+      }
+
+      return TRACES_SAMPLE_RATE;
+    },
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
     debug: false,
 
-    // TODO: reduce session sample rate in production
+    // TODO: reduce session sample rate in production if needed
     replaysSessionSampleRate: 1.0,
     replaysOnErrorSampleRate: 1.0,
 
     tunnel: websiteConfig.sentry_tunnel,
 
-    integrations: []
+    integrations: [],
   });
 
   // Lazy-load the Sentry Replay integration
