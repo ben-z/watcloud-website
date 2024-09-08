@@ -389,7 +389,7 @@ This will allow the cluster switch to receive the new hostname and assign a temp
 
 [^dhcp-restart]: This may also be done some other way (e.g. using `dhclient`). However, restarting the VM has always worked for us and is a simple solution without digging into the details.
 
-After the VM has restarted, you should be able to look it up using the cluster DNS server (`100.50.254`):
+After the VM has restarted, you should be able to look it up using the cluster DNS server (`10.0.50.254`):
 
 ```
 root@wato-thor:~# nslookup ha-microk8s1.watocluster.local 10.0.50.254
