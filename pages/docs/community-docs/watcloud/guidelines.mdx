@@ -73,7 +73,7 @@ Every service should be monitored, and alerts should be set up to notify us when
 
 Communication, especially technical, should be accurate, as it can be very misleading if it is incorrect.
 For example:
-- `MB` (megabytes--$10^6$ bytes or $2^{20}$ bytes, depending on the context) is not the same as `Mb` (megabits--$10^6$ bits or $2^{20}$ bits, depending on the context) or `mb` (even more ambiguous, could be anything).
+- `MB` (megabytes—$10^6$ bytes or $2^{20}$ bytes, depending on the context) is not the same as `Mb` (megabits—$10^6$ bits or $2^{20}$ bits, depending on the context) or `mb` (even more ambiguous, could be anything).
 - Use `MiB` instead of `MB` whenever you know for sure that you are referring to the IEC[^iec] mebibytes ($2^{20}$ bytes) instead of the SI[^si] megabytes ($10^6$ bytes).
 
 [^iec]: The International Electrotechnical Commission (IEC) defines binary prefixes "kibi", "mebi", "gibi", etc., to refer to powers of 2.
@@ -152,6 +152,17 @@ This philosophy complements our [technical guidelines](#technical-guidelines), w
 
 With comprehensive observability, a dedication to infrastructure-as-code, and a commitment to minimize and document manual changes,
 we are equipped to quickly identify and resolve issues as they arise.
+
+### Establish Boundaries
+
+WATcloud is committed to delivering high-quality, maintainable systems.
+To ensure that everything we release is well-supported, we must consider the implications of each new feature.
+Our capacity to [address urgent issues](#proactively-firefight) is not unlimited, thus prioritization is essential.
+Often, our role is to provide a robust interface on which users can build.
+
+For instance, our [SSH access instructions](/docs/compute-cluster/ssh) include reliable one-liner commands that work consistently.
+However, configuration of SSH and agent forwarding—which vary based on the user's operating system and SSH agent—are left to the user.
+For these more personalized setups, we direct users to the extensive resources available online.
 
 </Steps>
 
