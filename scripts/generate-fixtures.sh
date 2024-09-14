@@ -57,13 +57,13 @@ mkdir -p "$PROJECT_DIR/build/fixtures"
 
 if [ -n "$__fetch_from" ]; then
     echo "Fetching fixtures from $__fetch_from..."
-    wget --quiet -O "$PROJECT_DIR/build/fixtures/machine-info.json" "$__fetch_from/machine-info.json"
-    wget --quiet -O "$PROJECT_DIR/build/fixtures/ssh-info.json" "$__fetch_from/ssh-info.json"
-    wget --quiet -O "$PROJECT_DIR/build/fixtures/website-config.json" "$__fetch_from/website-config.json"
-    wget --quiet -O "$PROJECT_DIR/build/fixtures/affiliation.schema.json" "$__fetch_from/affiliation.schema.json"
-    wget --quiet -O "$PROJECT_DIR/build/fixtures/user.schema.json" "$__fetch_from/user.schema.json"
-    wget --quiet -O "$PROJECT_DIR/build/fixtures/affiliation-info.json" "$__fetch_from/affiliation-info.json"
-    wget --quiet -O "$PROJECT_DIR/build/fixtures/user-profiles.json" "$__fetch_from/user-profiles.json"
+    wget --no-verbose -O "$PROJECT_DIR/build/fixtures/machine-info.json" "$__fetch_from/machine-info.json"
+    wget --no-verbose -O "$PROJECT_DIR/build/fixtures/ssh-info.json" "$__fetch_from/ssh-info.json"
+    wget --no-verbose -O "$PROJECT_DIR/build/fixtures/website-config.json" "$__fetch_from/website-config.json"
+    wget --no-verbose -O "$PROJECT_DIR/build/fixtures/affiliation.schema.json" "$__fetch_from/affiliation.schema.json"
+    wget --no-verbose -O "$PROJECT_DIR/build/fixtures/user.schema.json" "$__fetch_from/user.schema.json"
+    wget --no-verbose -O "$PROJECT_DIR/build/fixtures/affiliation-info.json" "$__fetch_from/affiliation-info.json"
+    wget --no-verbose -O "$PROJECT_DIR/build/fixtures/user-profiles.json" "$__fetch_from/user-profiles.json"
 else
     echo "Generating fixtures..."
     # Create a new worktree
