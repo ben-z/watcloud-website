@@ -149,6 +149,35 @@ index 0641ded10f..5290b02478 100644
        - ./outputs:/infra-config/outputs:rw
 ```
 
+### Caching
+
+We use GitHub Container Registry to cache the provisioner Docker image[^caching-details].
+The cache is used to speed up both [CI](https://github.com/WATonomous/infra-config/pull/3170)
+and [local development](https://github.com/WATonomous/infra-config/pull/3175).
+
+The cache is automatically used. Without any changes, the following command should complete quickly[^build-time-with-cache]
+and show that every stage is loaded from cache:
+
+```bash copy
+docker compose build provisioner
+```
+
+On some setups, `COPY` and `ADD` commands may not be cached.
+For example, when there is a custom `umask` set when git checks out files, the permissions of the files may not match the cache.
+This is due to how git and Docker handle file permissions differently[^git-docker-permission-difference].
+To fix this, we can run the following to reset the non-executable bits of the files to the default:
+
+```bash copy
+git ls-files | xargs -I '{}' chmod u+rw,go+r-w {}
+```
+
+[^caching-details]: [Here](https://github.com/WATonomous/infra-config/blob/121af9af1dbe78e187670163545fa6537a26757f/.github/workflows/push-images.yml#L62) is where we push the cache, and [here](https://github.com/WATonomous/infra-config/blob/121af9af1dbe78e187670163545fa6537a26757f/docker-compose.yml#L5-L6) is where we use it. The cache lives [here](https://github.com/WATonomous/infra-config/pkgs/container/infra-config).
+
+[^build-time-with-cache]: At the time of writing (2024-09-16), the build time with cache is about 30 seconds on a single core (Docker immediately recognizes that every layer can be cached, and downloads the image from the cache). The build time without cache is about 3 minutes and 40 seconds on 8 cores.
+
+[^git-docker-permission-difference]: Git [only preserves the executable bit](https://stackoverflow.com/a/3211396/4527337) of files, and uses the umask ([defaults to `022`](https://man7.org/linux/man-pages/man2/umask.2.html) on most systems) to determine the permissions of the files it creates. Docker, on the other hand, [uses all permission bits](https://docs.docker.com/engine/reference/builder/#copy) when using `COPY` or `ADD`.
+
+
 ### Port forwarding
 
 Sometimes, we may need to access services running in the container from the host machine.
