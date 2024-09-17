@@ -156,15 +156,15 @@ The cache is used to speed up both [CI](https://github.com/WATonomous/infra-conf
 and [local development](https://github.com/WATonomous/infra-config/pull/3175).
 
 The cache is automatically used. Without any changes, the following command should complete quickly[^build-time-with-cache]
-and show that almost every stage is loaded from cache:
+and show that almost every stage is loaded from the cache:
 
 ```bash copy
 docker compose build provisioner
 ```
 
 Previously, there was a [cache invalidation issue](https://github.com/WATonomous/infra-config/pull/3176) when files in
-the Docker context don't have the same permissions as the cache[^git-docker-permission-difference].
-However, this issue has been fixed using a [workaround](https://github.com/WATonomous/infra-config/pull/3179).
+the build context don't have the same permissions as the cache[^git-docker-permission-difference].
+This issue has been fixed using a [workaround](https://github.com/WATonomous/infra-config/pull/3179).
 
 [^caching-details]: [Here](https://github.com/WATonomous/infra-config/blob/121af9af1dbe78e187670163545fa6537a26757f/.github/workflows/push-images.yml#L62) is where we push the cache, and [here](https://github.com/WATonomous/infra-config/blob/121af9af1dbe78e187670163545fa6537a26757f/docker-compose.yml#L5-L6) is where we use it. The cache lives [here](https://github.com/WATonomous/infra-config/pkgs/container/infra-config).
 
