@@ -162,7 +162,7 @@ and show that almost every stage is loaded from cache:
 docker compose build provisioner
 ```
 
-Previously, there was a [cache invalidation issue](https://github.com/WATonomous/infra-config/pull/3176) when the files in
+Previously, there was a [cache invalidation issue](https://github.com/WATonomous/infra-config/pull/3176) when files in
 the Docker context don't have the same permissions as the cache[^git-docker-permission-difference].
 However, this issue has been fixed using a [workaround](https://github.com/WATonomous/infra-config/pull/3179).
 
