@@ -1,4 +1,6 @@
 import { Steps } from 'nextra/components'
+import Picture from '@/components/picture'
+import { DocProxmoxPrimaryGpu } from '@/build/fixtures/images'
 
 # Proxmox
 
@@ -649,3 +651,37 @@ If you haven't already, please open a pull request (PR) and review the changes w
 </Steps>
 
 
+## GPU Passthrough
+
+*This note is derived from https://github.com/WATonomous/infra-notes/blob/7786dfe4cd2af74e76530285e1141d06f5ab2df2/gpu-passthrough.md*
+
+Passing through GPUs to VMs is a complex process that requires modifying many parts of the host system.
+Fortunately, the official Proxmox documentation contains a guide on how to do this: [PCI Passthrough](https://pve.proxmox.com/wiki/PCI_Passthrough).
+This guide should be sufficient, and other resources (such as various forums) may provide outdated information or incorrect steps.
+
+### Quirks
+
+- When passing through the GPU, there might need to be some fiddling around with whether or not to enable "Primary GPU": <Picture alt="Primary GPU Setting" image={DocProxmoxPrimaryGpu} />
+  - "Primary GPU" appears to be required when using GTX 1080 on Ubuntu (otherwise `nvidia-smi` throws an error) or Windows VMs (otherwise we get Error 43. Though with primary GPU enabled, we can't access the display from the Proxmox console anymore). It doesn't appear to be required when passing through an RTX 3090 to a Windows VM.
+- When desktop GUI is installed and a display is plugged in, GPU passthrough will stop working. It will error out the first time the VM is started, then it will hang the second time the VM is started. Brief discussion [here](https://discord.com/channels/478659303167885314/571386709233893406/952007213742977044). The solution is to uninstall the desktop GUI or not plug in a display.
+
+The following are some machine-specific quirks that we have encountered.
+
+#### trpro (ASUS WRX80 Motherboard)
+
+When a GPU is placed in the PCIe slot right beside the RAM, passthrough won't work. The error code is something about invalid VBIOS and then an error message about being stuck in power state D3. When we pass the VM a `romfile` manually according to the instructions in the Proxmox PCI passthrough doc the invalid VBIOS error goes away but we are still stuck in power state D3. ([Source](https://discord.com/channels/478659303167885314/580890419379044362/942267415071457311))
+
+### PCI bandwidth and GPUs
+
+PCIe gen4 appears to require a stronger signal quality than gen3.
+When using PCIe risers at gen4 speeds, we encountered PCIe errors.
+See [this thread](https://discord.com/channels/478659303167885314/1163159162432262264)
+for more info on this.
+
+We may be able to resolve this by replacing our current passive risers with retimers.
+See [this discussion](https://github.com/WATonomous/infra-config/discussions/1938) for more information on this.
+However, retimers are much more expensive than passive risers.
+
+The current workaround is to set the link speed to gen3 or below.
+This reduces the bandwidth available to the GPUs, but for a lot of workloads,
+this doesn't substantially decrease the performance.

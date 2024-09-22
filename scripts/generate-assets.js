@@ -233,6 +233,7 @@ function generateTypescript(image_names) {
         { name: "computer-dark", uri: new WATcloudURI("watcloud://v1/sha256:7dac34046e20b4a5c4982d2a7940fdb313687d030b72a297adcd2a84d138e099?name=computer-dark.avif") },
         { name: "server-room-light", uri: new WATcloudURI("watcloud://v1/sha256:c3b72b5fb4c7bdff14f293782a98d7b1a21c7f2d6479cb1fa3b1b196a2179f73?name=server-room-light-min.jpg"), optimize: true},
         { name: "server-room-dark", uri: new WATcloudURI("watcloud://v1/sha256:216ca4fdc626b94daaad8a63be5c1a507f82abb2b3bed1839f6d0996ac3e84d2?name=server-room-dark-min.jpg"), optimize: true},
+        { name: "doc-proxmox-primary-gpu", uri: new WATcloudURI("watcloud://v1/sha256:9b7b398205cf6508dce29f07023001baf5eebc287780d7220f50c6965da809ac?name=doc-proxmox-primary-gpu.png"), optimize: true},
     ];
     await Promise.all(IMAGES.map(image => processImage(image)));
 

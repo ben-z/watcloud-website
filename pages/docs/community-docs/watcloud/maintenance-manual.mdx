@@ -2,7 +2,19 @@
 
 This manual outlines the maintenance procedures for various components of WATcloud.
 
+## General procedure
+
+1. **Plan the maintenance**: Prepare a plan for the maintenance, including the start time, end time, and the steps to be taken during the maintenance. Identify the components and services that will be affected. Try to minimize the impact on users by using strategies like rolling updates.
+1. **Notify users**: If the maintenance will affect users, [notify them in advance](https://github.com/WATonomous/infrastructure-support/discussions). Make sure to give users plenty of time to prepare for the maintenance. In general, one week's notice is recommended.
+1. **Perform the maintenance**: Follow the steps outlined in the maintenance plan. If the maintenance runs over the scheduled end time, notify users of the delay.
+1. **Verify the maintenance**: After the maintenance is complete, verify that all components are working as expected (including CI pipelines). If there are any issues, address them immediately. Use [observability tools](./observability) to monitor the health of the system.
+1. **Notify users**: Once the maintenance is complete, update the maintenance announcement to indicate that the maintenance is complete. If there were any issues during the maintenance, provide details on what happened and how it was resolved.
+
 ## SLURM
+
+This section outlines the maintenance procedures for the SLURM cluster.
+
+### Cluster overview
 
 To get a general overview of the health of the SLURM cluster, you can run:
 
@@ -24,7 +36,7 @@ In the output above, `tr-slurm1` is in the `drained` state, which means it is no
 `thor-slurm1` is in the `mix` state, which means some jobs are running on it.
 All other nodes are in the `idle` state, which means there are no jobs running on them.
 
-To get a detailed overview of the health of the SLURM cluster, you can run:
+To get a detailed overview of nodes in the cluster, you can run:
 
 ```bash copy
 scontrol show node [NODE_NAME]
