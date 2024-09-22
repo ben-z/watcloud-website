@@ -1,0 +1,56 @@
+---
+title: 'Under the Hood: What is WATcloud?'
+description: "WATcloud is the result of over four years of dedicated work on both hardware and software to make computing resources easily accessible to everyone."
+title_image:
+  square: 'under-the-hood-square'
+  wide: 'under-the-hood-wide'
+  attribution: |
+    Image generated using DALL-E with ChatGPT-assisted prompt: "A comic-style drawing of a person standing in front of a larger car with a red hood, looking under the hood and finding it filled with computer parts instead of an engine. The car should have no engine visible; instead, the hood reveals computer parts like circuit boards, CPUs, cooling fans, and cables. The person is smaller in size compared to the car, standing on the ground, and looks surprised, with wide eyes and a raised eyebrow. The scene is light-hearted and humorous, with vibrant colors and exaggerated expressions, capturing the surprise and confusion of the person."
+date: 2024-09-22
+timezone: America/Vancouver
+authors:
+  - ben
+reviewers:
+  - j257jian
+notify_subscribers: true
+hidden: false
+---
+
+import { BlogPostHeader, BlogPostFooter } from '@/components/blog-post'
+
+<BlogPostHeader />
+
+WATcloud's mission is to make computing resources available to everyone in an easy and fair way.
+Over the past four years, we have continuously iterated on both the hardware and software that comprise our cluster.
+On the hardware side, WATcloud consists of servers, switches, IP-KVMs[^ip-kvm], and other peripherals that form our compute cluster.
+On the software side, WATcloud encompasses over 3,000 pull requests and tickets in our internal monorepo,
+along with over 40 satellite repositories ranging from bug-fixing forks of open-source projects to custom tools.
+Throughout the years, we've learned and grown immensely, and we're excited to share our journey with you.
+
+[^ip-kvm]: IP-KVM stands for Internet Protocol Keyboard, Video, and Mouse. It allows us to remotely control servers as if we were physically present.
+
+Over the next few blog posts, we'll be sharing the architecture of WATcloud in its current state and how we got here.
+Here's a list of topics we'll be covering:
+- Compute cluster hardware setup
+- Operating system/hypervisor/virtual machine configuration
+- Distributed storage configuration
+- Network configuration
+- Compute cluster provisioning pipeline
+- User provisioning pipeline
+- Resource management systems
+- Observability systems
+- On-prem and cloud-based Kubernetes clusters (and automatic failover)
+- Continuous integration and deployment (CI/CD) configuration
+- DNS management
+- Email infrastructure
+- Website/blog infrastructure
+- Auxiliary services (Discord, GitHub, Google Workspace, etc.)
+- Current major projects
+
+This list may be adjusted as we publish more posts, and we'll make sure to hyperlink each item as we go.
+This blog post serves as a preview for what's to come. If you'd like to stay up-to-date with our latest posts,
+please subscribe to our newsletter below.
+
+Do you have a suggestion for a blog post topic? Please let us know below in the comment section or reach out to us on [Discord](https://discord.gg/hEX5Q4KDYN).
+
+<BlogPostFooter />
