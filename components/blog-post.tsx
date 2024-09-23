@@ -112,7 +112,7 @@ export function BlogPostHeader() {
                     <Picture
                         image={titleImage}
                         alt={titleImageAttribution}
-                        imgClassName='h-[33vh] min-h-64 max-h-96 w-auto object-contain'
+                        imgClassName='max-h-96 object-contain'
                     />
                 </PopoverTrigger>
                 <PopoverContent side='bottom' className="w-96 max-w-full">

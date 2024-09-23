@@ -1,6 +1,6 @@
 ---
 title: 'Under the Hood: What is WATcloud?'
-description: "WATcloud is the result of over four years of dedicated work on both hardware and software to make computing resources easily accessible to everyone."
+description: "Curious about how WATcloud makes computing resources easily and fairly accessible to everyone? Join us as we kick off a blog series exploring our four-year journey of refining our compute cluster's hardware and software—from servers and networking to user provisioning and observability systems."
 title_image:
   square: 'under-the-hood-square'
   wide: 'under-the-hood-wide'
@@ -16,19 +16,20 @@ notify_subscribers: true
 hidden: false
 ---
 
-WATcloud's mission is to make computing resources available to everyone in an easy and fair way.
-Over the past four years, we have continuously iterated on both the hardware and software that comprise our cluster.
-On the hardware side, WATcloud consists of servers, switches, IP-KVMs[^ip-kvm], and other peripherals that form our compute cluster.
-On the software side, WATcloud encompasses over 3,000 pull requests and tickets in our internal monorepo,
-along with over 40 satellite repositories ranging from bug-fixing forks of open-source projects to custom tools.
+WATcloud's mission is to make computing resources easily and fairly accessible to everyone.
+Over the past four years, we have continuously refined both the hardware and software that comprise our cluster.
+On the hardware side, WATcloud includes servers, switches, IP-KVMs[^ip-kvm], and other peripherals that form our compute infrastructure.
+On the software side, we have developed a variety of systems for managing the compute cluster, user provisioning, and auxiliary services.
+These efforts encompass over 3,000 pull requests and tickets in our internal monorepo, along with more than 40 satellite repositories—ranging
+from bug-fixing forks of open-source projects to custom tools.
 Throughout the years, we've learned and grown immensely, and we're excited to share our journey with you.
 
-[^ip-kvm]: IP-KVM stands for Internet Protocol Keyboard, Video, and Mouse. It allows us to remotely control servers as if we were physically present.
+[^ip-kvm]: IP-KVM stands for Internet Protocol Keyboard, Video, and Mouse. It allows us to remotely control servers (console access, power cycling, etc.) as if we were physically present.
 
 Over the next few blog posts, we'll be sharing the architecture of WATcloud in its current state and how we got here.
 Here's a list of topics we'll be covering:
 - Compute cluster hardware setup
-- Operating system/hypervisor/virtual machine configuration
+- Operating system, hypervisor, and virtual machine configuration
 - Distributed storage configuration
 - Network configuration
 - Compute cluster provisioning pipeline
