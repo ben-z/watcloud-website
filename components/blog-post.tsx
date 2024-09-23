@@ -10,7 +10,7 @@ import { dayjsTz } from '@/lib/utils';
 import { GithubIcon, LinkIcon, LinkedinIcon, MailIcon, XIcon } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Link, useConfig } from "nextra-theme-docs";
-import React from 'react';
+import React, { Fragment } from 'react';
 import { SubscribeDialog } from './blog';
 import Picture from './picture';
 
@@ -67,7 +67,7 @@ export function Avatar({ username }: { username: string }) {
                         sr = "twitter";
                     }
                     return (
-                        <>
+                        <Fragment key={link}>
                             <dt className="sr-only">{sr}</dt>
                             <dd className="inline-block">
                                 <Link
@@ -78,7 +78,7 @@ export function Avatar({ username }: { username: string }) {
                                     {icon}
                                 </Link>
                             </dd>
-                        </>
+                        </Fragment>
                     )
                 })}
             </dl>
