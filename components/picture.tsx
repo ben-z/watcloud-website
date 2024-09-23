@@ -41,7 +41,7 @@ export default function Picture({
   )}")`;
 
   const placeholderStyle = {
-    backgroundSize: "cover",
+    backgroundSize: "contain",
     backgroundPosition: "50% 50%",
     backgroundRepeat: "no-repeat",
     backgroundImage,
