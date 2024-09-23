@@ -1,7 +1,6 @@
 import Giscus from "@giscus/react";
 import websiteConfig from "@/build/fixtures/website-config.json";
 import { useTheme } from "nextra-theme-docs";
-import { Separator } from "./ui/separator";
 
 export default function CommentSection() {
   const { theme } = useTheme();
@@ -18,7 +17,7 @@ export default function CommentSection() {
   const category = websiteConfig.category;
 
   return (
-    <>
+    <div>
       {repo && repo_id && category && category_id ? (
         <Giscus
           repo={repo as `${string}/${string}`}
@@ -33,6 +32,6 @@ export default function CommentSection() {
           theme={giscusTheme}
         />
       ) : null}
-    </>
+    </div>
   );
 }

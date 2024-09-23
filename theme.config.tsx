@@ -2,6 +2,8 @@ import { DiscordIcon } from 'nextra/icons'
 import { Bot, Heart, Code2 } from "lucide-react"
 import websiteConfig from '@/build/fixtures/website-config.json'
 import { Link } from "nextra-theme-docs"
+import { BlogPostHeader, BlogPostFooter } from '@/components/blog-post'
+import { useRouter } from 'next/router'
 
 const logo = (
   // This logo is designed in Sketch, exported as SVG, and then manually adjusted based on
@@ -115,6 +117,21 @@ const themeConfig = {
   },
   toc: {
     backToTop: true,
+  },
+  main: function Main({ children }: { children: React.ReactNode }) {
+    const router = useRouter();
+    const isBlogPost = router.pathname.startsWith("/blog/");
+
+    const header = isBlogPost && <BlogPostHeader />;
+    const footer = isBlogPost && <><BlogPostFooter /><div className="mt-16"/></>;
+
+    return (
+      <>
+        {header}
+        {children}
+        {footer}
+      </>
+    );
   }
 }
 

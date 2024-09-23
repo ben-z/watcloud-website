@@ -168,7 +168,7 @@ export function SubscribeDialog() {
     }
 
     return (
-        <div className="py-4 rounded-lg">
+        <div className="p-4 ring-1 ring-ring rounded-md">
             <h2 className="text-lg font-semibold">{"Subscribe to WATcloud's blog"}</h2>
             <p className="text-sm mt-1">{"Get the latest posts delivered right to your inbox. We won't spam you!"}</p>
             <Form {...form}>

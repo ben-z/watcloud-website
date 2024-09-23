@@ -6,14 +6,13 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { userProfiles, websiteConfig } from '@/lib/data';
-import { cn, dayjsTz } from '@/lib/utils';
+import { dayjsTz } from '@/lib/utils';
 import { GithubIcon, LinkIcon, LinkedinIcon, MailIcon, XIcon } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Link, useConfig } from "nextra-theme-docs";
 import React from 'react';
 import { SubscribeDialog } from './blog';
 import Picture from './picture';
-import { Separator } from './ui/separator';
 
 // Reference for styling: https://github.com/vercel/turbo/blob/22585c9dcc23eb010ab01f177394358af03210d7/docs/pages/blog/turbo-1-10-0.mdx
 
@@ -170,9 +169,8 @@ export function BlogPostHeader() {
 
 export function BlogPostFooter() {
     return <>
-        <Separator className="my-8" />
         <SubscribeDialog />
-        <Separator className="my-8" />
+        <div className="mt-16"/>
         <CommentSection />
     </>
 }

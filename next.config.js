@@ -22,7 +22,7 @@ module.exports = {
       'app',
       'components',
       'lib',
-      'theme.config.jsx',
+      'theme.config.tsx',
       "tailwind.config.js",
       "next.config.js",
       "postcss.config.js",
@@ -33,7 +33,7 @@ module.exports = {
 // Add Nextra config
 const withNextra = require('nextra')({
   theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.jsx',
+  themeConfig: './theme.config.tsx',
   latex: true, // LaTeX support: https://nextra.site/docs/guide/advanced/latex
 });
   
