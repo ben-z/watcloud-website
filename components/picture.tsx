@@ -41,7 +41,10 @@ export default function Picture({
   )}")`;
 
   const placeholderStyle = {
-    backgroundSize: "contain",
+    // This is `cover` because the blur image can have a different aspect ratio
+    // E.g. an image with 1792 × 1024 px can have a blur image with 240 x 150 px
+    // This may be due to some implementation details in the next/image loader
+    backgroundSize: "cover",
     backgroundPosition: "50% 50%",
     backgroundRepeat: "no-repeat",
     backgroundImage,

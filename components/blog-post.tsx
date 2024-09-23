@@ -112,7 +112,12 @@ export function BlogPostHeader() {
                     <Picture
                         image={titleImage}
                         alt={titleImageAttribution}
-                        imgClassName='max-h-96 object-contain'
+                        // The title images are either square or wide.
+                        // On small screens (viewport width < viewport height), the width is the constraint and the image looks nice by default (w-full).
+                        // On larger screens (viewport width > viewport height), we want to make sure
+                        // the image is not too tall, so we constrain the height.
+                        // w-auto is used to make sure the image doesn't get stretched.
+                        imgClassName='md:h-96 md:w-auto'
                     />
                 </PopoverTrigger>
                 <PopoverContent side='bottom' className="w-96 max-w-full">
