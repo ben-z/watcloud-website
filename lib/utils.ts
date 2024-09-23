@@ -384,3 +384,24 @@ export function maxBy<T>(array: T[], iteratee: (element: T) => number): T | unde
 export function minBy<T>(array: T[], iteratee: (element: T) => number): T | undefined {
   return maxBy(array, (element) => -iteratee(element));
 }
+
+// Derived from https://github.com/vercel/next.js/blob/4380d0b79d07637abd50a584b51317eae1297885/examples/image-legacy-component/pages/shimmer.tsx#L4-L16
+export const shimmer = (w: number, h: number) => `
+<svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="g">
+      <stop stop-color="#333" offset="20%" />
+      <stop stop-color="#222" offset="50%" />
+      <stop stop-color="#333" offset="70%" />
+    </linearGradient>
+  </defs>
+  <rect width="${w}" height="${h}" fill="#333" />
+  <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
+  <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
+</svg>`;
+
+// Derived from https://github.com/vercel/next.js/blob/4380d0b79d07637abd50a584b51317eae1297885/examples/image-legacy-component/pages/shimmer.tsx#L18-L21
+export const toBase64 = (str: string) =>
+  typeof window === "undefined"
+    ? Buffer.from(str).toString("base64")
+    : window.btoa(str);
