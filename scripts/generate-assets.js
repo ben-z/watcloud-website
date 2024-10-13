@@ -5,6 +5,7 @@ const sharp = require('sharp');
 const dedent = require('dedent');
 const os = require('os');
 const slugify = require('slugify');
+const assetConfig = require("./asset-config.json");
 
 const USER_PROFILES_PATH = path.resolve(process.argv[2]);
 if (!USER_PROFILES_PATH) {
@@ -81,21 +82,24 @@ class WATcloudURI extends URL {
 }
 
 async function processImage(image, preprocessSteps = []) {
-    const cacheDir = path.join(CACHE_DIR, `${image.uri.sha256}`);
+    const imageURI = new WATcloudURI(image.uri);
+
+    const cacheDir = path.join(CACHE_DIR, `${imageURI.sha256}`);
     const originalPath = path.join(cacheDir, "original");
 
     if (fs.existsSync(originalPath)) {
-        console.log(`Using cached version of ${image.name} (sha256:${image.uri.sha256})`)
+        console.log(`Using cached version of ${image.name} (sha256:${imageURI.sha256})`)
     } else {
         await fs.promises.mkdir(cacheDir, { recursive: true });
 
-        const url = await image.uri.resolveToURL();
+
+        const url = await imageURI.resolveToURL();
         console.log(`Downloading and processing ${image.name} from ${url}`);
         const res = await fetch(url);
         const buffer = await res.arrayBuffer();
         const sha256Hash = sha256(buffer);
-        if (sha256Hash !== image.uri.sha256) {
-            throw new Error(`SHA-256 hash mismatch for "${image.name}"! Expected ${image.uri.sha256}, got ${sha256Hash}`);
+        if (sha256Hash !== imageURI.sha256) {
+            throw new Error(`SHA-256 hash mismatch for "${image.name}"! Expected ${imageURI.sha256}, got ${sha256Hash}`);
         }
         await fs.promises.writeFile(originalPath, Buffer.from(buffer));
     }
@@ -224,19 +228,7 @@ function generateTypescript(image_names) {
 
     // MARK: Images
     console.log("Processing images...")
-    const IMAGES = [
-        { name: "cloud-light", uri: new WATcloudURI("watcloud://v1/sha256:906f98c1d660a70a6b36ad14c559a9468fe7712312beba1d24650cc379a62360?name=cloud-light.avif") },
-        { name: "cloud-dark", uri: new WATcloudURI("watcloud://v1/sha256:578d058bc16d5b52e93cc14f0d28ac0b4cf0a6e93b85db4a2c82a497ef43dc36?name=cloud-dark.avif") },
-        { name: "robot-light", uri: new WATcloudURI("watcloud://v1/sha256:439c9475cfe2202bbdf09dd60cd604564562ad2a2900c7b1c8eb6f392b961696?name=robot-light.avif") },
-        { name: "robot-dark", uri: new WATcloudURI("watcloud://v1/sha256:9490ceb060e2b58bd5235fe7351875ac7bb04791c0cdcbf35db364257e8ccd8d?name=robot-dark.avif") },
-        { name: "computer-light", uri: new WATcloudURI("watcloud://v1/sha256:3453358de2456b805229ba30ebc48a74f1e9eb7c8fbf3176927c60bbf99c69cc?name=computer-light.avif") },
-        { name: "computer-dark", uri: new WATcloudURI("watcloud://v1/sha256:7dac34046e20b4a5c4982d2a7940fdb313687d030b72a297adcd2a84d138e099?name=computer-dark.avif") },
-        { name: "server-room-light", uri: new WATcloudURI("watcloud://v1/sha256:c3b72b5fb4c7bdff14f293782a98d7b1a21c7f2d6479cb1fa3b1b196a2179f73?name=server-room-light-min.jpg"), optimize: true},
-        { name: "server-room-dark", uri: new WATcloudURI("watcloud://v1/sha256:216ca4fdc626b94daaad8a63be5c1a507f82abb2b3bed1839f6d0996ac3e84d2?name=server-room-dark-min.jpg"), optimize: true},
-        { name: "under-the-hood-wide", uri: new WATcloudURI("watcloud://v1/sha256:5cc9868176110e693921b642ef69b43ea1d6728c822d824bb405e1fc1631b345?name=under-the-hood-wide.png"), optimize: true},
-        { name: "under-the-hood-square", uri: new WATcloudURI("watcloud://v1/sha256:68ee1c08c67cc5120cd46d22240be39813516037c53aaa2c27f3d5a593b776c5?name=under-the-hood-square.webp"), optimize: true},
-        { name: "doc-proxmox-primary-gpu", uri: new WATcloudURI("watcloud://v1/sha256:9b7b398205cf6508dce29f07023001baf5eebc287780d7220f50c6965da809ac?name=doc-proxmox-primary-gpu.png"), optimize: true},
-    ];
+    const IMAGES = assetConfig.images;
     await Promise.all(IMAGES.map(image => processImage(image)));
 
     // MARK: Generate images.ts
