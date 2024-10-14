@@ -1,11 +1,12 @@
 # Machine Usage Guide
 
 This document provides an overview of the machines in the WATcloud compute cluster, including their hardware, networking, operating system, services, and software.
-It also includes guidelines for using the machines, troubleshoot instructions for common issues, and information about maintenance and outages.
+It also includes guidelines for using the machines, troubleshooting instructions for common issues, and information about maintenance and outages.
 
 ## Types of Machines
 
 There are two main types of machines in the cluster: [general-use machines](/machines#general-use-machines) and [SLURM compute nodes](/machines#slurm-compute-nodes).
+We will refer to them both as "development machines" in this document.
 
 ### General-Use Machines
 
@@ -31,20 +32,20 @@ Instructions for accessing our SLURM cluster can be found in our [SLURM document
 Most machines in the cluster come with standard workstation hardware that include CPU, RAM, GPU, and storage[^machine-specs]. In special
 cases, you can request to have specialized hardware such as FPGAs installed in the machines.
 
-[^machine-specs]: The specs of the machines can be found [here](/machines).
+[^machine-specs]: Machine specs can be found [here](/machines).
 
 ## Networking
 
-All machines in the cluster are connected to both the university network (over 10Gbps or 1Gbps Ethernet)
-and a cluster network (over 40Gbps or 10Gbps Ethernet). The IP address range for the university network is
+All machines in the cluster are connected to both the university network (using 10Gbps or 1Gbps Ethernet)
+and a cluster network (using 40Gbps or 10Gbps Ethernet). The IP address range for the university network is
 `129.97.0.0/16`[^uwaterloo-ip-range] and the IP address range for the cluster network is `10.0.50.0/24`.
 
 [^uwaterloo-ip-range]: The IP range for the university network can be found [here](https://uwaterloo.ca/information-systems-technology/about/organizational-structure/technology-integrated-services-tis/network-services-resources/ip-requests-and-registrations).
 
 ## Operating System
 
-All general-use machines and SLURM compute nodes are virtual machines (VMs)[^hypervisor].
-This setup allows us to easily manage the machines remotely and reduce the complexity of the bare-metal OSes.
+All development machines are virtual machines (VMs)[^hypervisor].
+This setup allows us to easily manage machines remotely and reduce the complexity of the bare-metal OSes.
 
 [^hypervisor]: We use [Proxmox](https://www.proxmox.com/en/) as our hypervisor.
 
@@ -52,40 +53,51 @@ This setup allows us to easily manage the machines remotely and reduce the compl
 
 ### `/home` Directory
 
-We run an SSD-backed Ceph[^ceph] cluster to provide distributed storage for the machines in the cluster. All general-use machines
-share a common `/home` directory that is backed by the Ceph cluster. This means that you can access your files (think
-bashrc files, project files, miniconda environments, etc.) from any general-use machine in the cluster.
+We run an SSD-backed Ceph[^ceph] cluster to provide distributed storage for machines in the cluster.
+All development machines share a common `/home` directory that is backed by the Ceph cluster.
 
-Due to the relatively expensive cost of SSDs, the Ceph cluster is only meant for storing small files. If you need to store large
-files (e.g. datasets, videos, ML model checkpoints), you should use one of the alternatives listed below.
+Due to the relatively expensive cost of SSDs and observations that large file transfers can slow down the filesystem for all users,
+the home directory should only be used for storing small files.
+If you need to store large files (e.g. datasets, videos, ML model checkpoints), please use one of the other storage options below.
 
 [^ceph]: [Ceph](https://ceph.io/) is a distributed storage system that provides high performance and reliability.
 
 ### `/mnt/wato-drive*` Directory
 
-We have a few HDD-backed NFS[^nfs] servers that provide large storage for the machines in the cluster. These NASes are mounted
-on all general-use machines at the `/mnt/wato-drive*` directories. You can use these mounts to store large files such as datasets.
+We have a few HDD-backed NFS[^nfs] servers that provide large storage for machines in the cluster.
+These NASes are mounted on all development machines at the `/mnt/wato-drive*` directories.
+You can use these mounts to store large files such as datasets and ML model checkpoints.
 
 [^nfs]: [NFS](https://en.wikipedia.org/wiki/Network_File_System) stands for "Network File System" and is used to share files over a network.
 
 ### `/mnt/scratch` Directory
 
 Every general-use machine has an SSD-backed local storage pool that is mounted at the `/mnt/scratch` directory.
-These storage pools are meant for temporary storage for long-running jobs that require fast and reliable filesystem access,
+These storage pools are meant for temporary storage for jobs that require fast and reliable filesystem access,
 such as storing training data and model checkpoints for ML workloads.
 
-The space on `/mnt/scratch` is limited. Please make sure to clean up your files after you are done with them.
+The space on `/mnt/scratch` is limited and shared between all users.
+Please make sure to clean up your files frequently (after every job).
+To promote good hygiene, there is an aggressive soft quota on the `/mnt/scratch` directory.
+Please refer to the [Quotas](./quotas) page for more information.
 
-An equivalent of `/mnt/scratch` is available on the SLURM compute nodes as well.
-They can be requested by following the instructions [here](./slurm#grestmpdisk).
+Scratch space is available on SLURM compute nodes as well.
+They are mounted at `/tmp` and can be requested using the [`tmpdisk` resource](./slurm#grestmpdisk).
 
 ### Docker
 
-Every general-use machine has Docker Rootless[^docker-rootless] installed. There is a per-user storage quota to ensure that everyone has
-enough space to run their workloads. The storage quota is described on the [Quotas](./quotas) page.
+Every development machine has Docker Rootless[^docker-rootless] installed.
+On general-use machines, the Docker daemon is automatically started[^docker-systemd] when you log in.
+On SLURM compute nodes, the Docker daemon needs to be [started manually](./slurm#using-docker).
+
+On general-use machines, the storage location for Docker is set to `/var/lib/cluster/users/$UID/docker`, where `$UID` is your user ID.
+`/var/lib/cluster` is an SSD-backed storage pool, and there is a per-user storage quota to ensure that everyone has
+enough space to run their workloads. Please refer to the [Quotas](./quotas) page for more information.
 
 [^docker-rootless]: [Docker](https://www.docker.com/) is a platform for neatly packaging software, both for development and deployment.
   [Docker Rootless](https://docs.docker.com/engine/security/rootless/) is a way to run Docker without root privileges.
+
+[^docker-systemd]: The Docker daemon is started using a systemd user service.
 
 ### S3-compatible Object storage
 
@@ -99,12 +111,12 @@ if you require this functionality, please contact a WATcloud admin to get access
 
 ### GitHub Actions Runners
 
-We run a GitHub Runner farm on the Kubernetes cluster using [actions-runner-controller](https://github.com/actions/actions-runner-controller).
+We run a GitHub Runner farm on Kubernetes using [actions-runner-controller](https://github.com/actions/actions-runner-controller).
 Currently, it's enabled for the WATonomous organization. If you require this functionality, please reach out to a WATcloud admin to get access.
 
 ## Software
 
-We try to keep the machines lean. We generally refrain from installing software that make sense for rootless installation or running in
+We try to keep the machines lean and generally refrain from installing software that make sense for rootless installation or running in
 containerized environments.
 
 Examples of software that we install:
@@ -122,42 +134,46 @@ If there is a piece of software that you think should be installed on the machin
 
 ## Maintenance and Outages
 
-We try to keep the machines in the cluster up and running at all times. However, we do need to perform regular maintenance to keep the machines
-up-to-date and our services running smoothly. All scheduled maintenance will be announced in the
-[infrastructure-support repo](https://github.com/WATonomous/infrastructure-support/discussions)[^maintenance-notify]. Emergency maintenance and maintenance
-that has little effect on user experience will be announced in the `#🌩-watcloud-use` channel on Discord.
+We try to keep machines in the cluster up and running at all times. However, we need to perform regular maintenance to keep machines
+up-to-date and services running smoothly. All scheduled maintenance will be announced in
+[infrastructure-support discussions](https://github.com/WATonomous/infrastructure-support/discussions)[^maintenance-notify].
+Emergency maintenance and maintenance that has little effect on user experience will be announced in the `#🌩-watcloud-use` channel on Discord.
 
 [^maintenance-notify]: The GitHub team `@WATonomous/watcloud-compute-cluster-users` will be notified.  Please ensure that you
 [enable notifications](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications)
 to receive these notices.
 
-Sometimes, the machines in the cluster may go down unexpectedly due to hardware failures or power outages. We have a comprehensive suite of
-healthchecks and internal monitoring tools to detect these failures and notify us. However, due to the part-time nature of the student team, we may not
-be able to respond to these failures immediately. If you notice that a machine is down, please restlessly ping the WATcloud team on Discord
+Sometimes, machines in the cluster may go down unexpectedly due to hardware failures or power outages.
+We have a comprehensive suite of healthchecks and internal monitoring tools[^watcloud-observability] to detect these failures and notify us.
+However, due to the part-time nature of the student team, we may not be able to respond to these failures immediately.
+If you notice that a machine is down, please ping the WATcloud team on Discord
 (`@WATcloud` or `@WATcloud Leads`, in the `#🌩-watcloud-use` channel).
 
+[^watcloud-observability]: Please refer to the [Observability](/docs/community-docs/watcloud/observability) page to learn more about the tools we use to monitor the cluster.
+
 To see if a machine is having issues, please visit [status.watonomous.ca](https://status.watonomous.ca). The WATcloud team uses this page as
-a dashboard to monitor the health of the machines in the cluster.
+a dashboard to monitor the health of machines in the cluster.
 
 ## Usage Guidelines
 
+- Use [SLURM](./slurm) as much as possible. SLURM streamlines resource allocation. You get a dedicated environment for your job, and you don't have to worry about CPU/memory contention.
 - Be [nice](https://man7.org/linux/man-pages/man2/nice.2.html)
-  - If you have a long-running non-interactive process, please [increase its niceness](https://www.tecmint.com/set-linux-process-priority-using-nice-and-renice-commands/) so that interactive programs don't lag.
+  - If you have a long-running non-interactive process on a general-use machine, please [increase its niceness](https://www.tecmint.com/set-linux-process-priority-using-nice-and-renice-commands/) so that interactive programs don't lag.
   - Being nice is simply changing `./my_program arg1 arg2{:bash}` to `nice ./my_program arg1 arg2{:bash}`.
 - Clean up after yourself
-  - If you are using `/mnt/scratch`, please make sure to clean up your files after you are done with them.
+  - If you are using `/mnt/scratch` on a general-use machine, please make sure to clean up your files after you are done with them.
   - Please only use `/home` for small files. Writing large files to `/home` will significantly slow down the filesystem for all users.
   - `/mnt/wato-drive*` are large storage pools, but they are not infinite and can fill up quickly with today's large datasets.
     Please remove unneeded files from these directories.
-  - Please clean up your Docker images and containers regularly. `docker system prune --all{:bash}` is your friend.
+  - When using Docker on general-use machines, please clean up your Docker images and containers regularly. `docker system prune --all{:bash}` is your friend.
 
 ## Troubleshooting
 
-This section contains some common issues that users may encounter when using the machines in the cluster and their solutions. If you encounter an issue that is not listed here, please [reach out](./support-resources).
+This section contains some common issues that users may encounter when using machines in the cluster and their solutions. If you encounter an issue that is not listed here, please [reach out](./support-resources).
 
 ### Permission denied while trying to connect to the Docker daemon
 
-You may encounter this error when trying to run Docker commands:
+You may encounter this error when trying to run Docker commands on general-use machines:
 
 ```
 > docker ps
@@ -176,7 +192,7 @@ Remember to restart your shell or source the rc file after making the change.
 
 ### Disk quota exceeded when running Docker commands
 
-You may encounter the following error when running Docker commands:
+You may encounter the following error when running Docker commands on general-use machines:
 
 ```
 > docker pull hello-world
@@ -185,7 +201,7 @@ open /var/lib/cluster/users/$UID/docker/tmp/GetImageBlob3112047691: disk quota e
 ```
 
 This means that you have exceeded your allocated storage quota[^quota-more-info].
-Here are some commands[^docker-prune] you can use to free up disk space:
+Here are some commands you can use to free up disk space[^docker-prune]:
 
 ```bash
 # remove dangling images (images without tags)
@@ -210,7 +226,7 @@ docker system prune --volumes --all
 
 ### Cannot connect to the Docker daemon
 
-You may encounter this error when trying to run Docker commands:
+You may encounter this error when trying to run Docker commands on general-use machines:
 
 ```
 > docker ps
