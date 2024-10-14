@@ -8,6 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # CONFIG
 if len(sys.argv) < 2:
@@ -47,38 +48,37 @@ def get_xpath(element):
     parts.reverse()
     return '/' + '/'.join(parts)
 
-def crawl_and_fetch_links(url, visited, internal_links, external_links):
-    """Recursively fetch links from the given URL, separating internal and external links."""
-    try:
-        response = requests.get(url)
-    except requests.RequestException as e:
-        print(f"Request for {url} failed: {e}")
-        global fail_build 
-        fail_build = True
-        return
-
-    soup = BeautifulSoup(response.text, 'html.parser')
-    for a in soup.find_all('a', href=True):
-        link = urljoin(url, a.get('href'))
-        if link not in visited:
-            visited.add(link)
-            xpath = get_xpath(a)
-            if is_internal_url(link):
-                link = convert_deployed_domain_to_base(link)
-                internal_links.add((url, link, xpath))
-                # print(f"Found internal link: {link} from url: {url} at xpath path: {xpath}")
-                link_without_fragment = urlparse(link)._replace(fragment='').geturl()
-                crawl_and_fetch_links(link_without_fragment, visited, internal_links, external_links)
-            else:
-                external_links.add(link)
-
-def crawl_and_fetch_links_wrapper(url):
+def crawl_and_fetch_links(url):
     """Wrapper function for crawl_and_fetch_links."""
-    visited_links = set()
+    visited = set()
     internal_links_tuples = set() # (source, destination, xpath)
     external_links = set()
-    crawl_and_fetch_links(url, visited_links, internal_links_tuples, external_links)
-    return internal_links_tuples, external_links
+    def crawl(url):
+        """Recursively fetch links from the given URL, separating internal and external links."""
+        try:
+            response = requests.get(url)
+        except requests.RequestException as e:
+            print(f"Request for {url} failed: {e}")
+            global fail_build 
+            fail_build = True
+            return
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for a in soup.find_all('a', href=True):
+            link = urljoin(url, a.get('href'))
+            if link not in visited:
+                visited.add(link)
+                xpath = get_xpath(a)
+                if is_internal_url(link):
+                    link = convert_deployed_domain_to_base(link)
+                    internal_links_tuples.add((url, link, xpath))
+                    # print(f"Found internal link: {link} from url: {url} at xpath path: {xpath}")
+                    link_without_fragment = urlparse(link)._replace(fragment='').geturl()
+                    crawl(link_without_fragment)
+                else:
+                    external_links.add(link)
+        return internal_links_tuples, external_links
+    return crawl(url)
 
 def get_response_code(full_url) -> int:
     """Check if a URL, including its fragment, is valid. 
@@ -113,34 +113,62 @@ def link_has_fragment(full_url) -> bool:
     return urlparse(full_url).fragment != ''
 
 def validate_internal_links(internal_links_tuples):
-    """Check if internal links are valid."""
+    """Check if internal links are valid in parallel."""
     invalid_links = []
-    for link in internal_links_tuples:
+
+    def check_link(link):
+        """Check if the link is valid."""
         _, destination, _ = link
         status_code = get_response_code(destination)
-        if status_code != 200:
-            invalid_links.append([link, status_code])
+        return (link, status_code) if status_code != 200 else None
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(check_link, link) for link in internal_links_tuples]
+        for future in as_completed(futures):
+            result = future.result()
+            if result:
+                invalid_links.append(result)
+
     return invalid_links
 
 def validate_internal_link_fragments(internal_links_tuples):
-    """Check if internal link fragments are valid."""
+    """Check if internal link fragments are valid in parallel."""
     invalid_fragment_links = []
-    for link in internal_links_tuples:
+
+    def check_fragment(link):
+        """Check if the fragment of the link is valid."""
         _, destination, _ = link
         if link_has_fragment(destination):
             if not check_fragment_validity(destination):
-                invalid_fragment_links.append(link)
+                return link
+        return None
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(check_fragment, link) for link in internal_links_tuples]
+        for future in as_completed(futures):
+            result = future.result()
+            if result:
+                invalid_fragment_links.append(result)
+
     return invalid_fragment_links
 
 if __name__ == '__main__':
     print("Collecting links...")
-    internal_links_tuples, external_links = crawl_and_fetch_links_wrapper(BASE_URL)
+    internal_links_tuples, external_links = crawl_and_fetch_links(BASE_URL)
     print(f"Found {len(internal_links_tuples)} internal links")
     print(f"Found {len(external_links)} external links")
-    invalid_internal_links = validate_internal_links(internal_links_tuples) 
-    invalid_fragment_links = validate_internal_link_fragments(internal_links_tuples)
 
-    if len(invalid_internal_links) == 0 and len(invalid_fragment_links) == 0:
+    # Run the validation in parallel
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        validate_internal_links_future = executor.submit(validate_internal_links, internal_links_tuples)
+        validate_internal_fragments_future = executor.submit(validate_internal_link_fragments, internal_links_tuples)
+
+        # Wait for both validations to complete
+        invalid_internal_links = validate_internal_links_future.result()
+        invalid_fragment_links = validate_internal_fragments_future.result()
+
+    # Print the results
+    if len(invalid_internal_links) == 0 and len(invalid_fragment_links) == 0 and not fail_build:
         print(f"All {len(internal_links_tuples)} internal links are valid.")
         sys.exit(0) # Exit with success
 
