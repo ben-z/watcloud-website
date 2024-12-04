@@ -13,6 +13,7 @@ import { Link, useConfig } from "nextra-theme-docs";
 import React, { Fragment } from 'react';
 import { SubscribeDialog } from './blog';
 import Picture from './picture';
+import { SocialLinks } from './ui/social-links';
 
 // Reference for styling: https://github.com/vercel/turbo/blob/22585c9dcc23eb010ab01f177394358af03210d7/docs/pages/blog/turbo-1-10-0.mdx
 
@@ -49,38 +50,9 @@ export function Avatar({ username }: { username: string }) {
             <dl className="ml-2 text-sm font-medium leading-4 text-left whitespace-no-wrap">
                 <dt className="sr-only">Name</dt>
                 <dd className="text-gray-800 dark:text-slate-50">{profile.watcloud_public_profile.full_name}</dd>
-                {profile.watcloud_public_profile.links && profile.watcloud_public_profile.links.map((link: string) => {
-                    const iconSize = 16;
-                    let icon = <LinkIcon size={iconSize} />;
-                    let sr = "link";
-                    if (link.startsWith("mailto:")) {
-                        icon = <MailIcon size={iconSize} />;
-                        sr = "email";
-                    } else if (link.startsWith("https://github.com")) {
-                        icon = <GithubIcon size={iconSize} />;
-                        sr = "github";
-                    } else if (link.startsWith("https://linkedin.com")) {
-                        icon = <LinkedinIcon size={iconSize} />;
-                        sr = "linkedin";
-                    } else if (link.startsWith("https://twitter.com") || link.startsWith("https://x.com")) {
-                        icon = <XIcon size={iconSize} />;
-                        sr = "twitter";
-                    }
-                    return (
-                        <Fragment key={link}>
-                            <dt className="sr-only">{sr}</dt>
-                            <dd className="inline-block">
-                                <Link
-                                    className="text-xs hover:text-gray-900 dark:hover:text-white"
-                                    href={link}
-                                    target="_blank"
-                                >
-                                    {icon}
-                                </Link>
-                            </dd>
-                        </Fragment>
-                    )
-                })}
+                {profile.watcloud_public_profile.links && (
+                    <SocialLinks links={profile.watcloud_public_profile.links} />
+                )}
             </dl>
         </div>
     );
