@@ -47,7 +47,12 @@ def generate_network_graph():
         G.add_node(network["name"], type="network", display_name=f"{network['name'].capitalize()} Network")
 
     for node in chain(login_nodes, bastion_nodes):
-        G.add_node(node["name"], type="host")
+        if node in bastion_nodes:
+            priority = 10 # prefer using bastion nodes
+        else:
+            priority = 5
+
+        G.add_node(node["name"], type="host", priority=priority)
 
         for nn in node["networks"]:
             is_entrypoint = nn["is_accessible_from_internet"]
@@ -120,6 +125,13 @@ def generate_ssh_markdown(hostnames):
         ```
     """).strip()
 
+def path_sort_key(G, path: list[str]):
+    """
+    This function is used to generate a sort key for a path in the network graph.
+    
+    We prefer shorter paths, and paths that go through nodes with higher priority.
+    """
+    return (len(path), ) + tuple(-G.nodes[n].get("priority", 0) for n in path)
 
 def generate_ssh_info():
     G = generate_network_graph()
@@ -138,14 +150,16 @@ def generate_ssh_info():
     ssh_info = {}
     for n, paths in shortest_paths.items():
         ssh_info[n] = {"paths": []}
-        for path in paths:
+        sorted_paths = sorted(paths, key=lambda p: path_sort_key(G, p))
+        for path in sorted_paths:
             assert (
-                len(path) <= 4
-            ), f"Expected at most 4 path nodes (2 hops), got {len(path)}: {path}"
+                len(path) <= 6 # _entrypoint -> host -> network -> host -> network -> host
+            ), f"Expected at most 6 path nodes (4 hops, including networks), got {len(path)}: {path}"
 
             instructions = []
             ssh_host_chain = []
 
+            assert path[0] == "_entrypoint", f"Expected path to start at _entrypoint, got {path[0]}"
             for edge in zip(path, path[1:]):
                 _source, target = edge
 
@@ -171,7 +185,7 @@ def generate_ssh_info():
             ssh_info[n]["paths"].append(
                 {
                     "hops": [
-                        G.nodes[n].get("display_name", n) for n in path if G.nodes[n]["type"] in ["host", "service", "network"]
+                        G.nodes[n].get("display_name", n) for n in path if G.nodes[n]["type"] in ["host", "service"]
                     ],
                     "instructions": instructions,
                 }

@@ -1,4 +1,13 @@
+import { Callout } from 'nextra/components'
+
 # Firewall
+
+<Callout type="warning">
+On 2024-12-18, the university requested that we move bastion to behind the firewall due to general security concerns.
+This means that users without access to the UWaterloo campus or VPN will no longer be able to access the cluster.
+We are working with the university to find a solution to this problem.
+In the meantime, materials regarding accessing the bastion host from off-campus are invalid.
+</Callout>
 
 The WATcloud compute cluster is housed at the University of Waterloo. All machines in the cluster are behind the University's firewall.
 In order to connect to the cluster, you must be on the campus network, connected to the University's [VPN][uw-vpn], or use a
