@@ -116,7 +116,7 @@ def check_link(url: str, page: str) -> ExternalLink:
 
     except requests.exceptions.Timeout:
         return ExternalLink(True, page, url, -1, "Timeout")
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException as e:
         # Any error like connection issues are treated as broken links
         return ExternalLink(True, page, url, -1, f'Request exception: {str(e)}')
 
