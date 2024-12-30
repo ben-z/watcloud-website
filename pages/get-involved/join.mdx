@@ -47,6 +47,24 @@ import { Callout } from 'nextra/components'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckSquareIcon } from "lucide-react"
 
+
+### Automated Power Outage Notification System
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/3371 */}
+
+Create a system to automate notifications for power outages impacting our server room (CPH, 3rd floor).
+The system should monitor the PlantOps [Service Interruptions page](https://plantops.uwaterloo.ca/service-interruptions/) to detect relevant updates and notify cluster users as needed.
+Notifications should include the date, time, and expected duration of the outage.
+We will also add additional information to the notification after the MVP, such as the impact on the cluster and any actions users should take.
+Here's [a list of historical announcements](https://github.com/WATonomous/infrastructure-support/discussions).
+
+#### Requirements
+- The tool should process historical outage data to demonstrate sufficiently low false positive and false negative rates.
+- Inputs to the tool can be the website or any equivalent data source (e.g., email). The tool is responsible for parsing the natural language and generating announcements when necessary.
+
+The deployment of this tool (mechanism to send notifications) can be done with the WATcloud team when the tool is ready for deployment.
+
+
 ### WATcloud CLI
 
 {/* Internal reference: https://github.com/WATonomous/infra-config/issues/3003 */}
@@ -75,17 +93,6 @@ This tool should detect capitalization issues, such as those outlined in the [gu
 Additionally, it would be nice if this tool can check for common grammar mistakes, such as subject-verb agreement, punctuation, and sentence structure.
 This tool can be run as a part of our CI/CD pipeline and should be used to check all documentation and, optionally, code comments.
 
-### Broken External Link Detector
-
-{/* Internal reference: https://github.com/WATonomous/infra-config/issues/2837 */}
-
-In [broken internal link detector](#broken-internal-link-detector), we implemented a tool that can detect broken internal links in our website. We would like to extend this tool/develop a new tool that can detect broken external links.
-
-Special considerations:
-- What happens if the external link is down temporarily? We have no control over how long the link will be down.
-- How do we handle links that require authentication? For example, on some member-facing pages, we have links to private GitHub repos. These links will return a 404 if the user is not authenticated. Should we simply whitelist these links, or is there a better way to handle them?
-
-We don't know the answers to these questions, and we'd love to hear your thoughts!
 
 ### Open Source Tickets
 
@@ -121,6 +128,30 @@ We use Cloudflare as our DNS provider. Cloudflare was generous enough to give us
 
 [^assume-round-robin]: We are assuming that there's perfect DNS round-robin or random selection.
 [^similar-reliability]: It's slightly less reliable than Cloudflare's Zero-Downtime Failover, since there's a delay between when the host goes down and when the DNS record is removed. However, this is still much better than the current situation, where the DNS record of a downed host is never removed.
+
+
+### Broken External Link Detector
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/2837 */}
+
+
+<Alert variant="success" className="mt-6">
+  <CheckSquareIcon className='h-5 w-5'/>
+  <AlertTitle>Completed</AlertTitle>
+  <AlertDescription>
+    This project has been completed and the initial version is available [here](https://github.com/WATonomous/watcloud-website/commit/ec049baa33ea4e5b9d6820941db07c905c7b3af4)
+    Please don't hesitate to reach out if you have any comments or suggestions!
+  </AlertDescription>
+</Alert>
+
+In [broken internal link detector](#broken-internal-link-detector), we implemented a tool that can detect broken internal links in our website. We would like to extend this tool/develop a new tool that can detect broken external links.
+
+Special considerations:
+- What happens if the external link is down temporarily? We have no control over how long the link will be down.
+- How do we handle links that require authentication? For example, on some member-facing pages, we have links to private GitHub repos. These links will return a 404 if the user is not authenticated. Should we simply whitelist these links, or is there a better way to handle them?
+
+We don't know the answers to these questions, and we'd love to hear your thoughts!
+
 
 ### Terraform Provider Rate Limiting/Retry Mechanism
 
