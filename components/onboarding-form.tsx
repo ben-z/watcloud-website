@@ -1,5 +1,5 @@
 import React from "react";
-import userSchemaJSON from "@/build/fixtures/user.schema.json";
+import userSchemaJSON from "@/build/fixtures/user.schema.generated.json";
 import userSchemaValidate from "@/build/fixtures/user.schema.validate";
 import RJSFFields from "@/components/rjsf-fields";
 import RJSFTemplates from "@/components/rjsf-templates";

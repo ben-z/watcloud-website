@@ -61,7 +61,7 @@ if [ -n "$__fetch_from" ]; then
     wget --no-verbose -O "$PROJECT_DIR/build/fixtures/ssh-info.json" "$__fetch_from/ssh-info.json"
     wget --no-verbose -O "$PROJECT_DIR/build/fixtures/website-config.json" "$__fetch_from/website-config.json"
     wget --no-verbose -O "$PROJECT_DIR/build/fixtures/affiliation.schema.json" "$__fetch_from/affiliation.schema.json"
-    wget --no-verbose -O "$PROJECT_DIR/build/fixtures/user.schema.json" "$__fetch_from/user.schema.json"
+    wget --no-verbose -O "$PROJECT_DIR/build/fixtures/user.schema.generated.json" "$__fetch_from/user.schema.generated.json"
     wget --no-verbose -O "$PROJECT_DIR/build/fixtures/affiliation-info.json" "$__fetch_from/affiliation-info.json"
     wget --no-verbose -O "$PROJECT_DIR/build/fixtures/user-profiles.json" "$__fetch_from/user-profiles.json"
 else
@@ -73,7 +73,7 @@ else
     python3 "$SCRIPT_DIR/generate-ssh-info.py" "$PROJECT_DIR/build/fixtures"
     python3 "$SCRIPT_DIR/generate-website-config.py" "$PROJECT_DIR/../outputs" "$PROJECT_DIR/build/fixtures"
     cp "$PROJECT_DIR/../directory/affiliations/affiliation.schema.json" "$PROJECT_DIR/build/fixtures"
-    cp "$PROJECT_DIR/../outputs/directory/users/user.schema.json" "$PROJECT_DIR/build/fixtures"
+    cp "$PROJECT_DIR/../outputs/directory/users/user.schema.generated.json" "$PROJECT_DIR/build/fixtures"
     python3 "$SCRIPT_DIR/generate-affiliation-info.py" "$PROJECT_DIR/build/fixtures"
     python3 "$SCRIPT_DIR/generate-user-profiles.py" > "$PROJECT_DIR/build/fixtures/user-profiles.json"
 fi
@@ -88,7 +88,7 @@ echo "Generating fixture types..."
 
 echo "Generating mdx files from data..."
 python3 "$SCRIPT_DIR/generate-mdx-strings.py" json-to-mdx "$PROJECT_DIR/build/fixtures/ssh-info.json" "$PROJECT_DIR/build/fixtures/ssh-info-strings"
-python3 "$SCRIPT_DIR/generate-mdx-strings.py" json-to-mdx "$PROJECT_DIR/build/fixtures/user.schema.json" "$PROJECT_DIR/build/fixtures/user-schema-strings"
+python3 "$SCRIPT_DIR/generate-mdx-strings.py" json-to-mdx "$PROJECT_DIR/build/fixtures/user.schema.generated.json" "$PROJECT_DIR/build/fixtures/user-schema-strings"
 
 echo "Compiling JSON schema validators..."
 node "$PROJECT_DIR/scripts/compile-json-schema-validators.js" "$PROJECT_DIR/build/fixtures"

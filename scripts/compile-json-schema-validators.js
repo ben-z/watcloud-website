@@ -36,7 +36,7 @@ compileSchemaValidators(
   options
 );
 
-const userSchemaPath = path.resolve(path.join(inputDir, "user.schema.json"));
+const userSchemaPath = path.resolve(path.join(inputDir, "user.schema.generated.json"));
 const userSchemaValidatorPath = path.resolve(
   path.join(inputDir, "user.schema.validate.js")
 );
