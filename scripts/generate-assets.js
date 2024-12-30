@@ -101,7 +101,9 @@ async function processImage(image, preprocessSteps = []) {
         if (sha256Hash !== imageURI.sha256) {
             throw new Error(`SHA-256 hash mismatch for "${image.name}"! Expected ${imageURI.sha256}, got ${sha256Hash}`);
         }
-        await fs.promises.writeFile(originalPath, Buffer.from(buffer));
+        // Perform an atomic write to prevent partial files
+        await fs.promises.writeFile(originalPath + ".partial", Buffer.from(buffer));
+        await fs.promises.rename(originalPath + ".partial", originalPath);
     }
 
     let sharpImage = sharp(originalPath);
@@ -145,13 +147,16 @@ async function processImage(image, preprocessSteps = []) {
     const jpgCacheName = `${image.name}-${slugify(JSON.stringify(jpgOptions), { lower: true, strict: true })}.jpg`;
 
     if (!fs.existsSync(path.join(cacheDir, avifCacheName))) {
-        await sharpImage.avif(avifOptions).toFile(path.join(cacheDir, avifCacheName));
+        await sharpImage.avif(avifOptions).toFile(path.join(cacheDir, avifCacheName + ".partial"));
+        await fs.promises.rename(path.join(cacheDir, avifCacheName + ".partial"), path.join(cacheDir, avifCacheName));
     }
     if (!fs.existsSync(path.join(cacheDir, webpCacheName))) {
-        await sharpImage.webp(webpOptions).toFile(path.join(cacheDir, webpCacheName));
+        await sharpImage.webp(webpOptions).toFile(path.join(cacheDir, webpCacheName + ".partial"));
+        await fs.promises.rename(path.join(cacheDir, webpCacheName + ".partial"), path.join(cacheDir, webpCacheName));
     }
     if (!fs.existsSync(path.join(cacheDir, jpgCacheName))) {
-        await sharpImage.jpeg(jpgOptions).toFile(path.join(cacheDir, jpgCacheName));
+        await sharpImage.jpeg(jpgOptions).toFile(path.join(cacheDir, jpgCacheName + ".partial"));
+        await fs.promises.rename(path.join(cacheDir, jpgCacheName + ".partial"), path.join(cacheDir, jpgCacheName));
     }
 
     await Promise.all([
