@@ -10,7 +10,7 @@ of the base URL
 
 from curl_cffi import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urldefrag
+from urllib.parse import urljoin, urldefrag, urlparse
 import sys
 
 # Broken links that match these exactly will be ignored.
@@ -26,23 +26,22 @@ WHITELISTED_PREFIXES = [
     "https://jira.watonomous.ca"
 ]
 
-# These will not be treated as urls at all (neither internal nor external)
-IGNORE_LINK_PREFIXES = [
-    "mailto"
+# These are the URL schemes that are treated as links (internal and external)
+SCHEMES = [
+    "",
+    "https",
+    "http"
 ]
 
 
 def clean_url(url):
-    res = url.replace("http://", "")
-    res = res.replace("https://", "")
-    res = res.replace("www.", "")
-    res = res.rstrip('/')
-    res = res.lower()
-    return res
+    parsed = urlparse(url)
+    return str(parsed.hostname).lower() + parsed.path.lower()
 
 
 CLEANED_WHITELISTED_URLS = [clean_url(url) for url in WHITELISTED_URLS]
 CLEANED_WHITELISTED_PREFIXES = [clean_url(url) for url in WHITELISTED_PREFIXES]
+
 
 if len(sys.argv) < 2:
     print(f"Usage: python3 {__file__} <BASE_URL>")
@@ -80,9 +79,10 @@ def is_external_url(url):
     return not url.startswith(BASE_URL.rstrip("/"))
 
 
-def check_link(url: str, page: str) -> ExternalLink:
+def check_link(url: str, page: str, attempt: int = 1) -> ExternalLink:
     print(f"Checking link {url}")
     print(f"    on page {page}")
+    print(f"    attempt {attempt}")
     try:
         request_response = requests.get(url, allow_redirects=True,
                                         impersonate="safari", timeout=10)
@@ -112,12 +112,19 @@ def check_link(url: str, page: str) -> ExternalLink:
             err_str = "Unauthorized redirect (likely)"
         else:
             err_str = "Unspecified error"
+
+        if attempt < 3:
+            return check_link(url, page, attempt + 1)
         return ExternalLink(True, page, url, request_code, err_str)
 
     except requests.exceptions.Timeout:
+        if attempt < 3:
+            return check_link(url, page, attempt + 1)
         return ExternalLink(True, page, url, -1, "Timeout")
     except requests.exceptions.RequestException as e:
         # Any error like connection issues are treated as broken links
+        if attempt < 3:
+            return check_link(url, page, attempt + 1)
         return ExternalLink(True, page, url, -1, f'Request exception: {str(e)}')
 
 
@@ -129,7 +136,7 @@ def get_links_on_page(url):
 
         # Extract all anchor tags with href attributes
         all_links = [a.get('href') for a in soup.find_all('a', href=True)]
-        filtered_links = [url for url in all_links if url not in IGNORE_LINK_PREFIXES]
+        filtered_links = [url for url in all_links if urlparse(url).scheme in SCHEMES]
 
         # Join relative URLs with the base URL to form complete links
         return [urljoin(url, link) for link in filtered_links]
