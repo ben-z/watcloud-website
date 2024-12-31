@@ -35,15 +35,17 @@ import { ariaDescribedByIds, toPathSchema } from "@rjsf/utils";
 import { CheckedState } from "@radix-ui/react-checkbox";
 import { Code, Pre } from "nextra/components";
 import { Textarea } from "@/components/ui/textarea";
-import { debounce, deepSet, encryptUnixPassword, getObjectPaths, getValuesFromPath, isCryptFormat } from "@/lib/utils";
+import { debounce, deepSet, encryptUnixPassword, getDayjsRelative, getObjectPaths, getValuesFromPath, isCryptFormat } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { deepEquals } from "@rjsf/utils"
 import { useRouter } from "next/router";
 import { encodeURI as b64EncodeURI, decode as b64Decode } from "js-base64";
 
 export const INITIAL_FORM_DATA_QUERY_PARAM = "initialformdatab64";
+export const EXPIRES_AT_QUERY_PARAM = "expires-at";
 const FORM_STATE_KEY = "onboarding-form-state";
+
+const dayjs = getDayjsRelative();
 
 function saveFormState(obj: Record<string, any>) {
   window.sessionStorage.setItem(FORM_STATE_KEY, JSON.stringify(obj));
@@ -96,6 +98,9 @@ function postprocessFormData(data: Record<string, unknown>) {
 export default function OnboardingForm() {
   const {query, isReady} = useRouter();
   // parse initial form data from query params
+  const expiresAtFromParam = Array.isArray(query[EXPIRES_AT_QUERY_PARAM])
+    ? query[EXPIRES_AT_QUERY_PARAM][0]
+    : query[EXPIRES_AT_QUERY_PARAM];
   const initialFormDataB64FromParam = Array.isArray(query[INITIAL_FORM_DATA_QUERY_PARAM])
     ? query[INITIAL_FORM_DATA_QUERY_PARAM][0]
     : query[INITIAL_FORM_DATA_QUERY_PARAM];
@@ -136,7 +141,8 @@ export default function OnboardingForm() {
       // 1. If there's no form data from query param, use saved form data.
       // 2. If there is form data from query param, and it's the same as before, use saved form data. This allows
       //    restoring the form data after an (accidental) navigation.
-      // 3. If there is form data from query param, and it's different from before, the saved data is stale.
+      // 3. If the data from query param is expired, use saved form data.
+      // 4. If there is form data from query param, and it's different from before, the saved data is stale.
       //    Use form data from query param.
       let dataSource = "" as "sessionStorage" | "queryParam" | "";
       let initialFormData = null;
@@ -144,6 +150,10 @@ export default function OnboardingForm() {
         initialFormData = savedFormData;
         dataSource = "sessionStorage";
       } else if (initialFormDataB64FromParam === savedInitialFormDataB64FromParam) {
+        initialFormData = savedFormData;
+        dataSource = "sessionStorage";
+      } else if (expiresAtFromParam && Date.parse(expiresAtFromParam) < Date.now()) {
+        toast.warning(`The form data from the query params is too old (expired ${dayjs().to(expiresAtFromParam)}). Not using it. If you are editing an existing profile, you can request a new link using the profile editor.`, { duration: 10000 });
         initialFormData = savedFormData;
         dataSource = "sessionStorage";
       } else {
@@ -164,7 +174,7 @@ export default function OnboardingForm() {
 
       toast.error("Failed to load saved form data. Please see the browser console for more information.");
     }
-  }, [isReady, initialFormDataB64FromParam]);
+  }, [isReady, initialFormDataB64FromParam, expiresAtFromParam]);
 
   function setFormData(data: any) {
     _setFormData(data);
