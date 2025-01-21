@@ -61,7 +61,7 @@ export function ProfileEditor() {
 
       if (res.status === 200) {
         setAlertTitle("Success!");
-        setAlertDescription(`If your email address (${email}) is on file, you should receive a link to edit your profile shortly.`);
+        setAlertDescription(`If an account with the email address (${email}) exists, you will receive a link to edit your profile shortly.`);
         form.reset();
       } else {
         setAlertTitle("Error");
