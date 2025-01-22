@@ -363,11 +363,6 @@ export default function OnboardingForm() {
           showRootDescription: false,
           showAdvancedFields,
         }}
-        experimental_defaultFormStateBehavior={{
-          // Only populate required default values. This prevents the form from unnecessarily adding default values to fields.
-          // Docs: https://rjsf-team.github.io/react-jsonschema-form/docs/api-reference/form-props/#emptyobjectfields
-          emptyObjectFields: 'populateRequiredDefaults',
-        }}
       >
         <div className="mt-8 space-x-4">
           <Button type="submit">Submit</Button>
