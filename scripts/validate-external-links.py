@@ -23,7 +23,6 @@ WHITELISTED_URLS = []
 WHITELISTED_PREFIXES = [
     "https://github.com/WATonomous/infra-config",
     "https://github.com/WATonomous/infra-notes",
-    "https://jira.watonomous.ca",
     # FIXME: ceph.io is down and blocking PRs. This is a temporary workaround
     # Discussion here: https://discord.com/channels/478659303167885314/1331445846121644133
     "https://ceph.io",
