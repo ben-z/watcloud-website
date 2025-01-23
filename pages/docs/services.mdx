@@ -36,8 +36,11 @@ export function ServiceDescriptions() {
             // only list services that can be enabled/disabled
             continue;
         }
+        if (!service["$services_description"]) {
+            throw new Error(`Service ${serviceKey} is missing a "$services_description" field`);
+        }
 
-        const Description = lookupStringMDX(userSchemaStrings, service["$services_description"] || service.description);
+        const Description = lookupStringMDX(userSchemaStrings, service["$services_description"]);
 
         ret.push(
             <div key={serviceKey}>
