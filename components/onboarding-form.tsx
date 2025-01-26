@@ -35,7 +35,7 @@ import { ariaDescribedByIds, toPathSchema } from "@rjsf/utils";
 import { CheckedState } from "@radix-ui/react-checkbox";
 import { Code, Pre } from "nextra/components";
 import { Textarea } from "@/components/ui/textarea";
-import { debounce, deepSet, encryptUnixPassword, getDayjsRelative, getObjectPaths, getValuesFromPath, isCryptFormat } from "@/lib/utils";
+import { debounce, deepSet, encryptUnixPassword, getDayjsRelative, encryptBcryptPassword, getObjectPaths, getValuesFromPath, isCryptFormat, isBcryptFormat } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { useRouter } from "next/router";
@@ -68,6 +68,7 @@ function getFormState() {
 }
 
 const cryptPaths = getObjectPaths(userSchemaJSON as JSONSchema7, (property: Record<string, any>) => property["$transform"] === "crypt");
+const bcryptPaths = getObjectPaths(userSchemaJSON as JSONSchema7, (property: Record<string, any>) => property["$transform"] === "bcrypt");
 
 const validator = createPrecompiledValidator(
   userSchemaValidate,
@@ -80,7 +81,7 @@ function string_to_mdx(str: string) {
 
 function postprocessFormData(data: Record<string, unknown>) {
   for (const path of cryptPaths) {
-    for (const { value, path: actualPath } of getValuesFromPath(
+    for (const {value, path: actualPath } of getValuesFromPath(
       data,
       path
     )) {
@@ -91,7 +92,19 @@ function postprocessFormData(data: Record<string, unknown>) {
       }
     }
   }
-
+  for (const path of bcryptPaths) {
+    for (const {value, path: actualPath } of getValuesFromPath(
+      data,
+      path
+    )) {
+      // If the password is already encrypted, we don't need to do anything.
+      // Else, encrypt it.
+      if (value && !isBcryptFormat(value)) {
+        const encryptedValue = encryptBcryptPassword(value);
+        deepSet(data, actualPath, encryptedValue);
+      }
+    }
+  }
   return data;
 }
 

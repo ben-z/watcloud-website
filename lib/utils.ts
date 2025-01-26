@@ -6,6 +6,7 @@ import dayjsTimezone from "dayjs/plugin/timezone";
 import dayjsRelativeTime from "dayjs/plugin/relativeTime";
 import { JSONSchema7 } from "json-schema";
 import { sha512crypt } from 'sha512crypt-node';
+import { genSaltSync, hashSync } from "bcrypt-ts/browser";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -269,11 +270,23 @@ export function encryptUnixPassword(password: string): string {
   return sha512crypt(password, genRanHex(16));
 }
 
+export function encryptBcryptPassword(password: string): string {
+  const salt = genSaltSync(10)
+  return hashSync(password, salt);
+}
+
 export function isCryptFormat(s: string) {
   // Regular expression for crypt format
   var pattern = new RegExp(
     "^\\$([1-6a-z])\\$([a-zA-Z0-9./]+)\\$([a-zA-Z0-9./]+)$"
   );
+  var match = pattern.test(s);
+  return match;
+}
+
+export function isBcryptFormat(s: string) {
+  // Regular expression for bcrypt format
+  const pattern: RegExp = /^\$2[ayb]\$\d{2}\$[A-Za-z0-9./]{53}$/;
   var match = pattern.test(s);
   return match;
 }
