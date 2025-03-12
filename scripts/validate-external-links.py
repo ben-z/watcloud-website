@@ -87,7 +87,7 @@ def check_link(url: str, page: str, attempt: int = 1) -> ExternalLink:
     print(f"    attempt {attempt}")
     try:
         request_response = requests.get(url, allow_redirects=True,
-                                        impersonate="safari", timeout=10)
+                                        impersonate="safari", timeout=10*attempt)
 
         # Get the HTTP status code
         request_code = request_response.status_code
