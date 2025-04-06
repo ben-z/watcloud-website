@@ -107,12 +107,6 @@ A second major challenge involved the repeated pulling of our provisioner image,
 ### Previous Solution
 Originally, we created and uploaded the provisioner image to a self-hosted S3-compatible [RGW](https://docs.ceph.com/en/latest/man/8/radosgw/) store in each workflow run. When using the actions-runner-controller, this setup worked well, as each job only involves one network hop (both the job pod and the RGW pod run on Kubernetes). With Slurm, however, jobs now required at least one hop (from the Slurm node to the Kubernetes ingress), and sometimes two (in case the Kubernetes ingress pod is on a different Kubernetes node than the RGW pod). Going through the Kubernetes ingress turned out to be much slower than using the internal Kubernetes network.
 
-```mermaid
-flowchart TD
-    SLURM[SLURM Job Node] -->|1 hop| Kubernetes[Kubernetes Ingress]
-    Kubernetes Ingress -->|0 or 1 depending on pod locations| RGW[RGW Pod]
-```
-
 ### Inspiration from CERN
 Initially, we looked to use the same Apptainer solution as we had for the runner image. However, this presented a new set of challenges, namely, that the CVMFS [DUCC](https://cvmfs.readthedocs.io/en/stable/cpt-ducc.html) pipeline is used to unpack the image for use in `unpacked.cern.ch`. Since the CERN pipeline runs hourly, we looked into running the DUCC command ourselves. However, the DUCC command builds multiple sets of layers to be compatible with software like Podman and ultimately took too long (around 2 minutes for the provisioner container) for our use case. 
 
