@@ -48,6 +48,36 @@
                 "name": "doc-proxmox-primary-gpu",
                 "uri": "watcloud://v1/sha256:9b7b398205cf6508dce29f07023001baf5eebc287780d7220f50c6965da809ac?name=doc-proxmox-primary-gpu.png",
                 "optimize": true
-            }
+            },
+			{
+				"name": "blog-slurm-ci-graph-light",
+				"uri": "watcloud://v1/sha256:d8991488dddf8a2f6841d244f365d2f6c613ec26c08909526df2a372eebdccd4?name=light.png",
+				"optimize": true
+			},
+			{
+				"name": "blog-slurm-ci-graph-dark",
+				"uri" : "watcloud://v1/sha256:117315381bacf8b9175256f025190912049606b388c83ff3d62103333dd99b60?name=dark.png",
+				"optimize": true
+			},
+			{
+				"name": "blog-slurm-ci-square",
+				"uri": "watcloud://v1/sha256:5a677ebacece8bf32ddd9942393ff09deb9930411829c60abad5825f94742aab?name=square.jpg",
+				"optimize": true
+			},
+			{
+				"name": "blog-slurm-ci-wide",
+				"uri": "watcloud://v1/sha256:c0780dc206334a15c1c3d9b67ad15c6967c79f4854edb41fe2e9c8b0fb0408f6?name=wide.jpg",
+				"optimize": true
+			}, 
+			{
+				"name": "blog-slurm-ci-pipeline-light",
+				"uri": "watcloud://v1/sha256:4e16fc15144dd402e36346ca5b99f5da1ceb80958e853c00098daca8d45427de?name=provision-light.png",
+				"optimize": true
+			},
+			{
+				"name": "blog-slurm-ci-pipeline-dark",
+				"uri": "watcloud://v1/sha256:5ee571f08a854a6e3cd15731abe1199eb6cc89aea0b8180a03ee0395b6488af0?name=provision-dark.png",
+				"optimize": true
+			}
         ]
     }

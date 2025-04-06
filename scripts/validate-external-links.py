@@ -16,7 +16,9 @@ import sys
 # Broken links that match these exactly will be ignored.
 # Since these links are external, these links will not be recursed on
 # when searching for links on a page.
-WHITELISTED_URLS = []
+WHITELISTED_URLS = [
+	"https://www.linkedin.com/in/alex-boden/"
+]
 
 # Broken links that have these as a prefix will be ignored.
 # These links will also not be recursed on.
