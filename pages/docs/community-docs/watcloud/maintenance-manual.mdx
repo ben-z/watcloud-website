@@ -5,7 +5,7 @@ This manual outlines the maintenance procedures for various components of WATclo
 ## General procedure
 
 1. **Plan the maintenance**: Prepare a plan for the maintenance, including the start time, end time, and the steps to be taken during the maintenance. Identify the components and services that will be affected. Try to minimize the impact on users by using strategies like rolling updates.
-1. **Notify users**: If the maintenance will affect users, [notify them in advance](https://github.com/WATonomous/infrastructure-support/discussions). Make sure to give users plenty of time to prepare for the maintenance. In general, one week's notice is recommended.
+1. **Notify users**: If the maintenance will affect users, [notify them in advance](#maintenance-email-generator). Make sure to give users plenty of time to prepare for the maintenance. In general, one week's notice is recommended.
 1. **Perform the maintenance**: Follow the steps outlined in the maintenance plan. If the maintenance runs over the scheduled end time, notify users of the delay.
 1. **Verify the maintenance**: After the maintenance is complete, verify that all components are working as expected (including CI pipelines). If there are any issues, address them immediately. Use [observability tools](./observability) to monitor the health of the system.
 1. **Notify users**: Once the maintenance is complete, update the maintenance announcement to indicate that the maintenance is complete. If there were any issues during the maintenance, provide details on what happened and how it was resolved.
@@ -224,4 +224,11 @@ This will resume the node `tr-slurm1` (allow new jobs to run on it) and clear th
 Also remember to delete any unexpired reservations (as outlined in [Creating a reservation](#creating-a-reservation)). 
 
 
+## Maintenance Email Generator
+
+Fill out the fields below to generate a maintenance announcement email. You can copy the generated email and send it to the [mailing list](https://groups.google.com/a/watonomous.ca/g/watcloud-compute-cluster-announcements).
+
+import MaintenanceEmailGenerator from "@/components/maintenance-email-generator";
+
+<MaintenanceEmailGenerator />
 
