@@ -97,7 +97,7 @@ const themeConfig = {
         </span>
         <ul className="flex flex-wrap justify-center items-start mt-8 lg:mt-0 text-sm font-medium text-gray-500 lg:flex-nowrap dark:text-gray-400 gap-6">
           <li>
-            <Link href="https://github.com/WATonomous/infrastructure-support/discussions" className="text-inherit no-underline hover:underline decoration-auto">
+            <Link href="https://groups.google.com/a/watonomous.ca/g/watcloud-compute-cluster-announcements" className="text-inherit no-underline hover:underline decoration-auto">
               Announcements
             </Link>
           </li>
