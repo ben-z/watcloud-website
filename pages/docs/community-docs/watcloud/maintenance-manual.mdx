@@ -232,3 +232,88 @@ import MaintenanceEmailGenerator from "@/components/maintenance-email-generator"
 
 <MaintenanceEmailGenerator />
 
+
+## Troubleshooting
+
+### SLURM `Invalid user id` when creating a reservation
+
+If you get `Error creating the reservation: Invalid user id` when creating a reservation, it may mean that you don't have sufficient permissions to create a reservation. You can try running the command with `sudo`. For example:
+
+```
+> sudo $(which scontrol) create reservation starttime=2025-04-27T19:00:00 duration=120 user=root flags=maint nodes=thor-slurm1
+Reservation created: root_12
+```
+
+### SLURM `Requested nodes are busy` when creating a reservation
+
+If you get `Error creating the reservation: Requested nodes are busy` when creating a reservation, it means that the nodes you are trying to reserve are already in use. E.g. there are jobs on the node with end time during the reservation window.
+
+```
+> scontrol create reservation starttime=2025-04-27T19:00:00 duration=120 user=root flags=maint nodes=thor-slurm1
+Error creating the reservation: Requested nodes are busy
+```
+
+You can check which jobs are running on the node with:
+
+```bash copy
+squeue --nodelist=<NODE_NAME>
+```
+
+For example:
+
+```bash
+> squeue --nodelist=thor-slurm1
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+            156143   compute slurm-sl watcloud  R       0:03      1 thor-slurm1
+            156144   compute slurm-sl watcloud  R       0:02      1 thor-slurm1
+            156133   compute slurm-sl watcloud  R       0:23      1 thor-slurm1
+```
+
+You can view the end time of a job with:
+
+```bash
+scontrol show job <JOB_ID>
+```
+
+For example:
+
+```bash {10}
+> scontrol show job 156143
+JobId=156143 JobName=slurm-slurm-runner-large-41221285582
+   UserId=watcloud-slurm-ci(1814) GroupId=watcloud-slurm-ci(1814) MCS_label=N/A
+   Priority=1116 Nice=0 Account=watonomous-watcloud QOS=normal
+   JobState=RUNNING Reason=None Dependency=(null)
+   Requeue=1 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0
+   RunTime=00:00:38 TimeLimit=00:30:00 TimeMin=N/A
+   SubmitTime=2025-04-27T05:39:27 EligibleTime=2025-04-27T05:39:27
+   AccrueTime=2025-04-27T05:39:29
+   StartTime=2025-04-27T05:39:29 EndTime=2025-04-27T06:09:29 Deadline=N/A
+   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2025-04-27T05:39:29 Scheduler=Main
+   Partition=compute AllocNode:Sid=10.1.77.47:21
+   ReqNodeList=(null) ExcNodeList=(null)
+   NodeList=thor-slurm1
+   BatchHost=thor-slurm1
+   NumNodes=1 NumCPUs=4 NumTasks=1 CPUs/Task=4 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=4,mem=8G,node=1,billing=4,gres/tmpdisk=16384
+   AllocTRES=cpu=4,mem=8G,node=1,billing=4,gres/tmpdisk=16384
+   Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=*
+   MinCPUsNode=4 MinMemoryCPU=2G MinTmpDiskNode=0
+   Features=(null) DelayBoot=00:00:00
+   OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null)
+   Command=/home/watcloud-slurm-ci/apptainer.sh
+   WorkDir=/home/watcloud-slurm-ci
+   StdErr=/var/log/slurm-ci/slurm-ci-156143.out
+   StdIn=/dev/null
+   StdOut=/var/log/slurm-ci/slurm-ci-156143.out
+   TresPerNode=gres/tmpdisk:16384
+   TresPerTask=cpu=4
+```
+
+If the job is long-running and you think it will finish before the maintenance starts, you can force create the reservation with the `ignore_jobs` flag. For example:
+
+```bash
+> scontrol create reservation starttime=2025-04-27T19:00:00 duration=120 user=root flags=maint,ignore_jobs nodes=thor-slurm1
+Reservation created: root_12
+```
+
+Before the maintenance starts, just make sure that the job is finished before proceeding.
