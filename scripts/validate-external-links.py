@@ -1,17 +1,24 @@
 """
 Purpose: Tool to detect broken external links on a website before it
-reaches production. Whitelisted URLs are ignored. Write whitelisted
-URLs in a file, one per line.
+reaches production. Whitelisted URLs are ignored. This implementation detects
+if broken external links on a website *statefully*. If a link has been UP at 
+least once in the last `GRACE_DAYS` days, the outage is ignored and considered
+temporary.
+
 Note: treats a link as external if and only if it doesn't direct to a subpage
 of the base URL
 
-"Usage: python3 validate-external-links.py <BASE_URL>"
+Usage:
+    python3 validate-external-links.py <BASE_URL> <STATE_READ_PATH> <STATE_WRITE_PATH>
 """
 
-from curl_cffi import requests
 from bs4 import BeautifulSoup
+from curl_cffi import requests
 from urllib.parse import urljoin, urldefrag, urlparse
-import sys
+from datetime import datetime, timedelta, timezone
+import json, os, sys
+
+GRACE_DAYS = 3 # Ignore link outages if they worked recently
 
 # Broken links that match these exactly will be ignored.
 # Since these links are external, these links will not be recursed on
@@ -48,12 +55,31 @@ CLEANED_WHITELISTED_URLS = [clean_url(url) for url in WHITELISTED_URLS]
 CLEANED_WHITELISTED_PREFIXES = [clean_url(url) for url in WHITELISTED_PREFIXES]
 
 
-if len(sys.argv) < 2:
-    print(f"Usage: python3 {__file__} <BASE_URL>")
+if len(sys.argv) < 4:
+    print(f"Usage: python3 {__file__} <BASE_URL> <STATE_READ_PATH> <STATE_WRITE_PATH>")
     sys.exit(1)
 
 BASE_URL = sys.argv[1]
+STATE_READ_PATH = sys.argv[2]
+STATE_WRITE_PATH = sys.argv[3]
 
+def _now() -> datetime:
+    return datetime.now(timezone.utc)
+
+def load_state(path: str) -> dict[str, datetime]:
+    try:
+        with open(path, "r") as f:
+            raw = json.load(f)
+        return {k: datetime.fromisoformat(v) for k, v in raw.items()}
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        print(f"[warn] could not load state file {path}: {e}, starting fresh")
+        return {}
+
+def save_state(state: dict[str, datetime], path: str) -> None:
+    with open(path, "w") as f:
+        json.dump({k: v.isoformat() for k, v in state.items()}, f, indent=2)
 
 class ExternalLink:
     def __init__(self, is_broken: bool, page: str,
@@ -163,6 +189,9 @@ def is_whitelisted(url):
 
 
 if __name__ == "__main__":
+    state = load_state(STATE_READ_PATH)
+    cutoff = _now() - timedelta(days=GRACE_DAYS)
+
     internal_urls = set()
     print("Recursively fetching internal pages...")
     recursively_fetch_internal_pages(internal_urls, BASE_URL)
@@ -180,16 +209,29 @@ if __name__ == "__main__":
     for external_link in external_links:
 
         if not external_link.is_broken:
+            state[external_link.dest] = _now()
             continue
 
         if is_whitelisted(external_link.dest):
             whitelist_ignores_count += 1
+            continue
+        
+        last_ok = state.get(external_link.dest)
+        if last_ok and last_ok > cutoff:
+            print(f"WARNING: ignoring outage for {external_link.dest} (last OK {last_ok.isoformat()}) which is in the last {GRACE_DAYS} days")
             continue
 
         broken_count += 1
         print(f"{external_link.code} {external_link.err_str}")
         print(f"    link {external_link.dest}")
         print(f"    on page {external_link.page}")
+
+    # Prune stale entries from the state
+    prune_cutoff = _now() - timedelta(days=GRACE_DAYS)
+    state = {k: v for k, v in state.items() if v > prune_cutoff}
+
+    print(f"Saving state to {STATE_WRITE_PATH}")
+    save_state(state, STATE_WRITE_PATH)
 
     print("DONE")
     print(f"{len(external_links)} external links in total")
