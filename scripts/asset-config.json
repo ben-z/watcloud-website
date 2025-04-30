@@ -1,83 +1,88 @@
-    {
-        "images": [
-            {
-                "name": "cloud-light",
-                "uri": "watcloud://v1/sha256:906f98c1d660a70a6b36ad14c559a9468fe7712312beba1d24650cc379a62360?name=cloud-light.avif"
-            },
-            {
-                "name": "cloud-dark",
-                "uri": "watcloud://v1/sha256:578d058bc16d5b52e93cc14f0d28ac0b4cf0a6e93b85db4a2c82a497ef43dc36?name=cloud-dark.avif"
-            },
-            {
-                "name": "robot-light",
-                "uri": "watcloud://v1/sha256:439c9475cfe2202bbdf09dd60cd604564562ad2a2900c7b1c8eb6f392b961696?name=robot-light.avif"
-            },
-            {
-                "name": "robot-dark",
-                "uri": "watcloud://v1/sha256:9490ceb060e2b58bd5235fe7351875ac7bb04791c0cdcbf35db364257e8ccd8d?name=robot-dark.avif"
-            },
-            {
-                "name": "computer-light",
-                "uri": "watcloud://v1/sha256:3453358de2456b805229ba30ebc48a74f1e9eb7c8fbf3176927c60bbf99c69cc?name=computer-light.avif"
-            },
-            {
-                "name": "computer-dark",
-                "uri": "watcloud://v1/sha256:7dac34046e20b4a5c4982d2a7940fdb313687d030b72a297adcd2a84d138e099?name=computer-dark.avif"
-            },
-            {
-                "name": "server-room-light",
-                "uri": "watcloud://v1/sha256:c3b72b5fb4c7bdff14f293782a98d7b1a21c7f2d6479cb1fa3b1b196a2179f73?name=server-room-light-min.jpg",
-                "optimize": true
-            },
-            {
-                "name": "server-room-dark",
-                "uri": "watcloud://v1/sha256:216ca4fdc626b94daaad8a63be5c1a507f82abb2b3bed1839f6d0996ac3e84d2?name=server-room-dark-min.jpg",
-                "optimize": true
-            },
-            {
-                "name": "under-the-hood-wide",
-                "uri": "watcloud://v1/sha256:5cc9868176110e693921b642ef69b43ea1d6728c822d824bb405e1fc1631b345?name=under-the-hood-wide.png",
-                "optimize": true
-            },
-            {
-                "name": "under-the-hood-square",
-                "uri": "watcloud://v1/sha256:68ee1c08c67cc5120cd46d22240be39813516037c53aaa2c27f3d5a593b776c5?name=under-the-hood-square.webp",
-                "optimize": true
-            },
-            {
-                "name": "doc-proxmox-primary-gpu",
-                "uri": "watcloud://v1/sha256:9b7b398205cf6508dce29f07023001baf5eebc287780d7220f50c6965da809ac?name=doc-proxmox-primary-gpu.png",
-                "optimize": true
-            },
-			{
-				"name": "blog-slurm-ci-graph-light",
-				"uri": "watcloud://v1/sha256:d8991488dddf8a2f6841d244f365d2f6c613ec26c08909526df2a372eebdccd4?name=light.png",
-				"optimize": true
-			},
-			{
-				"name": "blog-slurm-ci-graph-dark",
-				"uri" : "watcloud://v1/sha256:117315381bacf8b9175256f025190912049606b388c83ff3d62103333dd99b60?name=dark.png",
-				"optimize": true
-			},
-			{
-				"name": "blog-slurm-ci-square",
-				"uri": "watcloud://v1/sha256:5a677ebacece8bf32ddd9942393ff09deb9930411829c60abad5825f94742aab?name=square.jpg",
-				"optimize": true
-			},
-			{
-				"name": "blog-slurm-ci-wide",
-				"uri": "watcloud://v1/sha256:c0780dc206334a15c1c3d9b67ad15c6967c79f4854edb41fe2e9c8b0fb0408f6?name=wide.jpg",
-				"optimize": true
-			}, 
-			{
-				"name": "blog-slurm-ci-pipeline-light",
-				"uri": "watcloud://v1/sha256:4e16fc15144dd402e36346ca5b99f5da1ceb80958e853c00098daca8d45427de?name=provision-light.png",
-				"optimize": true
-			},
-			{
-				"name": "blog-slurm-ci-pipeline-dark",
-				"uri": "watcloud://v1/sha256:5ee571f08a854a6e3cd15731abe1199eb6cc89aea0b8180a03ee0395b6488af0?name=provision-dark.png",
-				"optimize": true
-			}
-        ]
-    }
+{
+    "images": [
+        {
+            "name": "cloud-light",
+            "uri": "watcloud://v1/sha256:906f98c1d660a70a6b36ad14c559a9468fe7712312beba1d24650cc379a62360?name=cloud-light.avif"
+        },
+        {
+            "name": "cloud-dark",
+            "uri": "watcloud://v1/sha256:578d058bc16d5b52e93cc14f0d28ac0b4cf0a6e93b85db4a2c82a497ef43dc36?name=cloud-dark.avif"
+        },
+        {
+            "name": "robot-light",
+            "uri": "watcloud://v1/sha256:439c9475cfe2202bbdf09dd60cd604564562ad2a2900c7b1c8eb6f392b961696?name=robot-light.avif"
+        },
+        {
+            "name": "robot-dark",
+            "uri": "watcloud://v1/sha256:9490ceb060e2b58bd5235fe7351875ac7bb04791c0cdcbf35db364257e8ccd8d?name=robot-dark.avif"
+        },
+        {
+            "name": "computer-light",
+            "uri": "watcloud://v1/sha256:3453358de2456b805229ba30ebc48a74f1e9eb7c8fbf3176927c60bbf99c69cc?name=computer-light.avif"
+        },
+        {
+            "name": "computer-dark",
+            "uri": "watcloud://v1/sha256:7dac34046e20b4a5c4982d2a7940fdb313687d030b72a297adcd2a84d138e099?name=computer-dark.avif"
+        },
+        {
+            "name": "server-room-light",
+            "uri": "watcloud://v1/sha256:c3b72b5fb4c7bdff14f293782a98d7b1a21c7f2d6479cb1fa3b1b196a2179f73?name=server-room-light-min.jpg",
+            "optimize": true
+        },
+        {
+            "name": "server-room-dark",
+            "uri": "watcloud://v1/sha256:216ca4fdc626b94daaad8a63be5c1a507f82abb2b3bed1839f6d0996ac3e84d2?name=server-room-dark-min.jpg",
+            "optimize": true
+        },
+        {
+            "name": "under-the-hood-wide",
+            "uri": "watcloud://v1/sha256:5cc9868176110e693921b642ef69b43ea1d6728c822d824bb405e1fc1631b345?name=under-the-hood-wide.png",
+            "optimize": true
+        },
+        {
+            "name": "under-the-hood-square",
+            "uri": "watcloud://v1/sha256:68ee1c08c67cc5120cd46d22240be39813516037c53aaa2c27f3d5a593b776c5?name=under-the-hood-square.webp",
+            "optimize": true
+        },
+        {
+            "name": "doc-proxmox-primary-gpu",
+            "uri": "watcloud://v1/sha256:9b7b398205cf6508dce29f07023001baf5eebc287780d7220f50c6965da809ac?name=doc-proxmox-primary-gpu.png",
+            "optimize": true
+        },
+        {
+            "name": "doc-kubernetes-cheat-sheet-k9s",
+            "uri": "watcloud://v1/sha256:1b2c797f0f07e69081a2a89924b17a017734efde1c0af34e1b45b411bf92a9ee?name=k9s.jpeg",
+            "optimize": true
+        },
+        {
+            "name": "blog-slurm-ci-graph-light",
+            "uri": "watcloud://v1/sha256:d8991488dddf8a2f6841d244f365d2f6c613ec26c08909526df2a372eebdccd4?name=light.png",
+            "optimize": true
+        },
+        {
+            "name": "blog-slurm-ci-graph-dark",
+            "uri": "watcloud://v1/sha256:117315381bacf8b9175256f025190912049606b388c83ff3d62103333dd99b60?name=dark.png",
+            "optimize": true
+        },
+        {
+            "name": "blog-slurm-ci-square",
+            "uri": "watcloud://v1/sha256:5a677ebacece8bf32ddd9942393ff09deb9930411829c60abad5825f94742aab?name=square.jpg",
+            "optimize": true
+        },
+        {
+            "name": "blog-slurm-ci-wide",
+            "uri": "watcloud://v1/sha256:c0780dc206334a15c1c3d9b67ad15c6967c79f4854edb41fe2e9c8b0fb0408f6?name=wide.jpg",
+            "optimize": true
+        },
+        {
+            "name": "blog-slurm-ci-pipeline-light",
+            "uri": "watcloud://v1/sha256:4e16fc15144dd402e36346ca5b99f5da1ceb80958e853c00098daca8d45427de?name=provision-light.png",
+            "optimize": true
+        },
+        {
+            "name": "blog-slurm-ci-pipeline-dark",
+            "uri": "watcloud://v1/sha256:5ee571f08a854a6e3cd15731abe1199eb6cc89aea0b8180a03ee0395b6488af0?name=provision-dark.png",
+            "optimize": true
+        }
+    ]
+}

@@ -1,0 +1,49 @@
+import Picture from '@/components/picture'
+import { DocKubernetesCheatSheetK9s } from '@/build/fixtures/images'
+
+# Kubernetes Cheat Sheet
+
+> **Note:**  This is an internal cheat sheet specific to WATcloud's Kubernetes set up.
+
+## When using the provisioner
+
+To run vanilla kubectl, `run.sh` will populate the `KUBECONFIG` env var so that the command knows which server to connect to and with what credentials
+
+```bash
+./kubernetes/run.sh kubectl
+```
+
+To access the azure kubernetes, simply use `./azure_kubernetes/run.sh`
+
+### Some useful commands
+List all pods in all namespaces (you can use `-A` or `--all-namespaces`)
+
+```bash
+./kubernetes/run.sh kubectl get pods -A
+```
+
+List all nodes in all namespaces
+
+```bash
+./kubernetes/run.sh kubectl get nodes -A
+```
+
+### k9s
+
+If you want to use a nice graphical interface you can use `k9s`. This is useful for learning Kubernetes because it lists all the common commands.
+
+```bash
+./kubernetes/run.sh k9s -A
+```
+
+Sample output of `k9s`:
+<Picture alt="k9s interface" image={DocKubernetesCheatSheetK9s} />
+
+You can type `:` to open the command prompt and type `help` to see all the commands.
+
+## Provisioning a project
+To provision a project, you can use the `provision.sh` script. Where `folder_name` is in `infra-config/kubernetes/*` and contains the terraform config.
+
+```bash
+./kubernetes/provision.sh folder_name
+```
