@@ -16,9 +16,10 @@ from bs4 import BeautifulSoup
 from curl_cffi import requests
 from urllib.parse import urljoin, urldefrag, urlparse
 from datetime import datetime, timedelta, timezone
-import json, os, sys
+import json, os, sys, time
 
 GRACE_DAYS = 3 # Ignore link outages if they worked recently
+BACKOFF_BASE = 10 # base (seconds) for linear or exponential backoffs
 
 # Broken links that match these exactly will be ignored.
 # Since these links are external, these links will not be recursed on
@@ -110,13 +111,23 @@ def is_external_url(url):
     return not url.startswith(BASE_URL.rstrip("/"))
 
 
+def is_number(value):
+    if value is None:
+        return False
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+
 def check_link(url: str, page: str, attempt: int = 1) -> ExternalLink:
     print(f"Checking link {url}")
     print(f"    on page {page}")
     print(f"    attempt {attempt}")
     try:
         request_response = requests.get(url, allow_redirects=True,
-                                        impersonate="safari", timeout=10*attempt)
+                                        impersonate="safari", timeout=BACKOFF_BASE*attempt)
 
         # Get the HTTP status code
         request_code = request_response.status_code
@@ -131,6 +142,13 @@ def check_link(url: str, page: str, attempt: int = 1) -> ExternalLink:
             err_str = "Forbidden"
         elif request_code == 404:
             err_str = "Page not found"
+        elif request_code == 429:
+            err_str = "Too many requests"
+            retry_after = request_response.headers.get("Retry-After")
+            backoff_seconds = BACKOFF_BASE * attempt
+            retry_duration = int(retry_after) if is_number(retry_after) else backoff_seconds
+            print(f"\tRate limit hit, retrying in {retry_duration} seconds...")
+            time.sleep(retry_duration)
         elif request_code >= 400 and request_code < 500:
             err_str = "Client error"
         elif request_code >= 500:
