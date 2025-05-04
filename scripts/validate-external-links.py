@@ -64,6 +64,10 @@ BASE_URL = sys.argv[1]
 STATE_READ_PATH = sys.argv[2]
 STATE_WRITE_PATH = sys.argv[3]
 
+print(f"INFO: Base URL: {BASE_URL}")
+print(f"INFO: State read path: {STATE_READ_PATH}")
+print(f"INFO: State write path: {STATE_WRITE_PATH}")
+
 def _now() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -71,14 +75,18 @@ def load_state(path: str) -> dict[str, datetime]:
     try:
         with open(path, "r") as f:
             raw = json.load(f)
-        return {k: datetime.fromisoformat(v) for k, v in raw.items()}
+        ret = {k: datetime.fromisoformat(v) for k, v in raw.items()}
+        print(f"INFO: Loaded {len(ret)} state objects from {path}")
+        return ret
     except FileNotFoundError:
+        print(f"WARNING: state file {path} not found, starting fresh")
         return {}
     except Exception as e:
-        print(f"[warn] could not load state file {path}: {e}, starting fresh")
+        print(f"WARNING: could not load state file {path}: {e}, starting fresh")
         return {}
 
 def save_state(state: dict[str, datetime], path: str) -> None:
+    print(f"INFO: Saving {len(state)} state objects to {path}")
     with open(path, "w") as f:
         json.dump({k: v.isoformat() for k, v in state.items()}, f, indent=2)
 
@@ -245,7 +253,7 @@ if __name__ == "__main__":
     prune_cutoff = _now() - timedelta(days=GRACE_DAYS)
     state = {k: v for k, v in state.items() if v > prune_cutoff}
 
-    print(f"Saving state to {STATE_WRITE_PATH}")
+    print(f"INFO: Saving state to {STATE_WRITE_PATH}")
     save_state(state, STATE_WRITE_PATH)
 
     print("DONE")
