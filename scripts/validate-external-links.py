@@ -223,22 +223,23 @@ if __name__ == "__main__":
     print(f"Fetched {len(internal_urls)} internal pages")
 
     print("Checking external links...")
-    external_links = []
-    for internal_url in internal_urls:
-        external_links += [check_link(link, internal_url) for link
-                           in get_links_on_page(internal_url)
-                           if is_external_url(link)]
-
-    broken_count = 0
     whitelist_ignores_count = 0
+    external_links = []
+
+    for internal_url in internal_urls:
+        for link in get_links_on_page(internal_url):
+            if is_whitelisted(link):
+                whitelist_ignores_count += 1
+                print(f"INFO: Ignoring whitelisted link {link}")
+                continue
+            if is_external_url(link):
+                external_links.append(check_link(link, internal_url))
+            
+    broken_count = 0
     for external_link in external_links:
 
         if not external_link.is_broken:
             state[external_link.dest] = _now()
-            continue
-
-        if is_whitelisted(external_link.dest):
-            whitelist_ignores_count += 1
             continue
         
         last_ok = state.get(external_link.dest)
