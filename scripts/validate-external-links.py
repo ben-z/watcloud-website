@@ -25,7 +25,7 @@ BACKOFF_BASE = 10 # base (seconds) for linear or exponential backoffs
 # Since these links are external, these links will not be recursed on
 # when searching for links on a page.
 WHITELISTED_URLS = [
-	"https://www.linkedin.com/in/alex-boden/"
+        "https://www.linkedin.com/in/alex-boden/"
 ]
 
 # Broken links that have these as a prefix will be ignored.
@@ -122,9 +122,7 @@ def is_number(value):
 
 
 def check_link(url: str, page: str, attempt: int = 1) -> ExternalLink:
-    print(f"Checking link {url}")
-    print(f"    on page {page}")
-    print(f"    attempt {attempt}")
+    print(f"Checking link {url} on page {page} (attempt {attempt})")
     try:
         request_response = requests.get(url, allow_redirects=True,
                                         impersonate="safari", timeout=BACKOFF_BASE*attempt)
@@ -163,6 +161,7 @@ def check_link(url: str, page: str, attempt: int = 1) -> ExternalLink:
             err_str = "Unspecified error"
 
         if attempt < 3:
+            print(f"WARNING: Failed to fetch {url} (attempt {attempt} of 3)")
             return check_link(url, page, attempt + 1)
         return ExternalLink(True, page, url, request_code, err_str)
 
@@ -240,9 +239,7 @@ if __name__ == "__main__":
             continue
 
         broken_count += 1
-        print(f"{external_link.code} {external_link.err_str}")
-        print(f"    link {external_link.dest}")
-        print(f"    on page {external_link.page}")
+        print(f"ERROR: Broken link to {external_link.dest} found last reporting status code {external_link.code} on {external_link.page}")
 
     # Prune stale entries from the state
     prune_cutoff = _now() - timedelta(days=GRACE_DAYS)
