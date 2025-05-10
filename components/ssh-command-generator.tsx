@@ -148,14 +148,14 @@ export function SSHCommandGenerator() {
             </div>
             <div ref={instructionsRef}>
             {
-                sshInfo[machineName].paths.map(({hops, instructions}) => (
-                    <div key={hops.join(" -> ")} className="mt-8">
+                sshInfo[machineName].paths.map(({hops, instructions}, i) => (
+                    <div key={i} className="mt-8">
                         <h4 className="text-lg font-semibold">{hops.length === 1 ? "Direct Connection" : hops.join(" → ")}</h4>
                         <ol className='list-decimal ltr:ml-6 rtl:mr-6 mt-6'>
-                            {instructions.map((instruction, i) => {
+                            {instructions.map((instruction, j) => {
                                 const MDXComponent = lookupStringMDX(sshInfoStrings, instruction)
                                 return (
-                                    <li key={i} className="my-2">
+                                    <li key={j} className="my-2">
                                         <MDXComponent />
                                     </li>
                                 )
