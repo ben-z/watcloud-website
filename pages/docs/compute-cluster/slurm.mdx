@@ -13,17 +13,12 @@ For more advanced usage beyond the basics, please refer to the [official SLURM d
 
 import { Callout } from 'nextra/components'
 
-<Callout type="info">
-WATcloud SLURM is currently in beta. If you encounter any issues, Please review the [troubleshooting](#troubleshooting) section
-or [let us know](/docs/compute-cluster/support-resources).
-</Callout>
-
 ## Terminology
 
 Before we dive into the details, let's define some common terms used in SLURM:
 
-- **SLURM Login node**: A node that users log into to submit jobs to the SLURM cluster. This is where you will interact with the SLURM cluster.
-- **SLURM Compute node**: A node that runs jobs submitted to the SLURM cluster. This is where your job will run.
+- **SLURM Login node**: A login node for submitting jobs to the SLURM cluster. This is where you will interact with the SLURM cluster.
+- **SLURM Compute node**: A compute node for running jobs submitted to the SLURM cluster.
 - **Partition**: A logical grouping of nodes in the SLURM cluster. Partitions can have different properties (e.g. different resource limits) and are used to organize resources.
 - **Job**: A unit of work submitted to the SLURM cluster. A job can be interactive or batch.
 - **Interactive job**: A job that runs interactively on a compute node. This is useful for debugging or running short tasks.
@@ -36,20 +31,15 @@ Before we dive into the details, let's define some common terms used in SLURM:
 
 ### SSH into a SLURM login node
 
-To submit jobs to the SLURM cluster, you must first SSH into one of the SLURM login nodes[^slurm-login-nodes]:
+To submit jobs to the SLURM cluster, first [SSH](./ssh) into one of the [SLURM login nodes](/machines#login-nodes).
 
 import { machineInfo } from '@/lib/data'
 
 export function SLURMLoginNodes() {
-  const slurmLoginNodes = machineInfo.machines.dev_vms.filter((machine) => machine.tags.map((tag) => tag.name).includes('SL'))
-  return <ul>{slurmLoginNodes.map((machine) => <li key={machine.name}>{machine.name}</li>)}</ul>
+  return <ul>{machineInfo.machines.slurm_login_nodes.map((machine) => <li key={machine.name}>{machine.name}</li>)}</ul>
 }
 
 <SLURMLoginNodes />
-
-Instructions on how to SSH into machines can be found [here](./ssh).
-
-[^slurm-login-nodes]: SLURM login nodes are also labelled `SL` in the [machine list](/machines#general-use-machines). These machines are subject to change. [Announcements](https://groups.google.com/a/watonomous.ca/g/watcloud-compute-cluster-announcements) will be made if changes occur.
 
 ### Interactive shell
 

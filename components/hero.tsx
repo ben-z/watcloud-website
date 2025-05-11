@@ -10,7 +10,8 @@ import { machineInfo } from '@/lib/data'
 
 const DEV_MACHINES = [
     ...machineInfo.machines.slurm_compute_nodes,
-    ...machineInfo.machines.dev_vms,
+    ...machineInfo.machines.slurm_login_nodes,
+    ...machineInfo.machines.legacy_general_use_machines,
 ]
 
 export function Hero() {

@@ -11,7 +11,7 @@ import networkx as nx
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from directory.scripts.host_utils import get_host_config, get_hosts_in_group
+from directory.scripts.host_utils import get_host_config, get_hosts_in_group, get_group_config
 
 
 def print_graph_ascii(G):
@@ -36,8 +36,13 @@ def generate_network_graph():
     host_config = get_host_config()
 
     networks = host_config["networks"]
-    login_nodes = get_hosts_in_group(host_config, "login_nodes")
-    bastion_nodes = get_hosts_in_group(host_config, "bastion_nodes")
+    slurm_login_nodes = [
+        h
+        for h in get_hosts_in_group(host_config, "slurmd_nodes")
+        if get_group_config(h, "slurmd_nodes")["slurm_role"] == "login"
+        and "legacy_general_use_machine"
+        not in (get_group_config(h, "tagged_nodes") or {}).get("tags", [])
+    ]
 
     G = nx.Graph()
 
@@ -46,11 +51,10 @@ def generate_network_graph():
     for network in networks:
         G.add_node(network["name"], type="network", display_name=f"{network['name'].capitalize()} Network")
 
-    for node in chain(login_nodes, bastion_nodes):
-        if node in bastion_nodes:
-            priority = 10 # prefer using bastion nodes
-        else:
-            priority = 5
+    for node in slurm_login_nodes:
+        # FIXME: This used to be for prioritizing bastion nodes over general use machines.
+        # Now that bastion nodes are deprecated, this is just a placeholder for future use.
+        priority = 5
 
         G.add_node(node["name"], type="host", priority=priority)
 
@@ -77,25 +81,15 @@ def generate_network_graph():
                     hostname=hostname,
                 )
 
-    G.add_node("UWaterloo VPN", type="service")
+    G.add_node("UWaterloo Network", type="service")
     G.add_edge(
-        "UWaterloo VPN",
+        "UWaterloo Network",
         "_entrypoint",
         instructions=[
-            "Connect to the [UWaterloo VPN](https://uwaterloo.atlassian.net/wiki/spaces/ISTKB/pages/262012980/Virtual+Private+Network+VPN)",
+            "Connect to the UWaterloo network (e.g. on-campus Ethernet, on-campus Eduroam Wi-Fi, or the [VPN](https://uwaterloo.atlassian.net/wiki/spaces/ISTKB/pages/262012980/Virtual+Private+Network+VPN))",
         ],
     )
-    G.add_edge("UWaterloo VPN", "university")
-
-    G.add_node("UWaterloo Campus", type="service")
-    G.add_edge(
-        "UWaterloo Campus",
-        "_entrypoint",
-        instructions=[
-            "Connect to the UWaterloo network (e.g. on-campus Ethernet or Eduroam Wi-Fi)",
-        ],
-    )
-    G.add_edge("UWaterloo Campus", "university")
+    G.add_edge("UWaterloo Network", "university")
 
     return G
 

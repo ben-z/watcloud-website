@@ -1,0 +1,151 @@
+# WATcloud Compute Cluster User Manual
+
+This document contains everything you need to know to start using the WATcloud Compute Cluster.
+
+## Announcements
+
+All compute-cluster-related announcements will be posted in the [announcements mailing list](https://groups.google.com/a/watonomous.ca/g/watcloud-compute-cluster-announcements). You are automatically subscribed to this list when you get access to the compute cluster.
+
+## Getting Access
+
+Please refer to the [Getting Access](./getting-access) page for instructions on how to get access to the compute cluster.
+
+## Cluster overview
+
+The WATcloud Compute Cluster is a collection of servers that are available for use by students and faculty at the University of Waterloo and partnering institutions.
+
+The cluster is managed by [SLURM](./slurm), a job scheduler that allocates resources to jobs on a cluster of [compute nodes](/machines#compute-nodes).
+There are a set of [login nodes](/machines#login-nodes) that can be used to submit jobs to the cluster.
+
+All nodes in the cluster are headless, meaning they do not run display servers and do not have a GUI.
+To run graphical applications, we refer users to use containerized display servers, such as [Neko](https://github.com/m1k1o/neko), [Selkies-GStreamer](https://github.com/selkies-project/selkies), or [x11docker](https://github.com/mviereck/x11docker).
+
+## Logging In
+
+After [getting access](./getting-access), you can log in to the cluster using SSH.
+Please refer to the [SSH](./ssh) page for instructions on how to log in to the cluster.
+
+## Submitting Jobs
+
+After logging in to the cluster, you can submit jobs to the cluster using SLURM.
+Please refer to the [SLURM](./slurm) page for instructions on how to submit jobs to the cluster.
+
+## Usage Guidelines
+
+The [login nodes](/machines#login-nodes) are meant for submitting jobs to the cluster and should not be used for heavy workloads. Some [quotas](./quotas) are enforced on the login nodes to prevent abuse.
+
+## Hardware
+
+All login nodes and compute nodes in the cluster are virtual machines (VMs). We use [Proxmox](https://www.proxmox.com/en/) as our hypervisor.
+Hardware specs for the VMs and the underlying bare-metal servers can be found [here](/machines).
+
+## Networking
+
+All machines in the cluster are connected to both the university network (using 10Gbps or 1Gbps Ethernet)
+and a cluster network (using 40Gbps or 10Gbps Ethernet). The IP address range for the university network is
+`129.97.0.0/16`[^uwaterloo-ip-range] and the IP address range for the cluster network is `10.0.50.0/24`.
+
+[^uwaterloo-ip-range]: The IP range for the university network can be found [here](https://uwaterloo.ca/information-systems-technology/about/organizational-structure/technology-integrated-services-tis/network-services-resources/ip-requests-and-registrations).
+
+## Storage
+
+There are two types of storage available for users: networked storage and node-local storage.
+
+### Networked Storage
+
+All login nodes and compute nodes in the cluster have access to a set of networked storage locations:
+
+**`/home` Directory**
+
+We run an SSD-backed Ceph[^ceph] cluster to provide distributed storage for machines in the cluster.
+All development machines share a common `/home` directory that is backed by the Ceph cluster.
+
+Due to the relatively expensive cost of SSDs and observations that large file transfers can slow down the filesystem for all users,
+the home directory should only be used for storing small files.
+If you need to store large files (e.g. datasets, videos, ML model checkpoints), please use one of the other storage options below.
+
+[^ceph]: [Ceph](https://ceph.io/) is a distributed storage system that provides high performance and reliability.
+
+**`/mnt/wato-drive*` Directory**
+
+We have a few HDD-backed NFS[^nfs] servers that provide large storage for machines in the cluster.
+These NASes are mounted on all development machines at the `/mnt/wato-drive*` directories.
+You can use these mounts to store large files such as datasets and ML model checkpoints.
+
+[^nfs]: [NFS](https://en.wikipedia.org/wiki/Network_File_System) stands for "Network File System" and is used to share files over a network.
+
+### Node-local Storage
+
+On compute nodes, there is a local storage pool meant for fast, temporary storage. They can be requested per-job using the [`tmpdisk` resource](./slurm#grestmpdisk).
+
+## Containerization
+
+There are various containerization options available for users. This allows users to run their workloads in a consistent environment and install dependencies without affecting the rest of the system.
+
+### Docker
+
+Unlike most HPC clusters, we provide [Docker Rootless](https://docs.docker.com/engine/security/rootless/) on compute nodes. Instructions on how to use it can be found [here](./slurm#using-docker).
+
+### Podman
+
+[Podman](https://podman.io/) is installed on all login nodes and compute nodes.
+
+### Apptainer
+
+[Apptainer](https://apptainer.org/) (formerly known as [Singularity](https://sylabs.io/singularity/)) is available via [CVMFS](./slurm#cvmfs).
+
+## Software
+
+We try to keep the machines lean and generally refrain from installing software that make sense for rootless installation or running in
+containerized environments.
+
+Examples of software that we install:
+- Docker (rootless)
+- NVIDIA Container Toolkit
+- zsh
+- various CLI tools (e.g. `vifm`, `iperf`, `moreutils`, `jq`, `ncdu`)
+
+Examples of software that we do not install:
+- conda (use [miniconda](https://docs.conda.io/en/latest/miniconda.html) instead)
+- ROS (use [Docker](https://hub.docker.com/_/ros) instead)
+- CUDA (use [Docker](https://hub.docker.com/r/nvidia/cuda) instead. Or use [CVMFS](./slurm#cvmfs) on the SLURM compute nodes.)
+
+If there is a piece of software that you think should be installed on the machines, please [reach out](./support-resources).
+
+## Quotas
+
+To keep the cluster running smoothly, we have a set of quotas that limit the amount of resources that can be used by each user.
+Please refer to the [Quotas](./quotas) page for more information.
+
+## Maintenance and Outages
+
+We try to keep machines in the cluster up and running at all times. However, we need to perform regular maintenance to keep machines
+up-to-date and services running smoothly. All scheduled maintenance will be announced in
+[announcements mailing list](https://groups.google.com/a/watonomous.ca/g/watcloud-compute-cluster-announcements).
+Emergency maintenance and maintenance that has little effect on user experience will be announced in the `#🌩-watcloud-use` channel on Discord.
+
+Sometimes, machines in the cluster may go down unexpectedly due to hardware failures or power outages.
+We have a comprehensive suite of healthchecks and internal monitoring tools[^watcloud-observability] to detect these failures and notify us.
+However, due to the part-time nature of the student team, we may not be able to respond to these failures immediately.
+If you notice that a machine is down, please ping the WATcloud team on Discord
+(`@WATcloud` or `@WATcloud Leads`, in the `#🌩-watcloud-use` channel).
+
+[^watcloud-observability]: Please refer to the [Observability](/docs/community-docs/watcloud/observability) page to learn more about the tools we use to monitor the cluster.
+
+To see if a machine is having issues, please visit [status.watonomous.ca](https://status.watonomous.ca). The WATcloud team uses this page as
+a dashboard to monitor the health of machines in the cluster.
+
+
+## Troubleshooting
+
+This section contains some common issues that users may encounter when using machines in the cluster and their solutions. If you encounter an issue that is not listed here, please [reach out](./support-resources).
+
+### Account not available
+
+The following message may appear when you attempt to log in to a general-use machine:
+
+> This account is currently not available.
+
+This message means that your account is locked.
+This can happen if your account is expired and is pending deletion.
+To re-enable your account, please reach out to your [WATcloud contact](/docs/services#watcloud-contact).

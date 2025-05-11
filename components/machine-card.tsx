@@ -167,9 +167,9 @@ export function MachineCard({
                                 <Popover>
                                     <PopoverTrigger><HelpCircle className="ml-1 mr-1 h-3 w-3 text-muted-foreground" /></PopoverTrigger>
                                     <PopoverContent side="top">
-                                        <p><Code>*.cluster.watonomous.ca</Code> hostnames resolve to internal IP addresses in the cluster. They are accessible only from within the cluster.</p>
-                                        <p><Code>*.ext.watonomous.ca</Code> hostnames resolve to external IP addresses. They are accessible from anywhere. However, they may be behind the UWaterloo firewall. To access them, you may need to use a VPN or a bastion server.</p>
-                                        <p>There may be other hostnames that resolve to this machine. For example, mesh networks may have additional hostnames.</p>
+                                        <p className="mb-2">Hostnames ending in <Code>.ext.watonomous.ca</Code> resolve to external IP addresses. They are accessible from outside the cluster.</p>
+                                        <p className="mb-2">Hostnames ending in <Code>.cluster.watonomous.ca</Code> resolve to internal IP addresses in the cluster. They are accessible only from within the cluster.</p>
+                                        <p>There may be other hostnames that resolve to this machine that are for internal use.</p>
                                     </PopoverContent>
                                 </Popover>
                             </dt>

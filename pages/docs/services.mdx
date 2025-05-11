@@ -11,15 +11,18 @@ Requests will be reviewed by your group's WATcloud contact.
 
 ### WATcloud contact
 
-A WATcloud contact is a designated person within each group (usually the group lead) who is responsible for approving access request and assisting users during the onboarding process.
-The following groups are registered with WATcloud:
+A WATcloud contact is the designated representative for each group—typically the group lead—responsible for approving access requests and supporting users during onboarding.
+
+The following groups are currently registered with WATcloud:
 
 import { affiliationInfo } from '@/lib/data'
 import { AffiliationList } from '@/components/affiliation-list'
 
 <AffiliationList affiliationInfo={affiliationInfo} />
 
-If your group is not listed or shows up as `[Legacy]`[^legacy-affiliation], please ask your group lead to [register the group][registered-affiliations] with WATcloud.
+If your group isn't listed or appears as [Legacy][^legacy-affiliation], please ask your group lead to [register the group][registered-affiliations] with WATcloud.
+
+If your group is already registered, contact your group lead to find out who your WATcloud contact is.
 
 [registered-affiliations]: /docs/registered-affiliations
 [^legacy-affiliation]: A legacy affiliation is a group that was onboarded before the current [registered affiliations][registered-affiliations] system was in place. Members of legacy affiliations can still access the compute cluster, but in order to use newer features like [SLURM](/docs/compute-cluster/slurm), the group must be registered.

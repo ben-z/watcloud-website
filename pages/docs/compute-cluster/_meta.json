@@ -2,11 +2,16 @@
     "overview": {
         "display": "hidden"
     },
+    "user-manual": "User Manual",
     "getting-access": "Getting Access",
-    "machine-usage-guide": "Machine Usage Guide",
+    "machine-usage-guide": {
+        "display": "hidden"
+    },
     "ssh": "SSH",
     "slurm": "SLURM",
-    "firewall": "Firewall",
+    "firewall": {
+        "display": "hidden"
+    },
     "quotas": "Quotas",
     "support-resources": "Support Resources"
 }

@@ -418,3 +418,15 @@ export const toBase64 = (str: string) =>
   typeof window === "undefined"
     ? Buffer.from(str).toString("base64")
     : window.btoa(str);
+
+/**
+ * Chains multiple iterables into a single iterable.
+ * @template T - The type of elements in the iterables.
+ * @param {...Iterable<T>} iterables - The iterables to chain.
+ * @returns {Iterable<T>} An iterable that yields elements from each of the input iterables in sequence.
+ */
+export function* chain<T>(...iterables: Iterable<T>[]): Iterable<T> {
+  for (const iterable of iterables) {
+    yield* iterable;
+  }
+}

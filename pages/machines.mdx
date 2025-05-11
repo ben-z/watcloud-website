@@ -5,15 +5,14 @@ import { machineInfo } from '@/lib/data'
 import { pluralizeWithCount } from '@/lib/utils'
 
 There are
-[{pluralizeWithCount(machineInfo.machines['slurm_compute_nodes'].length, "SLURM compute node")}](#slurm-compute-nodes)
-, [{pluralizeWithCount(machineInfo.machines['dev_vms'].length, "general-use machine")}](#general-use-machines)
-, and [{pluralizeWithCount(machineInfo.machines['bastions'].length, "bastion host")}](#bastion-hosts)
+[{pluralizeWithCount(machineInfo.machines['slurm_compute_nodes'].length, "SLURM compute node")}](#compute-nodes)
+and [{pluralizeWithCount(machineInfo.machines['slurm_login_nodes'].length, "SLURM login node")}](#login-nodes)
 hosted on [{pluralizeWithCount(machineInfo.machines['bare_metals'].length, "bare-metal machine")}](#bare-metal-machines)
 in the cluster.
 
-### SLURM Compute Nodes
+### Compute Nodes
 
-The following machines are used to run SLURM jobs. To use them, please follow the [SLURM](/docs/compute-cluster/slurm) guide.
+The following machines are used to run jobs. To use them, refer to the [SLURM](/docs/compute-cluster/slurm) guide for instructions on how to submit jobs.
 
 {
     <div className="items-start justify-center gap-6 rounded-lg p-8 grid md:grid-cols-2 xl:grid-cols-3">
@@ -21,19 +20,29 @@ The following machines are used to run SLURM jobs. To use them, please follow th
     </div>
 }
 
-### General-Use Machines
+### Login Nodes
 
-The following machines are available for general use. To access them, please follow the instructions in the [SSH](/docs/compute-cluster/ssh) guide.
+Use the following machines to submit jobs. To get started, follow the [SSH](/docs/compute-cluster/ssh) guide to connect, then refer to the [SLURM](/docs/compute-cluster/slurm) guide to submit your jobs.
 
 {
     <div className="items-start justify-center gap-6 rounded-lg p-8 grid md:grid-cols-2 xl:grid-cols-3">
-      { machineInfo.machines['dev_vms'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
+      { machineInfo.machines['slurm_login_nodes'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
     </div>
 }
 
-### Bastion Hosts
+### General-Use Machines (Legacy)
 
-The following machines are [bastions](/docs/compute-cluster/firewall#bastion). They can be used as [SSH jump hosts](https://wiki.gentoo.org/wiki/SSH_jump_host) to access the cluster from outside the university firewall.
+The following machines are legacy general-use machines. They will be decommissioned in the near future.
+
+{
+    <div className="items-start justify-center gap-6 rounded-lg p-8 grid md:grid-cols-2 xl:grid-cols-3">
+      { machineInfo.machines['legacy_general_use_machines'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
+    </div>
+}
+
+### Bastion Hosts (Legacy)
+
+The following machines are legacy bastion hosts. They will be decommissioned in the near future.
 
 {
     <div className="items-start justify-center gap-6 rounded-lg p-8 grid md:grid-cols-2 xl:grid-cols-3">
