@@ -9,7 +9,7 @@ import { DocKubernetesCheatSheetK9s } from '@/build/fixtures/images'
 
 To run vanilla kubectl, `run.sh` will populate the `KUBECONFIG` env var so that the command knows which server to connect to and with what credentials
 
-```bash
+```bash copy
 ./kubernetes/run.sh kubectl
 ```
 
@@ -18,13 +18,13 @@ To access the azure kubernetes, simply use `./azure_kubernetes/run.sh`
 ### Some useful commands
 List all pods in all namespaces (you can use `-A` or `--all-namespaces`)
 
-```bash
+```bash copy
 ./kubernetes/run.sh kubectl get pods -A
 ```
 
 List all nodes in all namespaces
 
-```bash
+```bash copy
 ./kubernetes/run.sh kubectl get nodes -A
 ```
 
@@ -32,7 +32,7 @@ List all nodes in all namespaces
 
 If you want to use a nice graphical interface you can use `k9s`. This is useful for learning Kubernetes because it lists all the common commands.
 
-```bash
+```bash copy
 ./kubernetes/run.sh k9s -A
 ```
 
@@ -44,6 +44,6 @@ You can type `:` to open the command prompt and type `help` to see all the comma
 ## Provisioning a project
 To provision a project, you can use the `provision.sh` script. Where `folder_name` is in `infra-config/kubernetes/*` and contains the terraform config.
 
-```bash
+```bash copy
 ./kubernetes/provision.sh folder_name
 ```
