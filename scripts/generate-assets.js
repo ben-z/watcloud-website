@@ -5,10 +5,7 @@ const sharp = require('sharp');
 const dedent = require('dedent');
 const os = require('os');
 const slugify = require('slugify');
-const pLimit = require('p-limit').default;
 const assetConfig = require("./asset-config.json");
-
-const concurrencyLimiter = pLimit(process.env.FETCH_CONCURRENCY ? parseInt(process.env.FETCH_CONCURRENCY) : 4);
 
 const USER_PROFILES_PATH = path.resolve(process.argv[2]);
 if (!USER_PROFILES_PATH) {
@@ -223,6 +220,10 @@ function generateTypescript(image_names) {
 }
 
 (async () => {
+    const pLimit = (await import('p-limit')).default;
+
+    const concurrencyLimiter = pLimit(process.env.FETCH_CONCURRENCY ? parseInt(process.env.FETCH_CONCURRENCY) : 4);
+
     // MARK: Profile Pictures
     console.log("Processing profile pictures...")
     const USER_PROFILES = require(USER_PROFILES_PATH)
