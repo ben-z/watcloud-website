@@ -13,74 +13,142 @@ const ThreeVisualization: React.FC = () => {
     // Scene setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true }); // alpha: true for transparent background
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio); // Adjust for device pixel ratio
+    renderer.setPixelRatio(window.devicePixelRatio);
     currentMount.appendChild(renderer.domElement);
 
     // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Softer ambient light
     scene.add(ambientLight);
-    const pointLight = new THREE.PointLight(0xffffff, 0.8);
-    camera.add(pointLight); // Attach light to camera
-    scene.add(camera); // Ensure camera (with light) is part of the scene
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8); // Directional light for better shading
+    directionalLight.position.set(5, 10, 7.5);
+    scene.add(directionalLight);
 
-    // Spheres and lines setup
-    const sphereGeometry = new THREE.SphereGeometry(0.3, 16, 16); // Smaller spheres
-    const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0x007bff, emissive: 0x111133 }); // Blueish, slightly emissive
-    const spheres: THREE.Mesh[] = [];
-    const lines: THREE.Line[] = [];
+    // Materials (reusable)
+    const rackMaterial = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8, roughness: 0.4 });
+    const nodeMaterialActive = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x003300, metalness: 0.5, roughness: 0.5 });
+    const nodeMaterialIdle = new THREE.MeshStandardMaterial({ color: 0x007700, emissive: 0x001100, metalness: 0.5, roughness: 0.5 });
+    const particleMaterial = new THREE.SpriteMaterial({ color: 0x00bbff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending });
 
-    const numSpheres = 7;
-    const radius = 2.5;
 
-    for (let i = 0; i < numSpheres; i++) {
-      const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-      const angle = (i / numSpheres) * Math.PI * 2;
-      const x = Math.cos(angle) * radius * (Math.random() * 0.4 + 0.8); // Add some randomness to position
-      const y = Math.sin(angle) * radius * (Math.random() * 0.4 + 0.8);
-      const z = (Math.random() - 0.5) * 2;
-      sphere.position.set(x, y, z);
-      spheres.push(sphere);
-      scene.add(sphere);
-    }
+    // Geometries (reusable)
+    const rackGeometry = new THREE.BoxGeometry(1, 2.5, 0.5);
+    const nodeGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.3); // Small boxes for nodes
+    const particleGeometry = new THREE.SphereGeometry(0.03, 8, 8); // Small spheres for particles
 
-    // Create lines between spheres
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa, transparent: true, opacity: 0.5 });
-    for (let i = 0; i < spheres.length; i++) {
-      for (let j = i + 1; j < spheres.length; j++) {
-        if (Math.random() > 0.6) { // Don't connect all spheres to keep it cleaner
-            const points = [spheres[i].position, spheres[j].position];
-            const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
-            const line = new THREE.Line(lineGeometry, lineMaterial);
-            lines.push(line);
-            scene.add(line);
+
+    const racks: THREE.Mesh[] = [];
+    const nodes: THREE.Mesh[] = [];
+    const particles: THREE.Sprite[] = []; // Using Sprites for particles now
+
+    const numRacks = 3;
+    const rackSpacing = 1.5;
+
+    // Create Racks and Nodes
+    for (let i = 0; i < numRacks; i++) {
+      const rack = new THREE.Mesh(rackGeometry, rackMaterial);
+      rack.position.set((i - (numRacks - 1) / 2) * rackSpacing, 0, 0);
+      racks.push(rack);
+      scene.add(rack);
+
+      const nodesPerRow = 5;
+      const nodesPerColumn = 8;
+      for (let r = 0; r < nodesPerRow; r++) {
+        for (let c = 0; c < nodesPerColumn; c++) {
+          const node = new THREE.Mesh(nodeGeometry, Math.random() > 0.3 ? nodeMaterialIdle : nodeMaterialActive);
+          node.position.set(
+            rack.position.x + (r - (nodesPerRow -1) / 2) * 0.22, // Distribute nodes on the rack
+            (c - (nodesPerColumn - 1) / 2) * 0.25 + 0.1, // Stack nodes vertically
+            rack.position.z + 0.2 // Place nodes slightly in front of the rack's center
+          );
+          node.userData = { baseColor: node.material === nodeMaterialActive ? 0x00ff00 : 0x007700, originalEmissive: (node.material as THREE.MeshStandardMaterial).emissive.getHex() };
+          nodes.push(node);
+          scene.add(node);
         }
       }
     }
 
-    camera.position.z = 6;
+    // Particle system
+    const numParticles = 100;
+    for (let i = 0; i < numParticles; i++) {
+        const particle = new THREE.Sprite(particleMaterial);
+        particle.position.set(
+            (Math.random() - 0.5) * numRacks * rackSpacing, // Spread across racks
+            (Math.random() - 0.5) * 3, // Vertical spread
+            (Math.random() - 0.5) * 2   // Depth spread
+        );
+        particle.userData = {
+            velocity: new THREE.Vector3(
+                (Math.random() - 0.5) * 0.01,
+                (Math.random() - 0.5) * 0.01,
+                (Math.random() - 0.5) * 0.01
+            ),
+            life: Math.random() * 2 + 1 // seconds
+        };
+        particles.push(particle);
+        scene.add(particle);
+    }
 
-    // Group for rotation
+
+    camera.position.set(0, 2, 7); // Adjusted camera position
+    camera.lookAt(0, 0, 0);
+
+    // Group for overall rotation/animation
     const group = new THREE.Group();
-    spheres.forEach(sphere => group.add(sphere));
-    lines.forEach(line => group.add(line));
+    racks.forEach(rack => group.add(rack));
+    nodes.forEach(node => group.add(node));
+    // Particles are managed separately for now, but could be added to group if desired
     scene.add(group);
+
 
     // Animation loop
     const clock = new THREE.Clock();
+    let lastBlinkTime = 0;
+
     const animate = () => {
       animationFrameId.current = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
+      const deltaTime = clock.getDelta();
 
-      // Subtle rotation for the group
-      group.rotation.y = elapsedTime * 0.1;
-      group.rotation.x = elapsedTime * 0.05;
+      // Group rotation
+      group.rotation.y = Math.sin(elapsedTime * 0.05) * 0.2; // Slower, gentler rotation
 
-      // Individual sphere pulsation (optional, can be resource intensive)
-      // spheres.forEach((sphere, index) => {
-      //   sphere.scale.setScalar(Math.sin(elapsedTime * 0.5 + index) * 0.1 + 0.9);
-      // });
+      // Node blinking
+      if (elapsedTime - lastBlinkTime > 0.2) { // Blink interval
+        nodes.forEach(node => {
+          if (Math.random() < 0.05) { // Chance to toggle state
+            const material = node.material as THREE.MeshStandardMaterial;
+            if (material.emissive.getHex() === node.userData.originalEmissive) {
+              material.emissive.setHex(0x00ff00); // Brighter emissive for "active"
+            } else {
+              material.emissive.setHex(node.userData.originalEmissive);
+            }
+          }
+        });
+        lastBlinkTime = elapsedTime;
+      }
+
+      // Particle animation
+      particles.forEach(p => {
+        p.position.addScaledVector(p.userData.velocity, deltaTime * 100); // Adjust speed with deltaTime
+        p.userData.life -= deltaTime;
+
+        if (p.userData.life <= 0) {
+            // Reset particle
+            p.position.set(
+                (Math.random() - 0.5) * numRacks * rackSpacing,
+                (Math.random() - 0.5) * 3,
+                (Math.random() - 0.5) * 2
+            );
+            p.userData.life = Math.random() * 2 + 1; // Reset life
+            p.material.opacity = 0.7; // Reset opacity
+        } else {
+            // Fade out particle towards end of life
+            p.material.opacity = Math.max(0, (p.userData.life / (Math.random() * 2 + 1)) * 0.7);
+        }
+      });
+
 
       renderer.render(scene, camera);
     };
@@ -99,9 +167,7 @@ const ThreeVisualization: React.FC = () => {
     };
 
     window.addEventListener('resize', handleResize);
-    // Initial resize call
-    handleResize();
-
+    handleResize(); // Initial call
 
     // Cleanup
     return () => {
@@ -109,19 +175,31 @@ const ThreeVisualization: React.FC = () => {
         cancelAnimationFrame(animationFrameId.current);
       }
       window.removeEventListener('resize', handleResize);
-      if (currentMount) {
-        currentMount.removeChild(renderer.domElement);
+      if (currentMount && renderer.domElement) {
+         if (currentMount.contains(renderer.domElement)) {
+            currentMount.removeChild(renderer.domElement);
+         }
       }
-      renderer.dispose();
-      sphereGeometry.dispose();
-      sphereMaterial.dispose();
-      lineMaterial.dispose();
-      lines.forEach(line => line.geometry.dispose());
-      // Dispose other geometries/materials if added
-    };
-  }, []); // Empty dependency array ensures this runs once on mount and cleans up on unmount
 
-  return <div ref={mountRef} style={{ width: '100%', height: '100%' }} />; // Ensure div takes full hero-visualization space
+      // Dispose THREE.js objects
+      renderer.dispose();
+      rackGeometry.dispose();
+      nodeGeometry.dispose();
+      particleGeometry.dispose(); // Dispose particle geometry
+      rackMaterial.dispose();
+      nodeMaterialActive.dispose();
+      nodeMaterialIdle.dispose();
+      particleMaterial.dispose(); // Dispose particle material
+
+      // Clear arrays
+      racks.length = 0;
+      nodes.length = 0;
+      particles.length = 0;
+      scene.clear(); // Clear all objects from scene
+    };
+  }, []);
+
+  return <div ref={mountRef} style={{ width: '100%', height: '100%' }} />;
 };
 
 export default ThreeVisualization;

@@ -122,7 +122,9 @@ async function processImage(image, preprocessSteps = []) {
         effort: 4, // CPU effort, between 0 (fastest) and 9 (slowest)
         chromaSubsampling: '4:2:0', // set to '4:4:4' to prevent chroma subsampling otherwise defaults to '4:2:0' chroma subsampling
     } : {};
-    const avifCacheName = `${image.name}-${slugify(JSON.stringify(avifOptions), { lower: true, strict: true })}.avif`;
+    const avifOptionsString = JSON.stringify(avifOptions);
+    const avifOptionsHash = sha256(avifOptionsString).substring(0, 16);
+    const avifCacheName = `${image.name}-${avifOptionsHash}.avif`;
     
     const webpOptions = image.optimize ? {
         quality: 50, // quality, integer 1-100
@@ -134,7 +136,9 @@ async function processImage(image, preprocessSteps = []) {
         minSize: false, // prevent use of animation key frames to minimise file size (slow)
         mixed: false, // allow mixture of lossy and lossless animation frames (slow)
     } : {};
-    const webpCacheName = `${image.name}-${slugify(JSON.stringify(webpOptions), { lower: true, strict: true })}.webp`;
+    const webpOptionsString = JSON.stringify(webpOptions);
+    const webpOptionsHash = sha256(webpOptionsString).substring(0, 16);
+    const webpCacheName = `${image.name}-${webpOptionsHash}.webp`;
     
     const jpgOptions = image.optimize ? {
         quality: 50, // quality, integer 1-100
@@ -147,7 +151,9 @@ async function processImage(image, preprocessSteps = []) {
         overshootDeringing: true, // apply overshoot deringing
         quantizationTable: 3, // quantization table to use, integer 0-8
     } : {};
-    const jpgCacheName = `${image.name}-${slugify(JSON.stringify(jpgOptions), { lower: true, strict: true })}.jpg`;
+    const jpgOptionsString = JSON.stringify(jpgOptions);
+    const jpgOptionsHash = sha256(jpgOptionsString).substring(0, 16);
+    const jpgCacheName = `${image.name}-${jpgOptionsHash}.jpg`;
 
     if (!fs.existsSync(path.join(cacheDir, avifCacheName))) {
         await sharpImage.avif(avifOptions).toFile(path.join(cacheDir, avifCacheName + ".partial"));
