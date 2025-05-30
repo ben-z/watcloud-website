@@ -5,7 +5,10 @@ const sharp = require('sharp');
 const dedent = require('dedent');
 const os = require('os');
 const slugify = require('slugify');
+const pLimit = require('p-limit').default;
 const assetConfig = require("./asset-config.json");
+
+const concurrencyLimiter = pLimit(process.env.FETCH_CONCURRENCY || 4);
 
 const USER_PROFILES_PATH = path.resolve(process.argv[2]);
 if (!USER_PROFILES_PATH) {
@@ -229,12 +232,12 @@ function generateTypescript(image_names) {
         uri: new WATcloudURI(profile.watcloud_public_profile.profile_picture)
     }));
 
-    await Promise.all(user_profile_images.map(image => processImage(image, [(sharpImage) => sharpImage.resize(200, 200)])));
+    await Promise.all(user_profile_images.map(image => concurrencyLimiter(() => processImage(image, [(sharpImage) => sharpImage.resize(200, 200)]))));
 
     // MARK: Images
     console.log("Processing images...")
     const IMAGES = assetConfig.images;
-    await Promise.all(IMAGES.map(image => processImage(image)));
+    await Promise.all(IMAGES.map(image => concurrencyLimiter(() => processImage(image))));
 
     // MARK: Generate images.ts
     const tsContent = generateTypescript([...user_profile_images, ...IMAGES].map((image) => image.name));
