@@ -1,0 +1,201 @@
+---
+title: 'Running Open Source LLMs on WATcloud'
+description: 'Set up and interact with leading open-source language models—including Qwen, Gemma, and Llama—directly on the WATcloud compute cluster. This guide walks you through reserving a GPU and launching a vLLM inference server, all tailored for the job-queued environment. Ideal for students and researchers who want hands-on experience with LLMs without cloud costs or long-term hosting.'
+title_image:
+  square: 'blog-vllm-square'
+  wide: 'blog-vllm-wide'
+  attribution: |
+    Image generated using ChatGPT 4o using the content of this blog post as a prompt.
+date: 2025-05-29
+timezone: America/Vancouver
+authors:
+  - ben
+reviewers:
+  - alexboden
+notify_subscribers: true
+hidden: false
+---
+
+import Picture from '@/components/picture'
+import {
+    BlogVllmTmux,
+} from '@/build/fixtures/images'
+
+Running your own LLM inference server is straightforward with [vLLM](https://github.com/vllm-project/vllm). This guide walks you through setting up a vLLM server in the WATcloud compute cluster.
+
+## Start an Interactive Session
+
+First, [SSH](/docs/compute-cluster/ssh) into a login node. Then submit an interactive job to a compute node. Since LLMs are memory-intensive, we will reserve a full RTX 3090 (24 GiB of VRAM).
+
+```sh copy
+srun --cpus-per-task 8 --mem 16G --gres gpu:rtx_3090:1,tmpdisk:51200 --time 1:00:00 --pty bash
+```
+
+
+## Verify GPU Access
+
+Once your session starts, confirm the GPU is available:
+
+```sh copy
+nvidia-smi
+```
+
+You should see an output like this:
+
+```
+Thu May 29 05:04:11 2025
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.183.06             Driver Version: 535.183.06   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA GeForce RTX 3090        Off | 00000000:01:00.0 Off |                  N/A |
+|  0%   23C    P8              20W / 350W |      0MiB / 24576MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+```
+
+## Set Up vLLM
+
+Create a temporary working directory, set up a Python virtual environment, and install vLLM:
+
+```sh copy
+mkdir /tmp/vllm
+cd /tmp/vllm
+python3 -m venv .venv
+source .venv/bin/activate
+pip install vllm
+```
+
+Check that vLLM installed correctly:
+
+```sh copy
+vllm --version
+```
+
+Sample output:
+
+```
+0.9.0
+```
+
+## Start tmux
+
+We will need to run multiple commands at the same time. You can do this in many ways (e.g. [`&`](https://www.gnu.org/software/bash/manual/html_node/Job-Control-Basics.html), [`nohup`](https://www.digitalocean.com/community/tutorials/nohup-command-in-linux), [`srun --overlap`](https://slurm.schedmd.com/srun.html#OPT_overlap)). In this guide, we use [tmux](https://github.com/tmux/tmux/wiki/Getting-Started) to manage multiple terminal panes.
+
+Start a tmux session:
+
+```sh copy
+tmux
+```
+
+Split the screen horizontally with `Ctrl+b` then `"`. Switch between panes with `Ctrl+b` and arrow keys.
+
+<Picture alt="tmux with 2 panes" image={BlogVllmTmux} />
+
+## Launch vLLM Server
+
+In the first pane, start the vLLM server with a small model (we use Qwen3-0.6B as an example):
+
+```sh copy
+HF_HOME=/tmp/hf_home vllm serve Qwen/Qwen3-0.6B --distributed-executor-backend ray --port $(($(id -u) * 20 + 5))
+```
+
+* `HF_HOME=/tmp/hf_home` stores model weights in `/tmp` to avoid cluttering your home directory and hitting [storage quotas](/docs/compute-cluster/quotas#disk-quotas).
+* `--distributed-executor-backend ray` uses the [Ray](https://github.com/ray-project/ray) backend, which is typically much faster than the default.
+* `--port $(($(id -u) * 20 + 5))` picks a port unique to each user to prevent conflicts.
+
+When the server is ready, you'll see logs that look like:
+
+```
+INFO 05-29 05:36:42 [api_server.py:1336] Starting vLLM API server on http://0.0.0.0:30145
+...
+INFO:     Started server process [1043336]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+```
+
+## Test with vLLM Chat Client
+
+In the second pane, run:
+
+```sh copy
+vllm chat --url http://localhost:$(($(id -u) * 20 + 5))/v1
+```
+
+You should see:
+
+```
+Using model: Qwen/Qwen3-0.6B
+Please enter a message for the chat model:
+>
+```
+
+You can now chat with the model. Try asking it a question!
+
+When you are done, exit the chat by pressing `Ctrl+d`. To stop the vLLM server, press `Ctrl+c` in the first pane.
+
+## Other Models to Try
+
+Here are a few other vLLM models that work out of the box on an RTX 3090:
+
+```sh
+# Qwen3-14B (AWQ quantized) with full context length (40960 tokens)
+# https://huggingface.co/Qwen/Qwen3-14B-AWQ
+HF_HOME=/tmp/hf_home vllm serve Qwen/Qwen3-14B-AWQ --distributed-executor-backend ray --port $(($(id -u) * 20 + 5)) --quantization awq_marlin --gpu-memory-utilization 0.85
+
+# Qwen3-14B (AWQ quantized) with reduced context length (8192 tokens), serves more concurrent requests
+# https://huggingface.co/Qwen/Qwen3-14B-AWQ
+HF_HOME=/tmp/hf_home vllm serve Qwen/Qwen3-14B-AWQ --distributed-executor-backend ray --port $(($(id -u) * 20 + 5)) --quantization awq_marlin --gpu-memory-utilization 0.85 --max-model-len 8192
+
+# Gemma-3-27B trained with quantization-aware training (QAT)
+# - Google blog post: https://developers.googleblog.com/en/gemma-3-quantized-aware-trained-state-of-the-art-ai-to-consumer-gpus/
+# - Unsloth quantized model (4-bit): https://huggingface.co/unsloth/gemma-3-27b-it-qat-bnb-4bit
+# Notes:
+# - --enforce-eager is used to disable the CUDA graph, which reduces the VRAM usage but also reduces performance.
+# - --gpu-memory-utilization 0.99 is used to increase the VRAM available for the KV cache, which allows for longer context lengths.
+pip install bitsandbytes
+HF_HOME=/tmp/hf_home vllm serve unsloth/gemma-3-27b-it-qat-bnb-4bit --distributed-executor-backend ray --port $(($(id -u) * 20 + 5)) --gpu-memory-utilization 0.99 --enforce-eager --max-model-len 16384
+
+# Gemma-3-27B (non-QAT, 4-bit quantized)
+# https://huggingface.co/ISTA-DASLab/gemma-3-27b-it-GPTQ-4b-128g
+# Notes:
+# - For unknown reasons, this model can be run with context length of 32768 tokens, which is more than the 16384 tokens of unsloth/gemma-3-27b-it-qat-bnb-4bit.
+HF_HOME=/tmp/hf_home vllm serve ISTA-DASLab/gemma-3-27b-it-GPTQ-4b-128g --distributed-executor-backend ray --port $(($(id -u) * 20 + 5)) --gpu-memory-utilization 0.99 --enforce-eager --max-model-len 32768
+
+# Llama 3.1 8B (non-quantized)
+# https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct
+# Notes:
+# - Requires HF_TOKEN and agreement to license on Hugging Face
+HF_TOKEN=<your_huggingface_token> HF_HOME=/tmp/hf_home vllm serve meta-llama/Llama-3.1-8B-Instruct --distributed-executor-backend ray --port $(($(id -u) * 20 + 5)) --max-model-len 32768
+
+# DeepSeek R1-0528 distilled to Qwen3-8B
+# https://huggingface.co/deepseek-ai/DeepSeek-R1-0528-Qwen3-8B
+HF_HOME=/tmp/hf_home vllm serve deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --distributed-executor-backend ray --port $(($(id -u) * 20 + 5)) --max-model-len 16384
+```
+
+{/* 
+
+Notes for other models:
+
+# Error: Unknown gguf model_type: gemma3_text
+# https://github.com/vllm-project/vllm/pull/14766
+# Gemma-3-27B
+# - Google GGUF model: https://huggingface.co/google/gemma-3-27b-it-qat-q4_0-gguf
+# Requires HF_TOKEN and agreement to license on Hugging Face
+HF_TOKEN=<your_huggingface_token> HF_HOME=/tmp/hf_home gguf_path=$(python -c "from huggingface_hub import hf_hub_download; print(hf_hub_download(repo_id='google/gemma-3-27b-it-qat-q4_0-gguf', filename='gemma-3-27b-it-q4_0.gguf'))")
+HF_HOME=/tmp/hf_home vllm serve "${gguf_path}" --distributed-executor-backend ray --port $(($(id -u) * 20 + 5))
+
+Other examples that we can try:
+# - https://huggingface.co/google/gemma-2-27b-it # Need to specify HF_TOKEN and agree to license. Q5 quantization should work according to https://www.reddit.com/r/LocalLLaMA/comments/1ecn06l/best_llm_to_run_on_1x_rtx_4090/
+# - llama: https://www.reddit.com/r/LocalLLaMA/comments/1fljyly/llama_31_70b_at_60_toks_on_rtx_4090_iq2_xs/
+
+*/}
+
+## Notes
+
+* Always store model weights in `/tmp` or storage locations meant for large files (e.g. `/mnt/wato-drive*`). You can learn more about the storage options available in the [compute cluster user manual](/docs/compute-cluster/user-manual#storage).
+* Quantized models (e.g., Q4, Q5, AWQ) are typically required for models with over ~10B parameters with context lengths exceeding ~4096 tokens when using a GPU with 24GiB of VRAM. To estimate the amount of VRAM needed, you can use the [VRAM Calculator](https://apxml.com/tools/vram-calculator).
+* The WATcloud compute cluster uses a job-queuing system ([Slurm](https://slurm.schedmd.com/)), so your vLLM inference server will automatically stop when the job ends. This setup is ideal for short interactive sessions or batch inference, but not for persistent, long-running servers. If you need a persistent hosted LLM endpoint, consider services offered by other groups on campus, such as the [ECE Nebula cluster](https://gitlab.uwaterloo.ca/mstachow/llm_endpoints) or the [CS Club](https://csclub.uwaterloo.ca/).

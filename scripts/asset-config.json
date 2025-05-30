@@ -83,6 +83,21 @@
             "name": "blog-slurm-ci-pipeline-dark",
             "uri": "watcloud://v1/sha256:5ee571f08a854a6e3cd15731abe1199eb6cc89aea0b8180a03ee0395b6488af0?name=provision-dark.png",
             "optimize": true
+        },
+        {
+            "name": "blog-vllm-tmux",
+            "uri": "watcloud://v1/sha256:e8e70de0b157d4749ce563564c873b39951d126aee7938c97905ee9bda9478fa?name=Screenshot%202025-05-29%20at%2011.11.09%E2%80%AFAM.png",
+            "optimize": true
+        },
+        {
+            "name": "blog-vllm-wide",
+            "uri": "watcloud://v1/sha256:d136ba7c8733a39e3fbbe68bc7597a6194fb0ae94e7073bfcfd216ddeb5f38bb?name=2025-05-30%2005%2028_51%20openOutpaint%20image.png",
+            "optimize": true
+        },
+        {
+            "name": "blog-vllm-square",
+            "uri": "watcloud://v1/sha256:c6ab96a63d928391a73c9e7ce9eb5f770116215f3f117d41f6396a86ccc56304?name=ChatGPT%20Image%20May%2029%2C%202025%2C%2011_20_07%20AM.png",
+            "optimize": true
         }
     ]
 }
