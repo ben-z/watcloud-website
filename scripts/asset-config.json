@@ -66,7 +66,7 @@
         },
         {
             "name": "blog-slurm-ci-square",
-            "uri": "watcloud://v1/sha256:5a677ebacece8bf32ddd9942393ff09deb9930411829c60abad5825f94742aab?name=square.jpg",
+            "uri": "watcloud://v1/sha256:52b4d271c4beafdd746f48b5565316c4711ac988ca72f581f5ad9d7c9bcdf0e9?name=square.jpg",
             "optimize": true
         },
         {

@@ -55,55 +55,80 @@ export function BlogIndex() {
         const { date, timezone } = frontMatter
         const dateObj = date && timezone && dayjsTz(date, timezone).toDate()
 
-        let titleImageComponent;
-        if (frontMatter.title_image) {
-            // prefer square image, fallback to wide image
-            const titleImageKey = frontMatter.title_image.square || frontMatter.title_image.wide;
-            const titleImage = allImages[titleImageKey];
-            if (!titleImage) {
-                throw new Error(`Cannot find image with key: ${titleImageKey}`);
-            }
-            const titleImageAttribution = frontMatter.title_image.attribution;
-            if (!titleImageAttribution) {
-                throw new Error(`No attribution found for title_image: ${JSON.stringify(frontMatter.title_image) }`);
-            }
+        const wideImageKey = frontMatter.title_image.wide;
+        const squareImageKey = frontMatter.title_image.square;
 
-            titleImageComponent = (
-                <Picture
-                    image={titleImage}
-                    alt={titleImageAttribution}
-                    wrapperClassName='ml-4 block'
-                    imgClassName='max-h-40 max-w-40 w-40 h-auto object-contain'
-                />
-            )
+        if (!wideImageKey || !squareImageKey) {
+            throw new Error(`Missing wide or square image key for title_image: ${JSON.stringify(frontMatter.title_image)}`);
         }
 
+        // Enforce image existence
+        const wideImage = allImages[wideImageKey];
+        if (!wideImage) {
+            throw new Error(`Cannot find image with key: ${wideImageKey}`);
+        }
+        const squareImage = allImages[squareImageKey];
+        if (!squareImage) {
+            throw new Error(`Cannot find image with key: ${squareImageKey}`);
+        }
+
+        // Enforce aspect ratios
+        if (Math.abs(wideImage.jpg.width / wideImage.jpg.height - 7 / 4) > 1e-6) {
+            throw new Error(`Wide image ${wideImageKey} does not have aspect ratio 7:4 (width: ${wideImage.jpg.width}, height: ${wideImage.jpg.height})`);
+        }
+        if (squareImage.jpg.width !== squareImage.jpg.height) {
+            throw new Error(`Square image ${squareImageKey} does not have aspect ratio 1:1 (width: ${squareImage.jpg.width}, height: ${squareImage.jpg.height})`);
+        }
+
+        // Enforce attribution
+        const titleImageAttribution = frontMatter.title_image.attribution;
+        if (!titleImageAttribution) {
+            throw new Error(`No attribution found for title_image: ${JSON.stringify(frontMatter.title_image) }`);
+        }
+
+        const squareImageComponent = (
+            <Picture
+                image={squareImage}
+                alt={titleImageAttribution}
+                wrapperClassName='ml-4 block'
+                imgClassName='max-h-40 max-w-40 w-40 h-auto object-contain'
+            />
+        );
+        const wideImageComponent = (
+            <Picture
+                image={wideImage}
+                alt={titleImageAttribution}
+                wrapperClassName=''
+                imgClassName='h-auto object-contain'
+            />
+        );
+
         return (
-            <div key={page.route} className="flex items-center">
-                <div>
-                    <Link href={page.route} style={{ color: "inherit", textDecoration: "none" }} className="block font-semibold text-2xl">
-                        {page.meta?.title || frontMatter.title || page.name}
-                    </Link>
-                    <p className="opacity-80" style={{ marginTop: ".5rem" }}>
-                        {frontMatter.description}{" "}
-                        <span className="inline-block">
-                            <Link href={page.route}>{"Read more →"}</Link>
-                        </span>
-                    </p>
-                    {dateObj ? (
-                        <p className="opacity-50 text-sm">
-                            {/* suppressHydrationWarning is used to prevent warnings due to differing server/client locales */}
-                            <time dateTime={dateObj.toISOString()} suppressHydrationWarning>
-                                {dateObj.toLocaleDateString(locale, {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric'
-                                })}
-                            </time>
-                        </p>
-                    ) : null}
-                </div>
-                <div className="hidden md:block ml-auto">{titleImageComponent}</div>
+            <div key={page.route}>
+                <Link href={page.route} style={{ color: "inherit", textDecoration: "none" }}>
+                    <div className="mb-4 md:hidden">{wideImageComponent}</div>
+                    <div className="flex items-center">
+                        <div>
+                            <h2 className="block font-semibold text-2xl">{page.meta?.title || frontMatter.title || page.name}</h2>
+                            <p className="opacity-80" style={{ marginTop: ".5rem" }}>
+                                {frontMatter.description}{" "}
+                            </p>
+                            {dateObj ? (
+                                <p className="opacity-50 text-sm">
+                                    {/* suppressHydrationWarning is used to prevent warnings due to differing server/client locales */}
+                                    <time dateTime={dateObj.toISOString()} suppressHydrationWarning>
+                                        {dateObj.toLocaleDateString(locale, {
+                                            day: 'numeric',
+                                            month: 'long',
+                                            year: 'numeric'
+                                        })}
+                                    </time>
+                                </p>
+                            ) : null}
+                        </div>
+                        <div className="hidden md:block ml-auto">{squareImageComponent}</div>
+                    </div>
+                </Link>
             </div>
         );
     })
