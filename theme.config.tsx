@@ -58,15 +58,10 @@ const themeConfig = {
     icon: (
       <>
         <DiscordIcon />
-        <span className="nx-sr-only">Discord</span>
+        <span className="_sr-only">Discord</span>
       </>
     ),
     link: `https://discord.gg/${websiteConfig.discord_invite_code}`
-  },
-  useNextSeoProps() {
-    return {
-      titleTemplate: '%s - WATcloud',
-    }
   },
   head: () => (
     <>
@@ -88,7 +83,7 @@ const themeConfig = {
     </>
   ),
   footer: {
-    text: (
+    content: (
       // Maybe create a footer component instead?
       // eg: map over FooterData.links, FooterData.icons
       <div className="w-full mx-auto max-w-screen-xl lg:flex lg:gap-x-20 lg:items-center lg:justify-between text-center lg:text-left">

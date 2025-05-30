@@ -1,4 +1,4 @@
-{
+export default {
     "overview": {
         "display": "hidden"
     },
@@ -14,4 +14,4 @@
     },
     "quotas": "Quotas",
     "support-resources": "Support Resources"
-}
+};
