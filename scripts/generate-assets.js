@@ -8,7 +8,7 @@ const slugify = require('slugify');
 const pLimit = require('p-limit').default;
 const assetConfig = require("./asset-config.json");
 
-const concurrencyLimiter = pLimit(process.env.FETCH_CONCURRENCY || 4);
+const concurrencyLimiter = pLimit(process.env.FETCH_CONCURRENCY ? parseInt(process.env.FETCH_CONCURRENCY) : 4);
 
 const USER_PROFILES_PATH = path.resolve(process.argv[2]);
 if (!USER_PROFILES_PATH) {
