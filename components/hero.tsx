@@ -4,9 +4,10 @@ import {
     bytesToSize,
     pluralizeWithCount,
     cn,
-} from '@/lib/utils'
-import heroStyles from '@/styles/hero.module.css'
-import { machineInfo } from '@/lib/data'
+} from '@/lib/utils';
+import heroStyles from '@/styles/hero.module.css';
+import { machineInfo } from '@/lib/data';
+import ThreeVisualization from './three-visualization';
 
 const DEV_MACHINES = [
     ...machineInfo.machines.slurm_compute_nodes,
@@ -34,6 +35,9 @@ export function Hero() {
                 <div className="hero-subtitle">
                     <Link className={cn(heroStyles['cta-btn'],heroStyles['secondary'],"mr-4")} href="/machines">View Specs</Link>
                     <Link className={heroStyles['cta-btn']} href="/docs">Learn More <span>→</span></Link>
+                </div>
+                <div className="hero-visualization">
+                    <ThreeVisualization />
                 </div>
             </div>
             <style jsx>{`
@@ -69,6 +73,11 @@ export function Hero() {
                 font-feature-settings: initial;
                 line-height: 1.6;
                 margin-top: 1.5rem;
+            }
+            .hero-visualization {
+                margin-top: 2rem;
+                width: 100%;
+                height: 400px; /* Or any other desired height */
             }
             @media screen and (max-width: 768px) {
                 .hero-title {
