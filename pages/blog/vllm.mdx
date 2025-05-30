@@ -166,10 +166,12 @@ HF_HOME=/tmp/hf_home vllm serve unsloth/gemma-3-27b-it-qat-bnb-4bit --distribute
 HF_HOME=/tmp/hf_home vllm serve ISTA-DASLab/gemma-3-27b-it-GPTQ-4b-128g --distributed-executor-backend ray --port $(($(id -u) * 20 + 5)) --gpu-memory-utilization 0.99 --enforce-eager --max-model-len 32768
 
 # Llama 3.1 8B (non-quantized)
+# Official repo (gated). Requires HF_TOKEN and agreement to license on Hugging Face
 # https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct
-# Notes:
-# - Requires HF_TOKEN and agreement to license on Hugging Face
 HF_TOKEN=<your_huggingface_token> HF_HOME=/tmp/hf_home vllm serve meta-llama/Llama-3.1-8B-Instruct --distributed-executor-backend ray --port $(($(id -u) * 20 + 5)) --max-model-len 32768
+# NousResearch repo (non-gated)
+# https://huggingface.co/NousResearch/Meta-Llama-3.1-8B-Instruct
+HF_HOME=/tmp/hf_home vllm serve NousResearch/Meta-Llama-3.1-8B-Instruct --distributed-executor-backend ray --port $(($(id -u) * 20 + 5)) --max-model-len 32768
 
 # DeepSeek R1-0528 distilled to Qwen3-8B
 # https://huggingface.co/deepseek-ai/DeepSeek-R1-0528-Qwen3-8B
