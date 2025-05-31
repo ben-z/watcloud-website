@@ -47,11 +47,13 @@ import { Link } from "nextra-theme-docs"
 import { MachineInfo, websiteConfig } from '@/lib/data'
 import { hostnameSorter } from '@/lib/wato-utils'
 
-export function MachineCard({
-    machine,
-}: {
-    machine: UnionOfElementTypes<MachineInfo["machines"]>,
-}) {
+interface MachineCardProps {
+    machine: UnionOfElementTypes<MachineInfo["machines"]>;
+    showStatusIndicator?: boolean;
+}
+
+export function MachineCard(props: MachineCardProps) {
+    const { machine, showStatusIndicator = true } = props;
     const { data, error, isLoading } : {
         data?: HealthchecksioCheckProcessed[],
         error?: any,
@@ -133,6 +135,7 @@ export function MachineCard({
             <CardHeader>
             <CardTitle className="mb-1">
                 {machine.name}
+                {showStatusIndicator && (
                 <Popover>
                     <PopoverTrigger>
                         <Circle size="10" className="inline-flex align-baseline ml-2 my-0.5" fill={machineHealthColor} color={machineHealthColor} />
@@ -142,6 +145,7 @@ export function MachineCard({
                         {machineHealthSummary}
                     </PopoverContent>
                 </Popover>
+                )}
                 {
                     machine.tags.map(({name, description}) => (
                         <span key={name} className="ml-2 mr-1">
