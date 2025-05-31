@@ -1,5 +1,9 @@
+import nextra from 'nextra'
+import { withSentryConfig } from "@sentry/nextjs"
+import withBundleAnalyzer from "@next/bundle-analyzer"
+
 // Original Next.js config
-module.exports = {
+const nextConfig = {
   reactStrictMode: true,
   output: 'export',
   images: {
@@ -24,26 +28,24 @@ module.exports = {
       'lib',
       'theme.config.tsx',
       "tailwind.config.js",
-      "next.config.js",
+      "next.config.mjs",
       "postcss.config.js",
     ]
   }
 }
 
 // Add Nextra config
-const withNextra = require('nextra')({
+const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.tsx',
   latex: true, // LaTeX support: https://nextra.site/docs/guide/advanced/latex
 });
   
-module.exports = withNextra(module.exports)
+let config = withNextra(nextConfig)
 
 // Add Sentry config
-const { withSentryConfig } = require("@sentry/nextjs");
-
-module.exports = withSentryConfig(
-  module.exports,
+config = withSentryConfig(
+  config,
   {
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options
@@ -78,8 +80,10 @@ module.exports = withSentryConfig(
 );
 
 // Add bundle analyzer config
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
+const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
-module.exports = withBundleAnalyzer(module.exports);
+config = bundleAnalyzer(config);
+
+export default config
