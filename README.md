@@ -22,7 +22,7 @@ The [website](https://cloud.watonomous.ca) for WATcloud.
 3. Run the development server:
     ```bash
     # This line is optional if you are using the internal monorepo
-    export FETCH_FIXTURES_FROM=http://cloud.watonomous.ca/fixtures
+    export FETCH_FIXTURES_FROM=https://cloud.watonomous.ca/fixtures
     npm run dev
     ```
 
