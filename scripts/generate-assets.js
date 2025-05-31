@@ -157,15 +157,21 @@ async function processImage(image, preprocessSteps = []) {
 
     if (!fs.existsSync(path.join(cacheDir, avifCacheName))) {
         await sharpImage.avif(avifOptions).toFile(path.join(cacheDir, avifCacheName + ".partial"));
+        if (!fs.existsSync(path.join(cacheDir, avifCacheName + ".partial"))) { console.error(`ERROR: AVIF partial file missing for ${image.name}`); throw new Error('AVIF partial file missing'); }
         await fs.promises.rename(path.join(cacheDir, avifCacheName + ".partial"), path.join(cacheDir, avifCacheName));
+        if (!fs.existsSync(path.join(cacheDir, avifCacheName))) { console.error(`ERROR: AVIF file missing after rename for ${image.name}`); throw new Error('AVIF file missing after rename'); }
     }
     if (!fs.existsSync(path.join(cacheDir, webpCacheName))) {
         await sharpImage.webp(webpOptions).toFile(path.join(cacheDir, webpCacheName + ".partial"));
+        if (!fs.existsSync(path.join(cacheDir, webpCacheName + ".partial"))) { console.error(`ERROR: WebP partial file missing for ${image.name}`); throw new Error('WebP partial file missing'); }
         await fs.promises.rename(path.join(cacheDir, webpCacheName + ".partial"), path.join(cacheDir, webpCacheName));
+        if (!fs.existsSync(path.join(cacheDir, webpCacheName))) { console.error(`ERROR: WebP file missing after rename for ${image.name}`); throw new Error('WebP file missing after rename'); }
     }
     if (!fs.existsSync(path.join(cacheDir, jpgCacheName))) {
         await sharpImage.jpeg(jpgOptions).toFile(path.join(cacheDir, jpgCacheName + ".partial"));
+        if (!fs.existsSync(path.join(cacheDir, jpgCacheName + ".partial"))) { console.error(`ERROR: JPG partial file missing for ${image.name}`); throw new Error('JPG partial file missing'); }
         await fs.promises.rename(path.join(cacheDir, jpgCacheName + ".partial"), path.join(cacheDir, jpgCacheName));
+        if (!fs.existsSync(path.join(cacheDir, jpgCacheName))) { console.error(`ERROR: JPG file missing after rename for ${image.name}`); throw new Error('JPG file missing after rename'); }
     }
 
     await Promise.all([
@@ -231,7 +237,7 @@ function generateTypescript(image_names) {
 (async () => {
     const pLimit = (await import('p-limit')).default;
 
-    const concurrencyLimiter = pLimit(process.env.FETCH_CONCURRENCY ? parseInt(process.env.FETCH_CONCURRENCY) : 4);
+    const concurrencyLimiter = pLimit(1); // Temporarily reduce concurrency
 
     // MARK: Profile Pictures
     console.log("Processing profile pictures...")
