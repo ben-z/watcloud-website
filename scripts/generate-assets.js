@@ -5,6 +5,7 @@ const sharp = require('sharp');
 const dedent = require('dedent');
 const os = require('os');
 const slugify = require('slugify');
+const axios = require('axios');
 const assetConfig = require("./asset-config.json");
 
 const USER_PROFILES_PATH = path.resolve(process.argv[2]);
@@ -66,9 +67,11 @@ class WATcloudURI extends URL {
     async resolveToURL() {
         const urls = await Promise.all(RESOLVER_URL_PREFIXES.map(async (prefix) => {
             const r = `${prefix}/${this.sha256}`;
-            const res = await fetch(r, { method: 'HEAD' });
-            if (res.ok) {
+            try {
+                await axios.head(r);
                 return r;
+            } catch (error) {
+                return undefined;
             }
         }));
 
@@ -95,9 +98,9 @@ async function processImage(image, preprocessSteps = []) {
 
         const url = await imageURI.resolveToURL();
         console.log(`Downloading and processing ${image.name} from ${url}`);
-        const res = await fetch(url);
-        const buffer = await res.arrayBuffer();
-        const sha256Hash = sha256(buffer);
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        const buffer = response.data;
+        const sha256Hash = sha256(Buffer.from(buffer));
         if (sha256Hash !== imageURI.sha256) {
             throw new Error(`SHA-256 hash mismatch for "${image.name}"! Expected ${imageURI.sha256}, got ${sha256Hash}`);
         }
@@ -220,6 +223,10 @@ function generateTypescript(image_names) {
 }
 
 (async () => {
+    const pLimit = (await import('p-limit')).default;
+
+    const concurrencyLimiter = pLimit(process.env.FETCH_CONCURRENCY ? parseInt(process.env.FETCH_CONCURRENCY) : 4);
+
     // MARK: Profile Pictures
     console.log("Processing profile pictures...")
     const USER_PROFILES = require(USER_PROFILES_PATH)
@@ -229,12 +236,12 @@ function generateTypescript(image_names) {
         uri: new WATcloudURI(profile.watcloud_public_profile.profile_picture)
     }));
 
-    await Promise.all(user_profile_images.map(image => processImage(image, [(sharpImage) => sharpImage.resize(200, 200)])));
+    await Promise.all(user_profile_images.map(image => concurrencyLimiter(() => processImage(image, [(sharpImage) => sharpImage.resize(200, 200)]))));
 
     // MARK: Images
     console.log("Processing images...")
     const IMAGES = assetConfig.images;
-    await Promise.all(IMAGES.map(image => processImage(image)));
+    await Promise.all(IMAGES.map(image => concurrencyLimiter(() => processImage(image))));
 
     // MARK: Generate images.ts
     const tsContent = generateTypescript([...user_profile_images, ...IMAGES].map((image) => image.name));
