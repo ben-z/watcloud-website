@@ -65,24 +65,18 @@ class WATcloudURI extends URL {
     }
 
     async resolveToURL() {
-        const urls = await Promise.all(RESOLVER_URL_PREFIXES.map(async (prefix) => {
+        for (const prefix of RESOLVER_URL_PREFIXES) {
             const r = `${prefix}/${this.sha256}`;
             try {
                 await axios.head(r);
                 console.log(`Resolved ${this} to ${r}`);
                 return r;
             } catch (error) {
-                console.log(`Failed to resolve ${this} to ${r}: ${error}`);
-                return undefined;
+                console.log(`WARNING: Failed to resolve ${this} to ${r}: ${error}`);
             }
-        }));
-
-        const url = urls.find((url) => url !== undefined);
-        if (!url) {
-            throw new Error(`Asset not found: ${this}`);
         }
 
-        return url
+        throw new Error(`Asset not found: ${this}`);
     }
 }
 
