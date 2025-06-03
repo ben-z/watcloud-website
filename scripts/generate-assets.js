@@ -69,8 +69,10 @@ class WATcloudURI extends URL {
             const r = `${prefix}/${this.sha256}`;
             try {
                 await axios.head(r);
+                console.log(`Resolved ${this} to ${r}`);
                 return r;
             } catch (error) {
+                console.log(`Failed to resolve ${this} to ${r}: ${error}`);
                 return undefined;
             }
         }));
