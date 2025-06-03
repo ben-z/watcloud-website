@@ -83,7 +83,7 @@ async function resolveURI(uri: string) {
         return res.expiresAt.getTime();
     });
     if (!result) {
-        throw new Error('Asset not found.');
+        throw new Error(`Asset not found: ${uri}`);
     }
 
     return {

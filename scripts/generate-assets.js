@@ -77,7 +77,7 @@ class WATcloudURI extends URL {
 
         const url = urls.find((url) => url !== undefined);
         if (!url) {
-            throw new Error('Asset not found.');
+            throw new Error(`Asset not found: ${this}`);
         }
 
         return url
