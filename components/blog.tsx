@@ -21,7 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from 'next/router';
 import { MdxFile } from "nextra";
 import { Link } from "nextra-theme-docs";
-import { getPagesUnderRoute } from "nextra/context";
+import { getPagesUnderRoute, Page } from "@/lib/nextra";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

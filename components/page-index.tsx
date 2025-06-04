@@ -1,7 +1,5 @@
-import {
-  getPagesUnderRoute,
-} from "nextra/context";
-import { Card, Cards } from "nextra/components";
+import { getPagesUnderRoute, Page } from "@/lib/nextra";
+import { Cards } from "nextra/components";
 import { BookMarkedIcon } from "lucide-react";
 
 function PageIndex({
@@ -22,12 +20,12 @@ function PageIndex({
                 const route = page.route;
 
                 return (
-                    <Card
+                    <Cards.Card
                         key={i}
                         icon={<BookMarkedIcon />}
                         title={title}
                         href={route}
-                    >{null}</Card>
+                    >{null}</Cards.Card>
                 );
             })
         }

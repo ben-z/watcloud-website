@@ -30,14 +30,7 @@ module.exports = {
   }
 }
 
-// Add Nextra config
-const withNextra = require('nextra')({
-  theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.tsx',
-  latex: true, // LaTeX support: https://nextra.site/docs/guide/advanced/latex
-});
-  
-module.exports = withNextra(module.exports)
+// Nextra configuration handled via theme imports in _app.mdx
 
 // Add Sentry config
 const { withSentryConfig } = require("@sentry/nextjs");
