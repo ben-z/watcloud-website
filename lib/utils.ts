@@ -358,7 +358,7 @@ export function deepSet(
  * @returns An object where each key is the name of an attribute and each value is the corresponding attribute value parsed from the input string.
  */
 export function parseAttributes(input: string): Record<string, string> {
-    const attributeValueRegex = /(\w+-?\w*)=["']([^"']*)["']/g;
+    const attributeValueRegex = /([\w-]+)=["']([^"']*)["']/g;
     const attributes: Record<string, string> = {};
 
     let match: RegExpExecArray | null;

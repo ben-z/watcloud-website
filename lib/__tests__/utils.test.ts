@@ -207,4 +207,14 @@ describe('parseAttributes', () => {
 
         expect(parseAttributes(input)).toEqual(expected);
     });
+
+    test('should handle attributes with multiple hyphens', () => {
+        const input = 'data-long-attribute-name="value" another-attr="test"';
+        const expected = {
+            'data-long-attribute-name': 'value',
+            'another-attr': 'test',
+        };
+
+        expect(parseAttributes(input)).toEqual(expected);
+    });
 });
