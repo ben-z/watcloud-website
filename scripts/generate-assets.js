@@ -6,15 +6,15 @@ const dedent = require('dedent');
 const os = require('os');
 const slugify = require('slugify');
 const axios = require('axios');
-const httpsProxyAgent = require('https-proxy-agent');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 const assetConfig = require("./asset-config.json");
 
 const axiosConfig = {}
 if (process.env.HTTPS_PROXY) {
-    axiosConfig.httpsAgent = new httpsProxyAgent(process.env.HTTPS_PROXY);
+    axiosConfig.httpsAgent = new HttpsProxyAgent(process.env.HTTPS_PROXY);
 }
 if (process.env.HTTP_PROXY || process.env.http_proxy) {
-    axiosConfig.httpAgent = new httpsProxyAgent(process.env.HTTP_PROXY || process.env.http_proxy);
+    axiosConfig.httpAgent = new HttpsProxyAgent(process.env.HTTP_PROXY || process.env.http_proxy);
 }
 const axiosInstance = axios.create(axiosConfig);
 
