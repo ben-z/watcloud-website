@@ -9,7 +9,7 @@ const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 const assetConfig = require("./asset-config.json");
 
-const axiosConfig = {}
+const axiosConfig = { proxy: false }
 if (process.env.HTTPS_PROXY) {
     axiosConfig.httpsAgent = new HttpsProxyAgent(process.env.HTTPS_PROXY);
 }
