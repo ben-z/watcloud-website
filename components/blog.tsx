@@ -19,7 +19,6 @@ import { websiteConfig } from '@/lib/data';
 import { dayjsTz } from '@/lib/utils';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from 'next/router';
-import { MdxFile } from "nextra";
 import { Link } from "nextra-theme-docs";
 import { getPagesUnderRoute, Page } from "@/lib/nextra";
 import { useState } from "react";
@@ -28,6 +27,14 @@ import { z } from "zod";
 import Picture from "./picture";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+
+interface MdxFile {
+    kind: 'MdxPage';
+    name: string;
+    route: string;
+    locale?: string;
+    frontMatter?: Record<string, any>;
+}
 
 // Header and Index derived from https://github.com/vercel/turbo/blob/66196a70d02cddc8899ed1423684b1f716aa310e/docs/pages/blog.mdx
 export function BlogHeader() {

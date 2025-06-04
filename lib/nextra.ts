@@ -1,11 +1,7 @@
 export type Page = {
   route: string;
   name: string;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
   kind?: string;
 };
-
-// Temporary stub until Nextra v4 export is available
-export function getPagesUnderRoute(_route: string): Page[] {
-  return [];
-}
+export { getPagesUnderRoute } from 'nextra/context';

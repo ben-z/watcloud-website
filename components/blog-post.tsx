@@ -59,8 +59,7 @@ export function Avatar({ username }: { username: string }) {
 }
 
 export function BlogPostHeader() {
-    const { normalizePagesResult: { activeMetadata } } = useConfig();
-    const frontMatter: any = activeMetadata || {};
+    const { frontMatter } = useConfig();
 
     const { title, date, timezone, authors, reviewers } = frontMatter;
     const { locale = websiteConfig.default_locale } = useRouter()
