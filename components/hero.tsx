@@ -83,8 +83,7 @@ export function Hero() {
                 background-image: linear-gradient(146deg,#fff,#757a7d);
             }
             .hero-subtitle {
-                font-size: 1.3rem;
-                font-size: min(1.3rem, max(3.5vw, 1.2rem));
+                font-size: clamp(1.1rem, 2.5vw, 1.3rem);
                 font-feature-settings: initial;
                 line-height: 1.6;
                 margin-top: 1.5rem;
