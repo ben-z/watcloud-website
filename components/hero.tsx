@@ -6,11 +6,9 @@ import {
 } from '@/lib/utils'
 import heroStyles from '@/styles/hero.module.css'
 import { machineInfo } from '@/lib/data'
-import Picture from '@/components/picture'
-import {
-    ServerRoomLight,
-    ServerRoomDark,
-} from '@/build/fixtures/images'
+import dynamic from 'next/dynamic'
+
+const ServerRackScene = dynamic(() => import('./server-rack-scene'), { ssr: false })
 
 const DEV_MACHINES = [
     ...machineInfo.machines.slurm_compute_nodes,
@@ -42,8 +40,7 @@ export function Hero() {
                     </div>
                 </div>
                 <div className="hero-image">
-                    <Picture wrapperClassName="dark:hidden" imgClassName="rounded-lg shadow-lg" image={ServerRoomLight} alt="Server room" />
-                    <Picture wrapperClassName="hidden dark:block" imgClassName="rounded-lg shadow-lg" image={ServerRoomDark} alt="Server room" />
+                    <ServerRackScene />
                 </div>
             </div>
             <style jsx>{`
@@ -87,6 +84,10 @@ export function Hero() {
                 font-feature-settings: initial;
                 line-height: 1.6;
                 margin-top: 1.5rem;
+            }
+            .hero-image {
+                width: 100%;
+                height: clamp(16rem, 40vw, 24rem);
             }
             @media screen and (max-width: 768px) {
                 .hero-title {
