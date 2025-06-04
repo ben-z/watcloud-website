@@ -10,8 +10,8 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 const assetConfig = require("./asset-config.json");
 
 const axiosConfig = { proxy: false }
-if (process.env.HTTPS_PROXY) {
-    axiosConfig.httpsAgent = new HttpsProxyAgent(process.env.HTTPS_PROXY);
+if (process.env.HTTPS_PROXY || process.env.https_proxy) {
+    axiosConfig.httpsAgent = new HttpsProxyAgent(process.env.HTTPS_PROXY || process.env.https_proxy);
 }
 if (process.env.HTTP_PROXY || process.env.http_proxy) {
     axiosConfig.httpAgent = new HttpsProxyAgent(process.env.HTTP_PROXY || process.env.http_proxy);
