@@ -75,18 +75,18 @@ class WATcloudURI extends URL {
     }
 
     async resolveToURL() {
+        const errors = [];
         for (const prefix of RESOLVER_URL_PREFIXES) {
             const r = `${prefix}/${this.sha256}`;
             try {
                 await axiosInstance.head(r);
-                console.log(`Resolved ${this} to ${r}`);
                 return r;
             } catch (error) {
-                console.log(`WARNING: Failed to resolve ${this} to ${r}: ${error}`);
+                errors.push(error);
             }
         }
 
-        throw new Error(`Asset not found: ${this}`);
+        throw new Error(`Asset not found: ${this}. Errors:\n${errors.join("\n")}`);
     }
 }
 
