@@ -2,6 +2,7 @@ import json
 from itertools import chain
 from pathlib import Path
 import re
+import fnmatch
 
 import typer
 
@@ -53,26 +54,44 @@ def escape_non_math_dollars(text: str) -> str:
 # Derived from:
 # https://chat.openai.com/share/41d568ff-b124-4144-a19e-b51938adf7ce
 @app.command()
-def get_all_strings(json_file_path):
-    # Load the JSON data from the file
+def get_all_strings(
+    json_file_path: str,
+    include: list[str] = typer.Option(
+        None,
+        "--include",
+        "-i",
+        help="Glob or regex patterns for JSON paths to include. May be repeated",
+    ),
+):
+    """Return all strings from a JSON file matching the given path patterns."""
+
     with open(json_file_path, "r") as file:
         data = json.load(file)
 
-    def extract_strings(element, result):
-        if isinstance(element, dict):  # If element is a dictionary
-            for value in element.values():
-                extract_strings(value, result)
-        elif isinstance(element, list):  # If element is a list
-            for item in element:
-                extract_strings(item, result)
-        elif isinstance(element, str):  # If element is a string
-            result.append(element)
+    regexes: list[re.Pattern[str]] = []
+    if include:
+        for pat in include:
+            regexes.append(re.compile(fnmatch.translate(pat)))
 
-    # Initialize an empty list to hold the strings
-    strings = []
-    # Extract strings from the loaded JSON data
-    extract_strings(data, strings)
+    def path_matches(path: list[str]) -> bool:
+        if not regexes:
+            return True
+        path_str = "/".join(path)
+        return any(r.fullmatch(path_str) for r in regexes)
 
+    def extract_strings(element, result, path):
+        if isinstance(element, dict):
+            for key, value in element.items():
+                extract_strings(value, result, path + [str(key)])
+        elif isinstance(element, list):
+            for idx, item in enumerate(element):
+                extract_strings(item, result, path + [str(idx)])
+        elif isinstance(element, str):
+            if path_matches(path):
+                result.append(element)
+
+    strings: list[str] = []
+    extract_strings(data, strings, [])
     return strings
 
 @app.command()
@@ -114,8 +133,19 @@ def dump_mdx(strings: list[str], output_dir: str, overwrite: bool = False):
     print(f"Dumped {len(strings)} strings to {output_dir}")
 
 @app.command()
-def json_to_mdx(json_file_paths: list[str], output_dir: str):
-    strings = list(chain.from_iterable(get_all_strings(p) for p in json_file_paths))
+def json_to_mdx(
+    json_file_paths: list[str],
+    output_dir: str,
+    include: list[str] = typer.Option(
+        None,
+        "--include",
+        "-i",
+        help="Glob or regex patterns for JSON paths to include. May be repeated",
+    ),
+):
+    strings = list(
+        chain.from_iterable(get_all_strings(p, include=include) for p in json_file_paths)
+    )
     dump_mdx(strings, output_dir)
 
 if __name__ == '__main__':
