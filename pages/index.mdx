@@ -3,6 +3,24 @@ title: "Welcome"
 ---
 
 import { Hero } from '@/components/hero'
- 
+import { Cards } from 'nextra/components'
+import Picture from '@/components/picture'
+import { ComputerDark, ComputerLight, RobotDark, RobotLight, CloudDark, CloudLight } from '@/build/fixtures/images'
+import { CpuIcon, CheckSquareIcon, BookMarkedIcon } from 'lucide-react'
+import { DiscordIcon } from 'nextra/icons'
+import websiteConfig from '@/build/fixtures/website-config.json'
 
 <Hero />
+
+## Why WATcloud?
+WATcloud is a student-run group that makes powerful computing resources available to the campus community.
+
+<Cards num={4}>
+  <Cards.Card image arrow title='Get Access' href='/docs/compute-cluster/getting-access'>
+    <span className='hidden dark:block'><Picture alt='Abstract Computer (Dark)' image={ComputerDark} /></span>
+    <span className='dark:hidden'><Picture alt='Abstract Computer (Light)' image={ComputerLight} /></span>
+  </Cards.Card>
+  <Cards.Card icon={<CpuIcon />} arrow title='View Machines' href='/machines' />
+  <Cards.Card icon={<BookMarkedIcon />} arrow title='Read the Docs' href='/docs' />
+  <Cards.Card icon={<DiscordIcon />} arrow title='Join Discord' href={`https://discord.gg/${websiteConfig.discord_invite_code}`} />
+</Cards>
