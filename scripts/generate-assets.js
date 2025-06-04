@@ -86,7 +86,7 @@ class WATcloudURI extends URL {
             }
         }
 
-        throw new Error(`Asset not found: ${this}. Errors:\n${errors.join("\n")}`);
+        throw new Error(`Asset not found: ${this}. Errors:\n${errors.map(e => e.message).join("\n")}`);
     }
 }
 
