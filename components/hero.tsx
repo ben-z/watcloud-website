@@ -43,8 +43,17 @@ export function Hero() {
                     <ServerRackScene />
                 </div>
             </div>
+            <div className="hero-bg" />
             <style jsx>{`
             .hero {
+                position: relative;
+                overflow: hidden;
+            }
+            .hero-bg {
+                pointer-events: none;
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(circle at 40% 20%, #238aff33, transparent 70%);
             }
             .hero-inner {
                 max-width: 90rem;
@@ -58,7 +67,7 @@ export function Hero() {
             }
             @media screen and (min-width: 768px) {
                 .hero-inner {
-                    grid-template-columns: 55% 45%;
+                    grid-template-columns: auto 1fr;
                 }
             }
             .hero-title {
@@ -87,7 +96,13 @@ export function Hero() {
             }
             .hero-image {
                 width: 100%;
-                height: clamp(16rem, 40vw, 24rem);
+                height: clamp(20rem, 40vw, 28rem);
+            }
+            @media screen and (max-width: 768px) {
+                .hero-image {
+                    margin-top: 2rem;
+                    height: 20rem;
+                }
             }
             @media screen and (max-width: 768px) {
                 .hero-title {
