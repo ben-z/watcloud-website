@@ -61,11 +61,12 @@ export function Hero() {
             }
             @media screen and (min-width: 768px) {
                 .hero-inner {
-                    grid-template-columns: 1fr 1fr;
+                    grid-template-columns: auto 1fr;
                 }
             }
             .hero-title {
-                display: inline-flex;
+                display: inline-block;
+                white-space: nowrap;
                 font-size: 3.125rem;
                 font-size: min(4.375rem, max(8vw, 2.5rem));
                 font-weight: 700;
