@@ -5,6 +5,7 @@ const sharp = require('sharp');
 const dedent = require('dedent');
 const os = require('os');
 const slugify = require('slugify');
+const axios = require('axios');
 const assetConfig = require("./asset-config.json");
 
 const USER_PROFILES_PATH = path.resolve(process.argv[2]);
@@ -67,15 +68,11 @@ class WATcloudURI extends URL {
         for (const prefix of RESOLVER_URL_PREFIXES) {
             const r = `${prefix}/${this.sha256}`;
             try {
-                const res = await fetch(r, { method: 'HEAD' });
-                if (res.ok) {
-                    console.log(`Resolved ${this} to ${r}`);
-                    return r;
-                } else {
-                    console.log(`WARNING: Failed to resolve ${this} to ${r}: ${res.statusText}. Trying the next prefix...`)
-                }
+                await axios.head(r);
+                console.log(`Resolved ${this} to ${r}`);
+                return r;
             } catch (error) {
-                console.log(`Error resolving ${this} to ${r}: ${error}`);
+                console.log(`WARNING: Failed to resolve ${this} to ${r}: ${error}`);
             }
         }
 
@@ -97,9 +94,9 @@ async function processImage(image, preprocessSteps = []) {
 
         const url = await imageURI.resolveToURL();
         console.log(`Downloading and processing ${image.name} from ${url}`);
-        const res = await fetch(url);
-        const buffer = await res.arrayBuffer();
-        const sha256Hash = sha256(buffer);
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        const buffer = response.data;
+        const sha256Hash = sha256(Buffer.from(buffer));
         if (sha256Hash !== imageURI.sha256) {
             throw new Error(`SHA-256 hash mismatch for "${image.name}"! Expected ${imageURI.sha256}, got ${sha256Hash}`);
         }
