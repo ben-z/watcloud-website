@@ -55,8 +55,10 @@ def get_all_strings(json_file_path):
 def dump_mdx(strings: list[str], output_dir: str, overwrite: bool = False):
     output_dir = Path(output_dir)
     if output_dir.exists() and not overwrite:
-        raise Exception(f"Output directory '{output_dir}' already exists. Use --overwrite to overwrite it.")
-    Path.mkdir(output_dir, parents=True)
+        raise Exception(
+            f"Output directory '{output_dir}' already exists. Use --overwrite to overwrite it."
+        )
+    Path.mkdir(output_dir, parents=True, exist_ok=True)
 
     hash_to_string = {}
     for s in strings:
@@ -68,8 +70,11 @@ def dump_mdx(strings: list[str], output_dir: str, overwrite: bool = False):
     for h, s in hash_to_string.items():
         basename = f"{h}.mdx"
 
+        sanitized = s.replace("$", "\\$")
+
         with open(output_dir / basename, "w") as file:
-            file.write(s)
+            file.write(sanitized)
+            file.write("\n")
 
     strings_file = output_dir / "strings.ts"
     with open(strings_file, "w") as file:
