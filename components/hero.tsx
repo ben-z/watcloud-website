@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button"
 import { Link } from "nextra-theme-docs"
 import {
     bytesToSize,
@@ -7,6 +6,11 @@ import {
 } from '@/lib/utils'
 import heroStyles from '@/styles/hero.module.css'
 import { machineInfo } from '@/lib/data'
+import Picture from '@/components/picture'
+import {
+    ServerRoomLight,
+    ServerRoomDark,
+} from '@/build/fixtures/images'
 
 const DEV_MACHINES = [
     ...machineInfo.machines.slurm_compute_nodes,
@@ -23,17 +27,23 @@ export function Hero() {
     return (
         <div className="hero">
             <div className="hero-inner">
-                <h1 className="hero-title">
-                    {vCPUs} vCPUs<br />
-                    {bytesToSize(ramBytes,0)} RAM<br />
-                    {bytesToSize(redundantStorageBytes,0)} Storage<br />
-                    {pluralizeWithCount(gpuCount, "GPU")}<br />
-                    {"10/40 Gbps Network"}
-                </h1>
-                <p className="hero-subtitle">Welcome to WATcloud. We make powerful computers <br className='sm:block hidden'/>easily accessible to students and researchers.</p>
-                <div className="hero-subtitle">
-                    <Link className={cn(heroStyles['cta-btn'],heroStyles['secondary'],"mr-4")} href="/machines">View Specs</Link>
-                    <Link className={heroStyles['cta-btn']} href="/docs">Learn More <span>→</span></Link>
+                <div className="hero-text">
+                    <h1 className="hero-title">
+                        {vCPUs} vCPUs<br />
+                        {bytesToSize(ramBytes,0)} RAM<br />
+                        {bytesToSize(redundantStorageBytes,0)} Storage<br />
+                        {pluralizeWithCount(gpuCount, "GPU")}<br />
+                        {"10/40 Gbps Network"}
+                    </h1>
+                    <p className="hero-subtitle">Welcome to WATcloud. We make powerful computers <br className='sm:block hidden'/>easily accessible to students and researchers.</p>
+                    <div className="hero-subtitle">
+                        <Link className={cn(heroStyles['cta-btn'],heroStyles['secondary'],"mr-4")} href="/machines">View Specs</Link>
+                        <Link className={heroStyles['cta-btn']} href="/docs">Learn More <span>→</span></Link>
+                    </div>
+                </div>
+                <div className="hero-image">
+                    <Picture wrapperClassName="dark:hidden" imgClassName="rounded-lg shadow-lg" image={ServerRoomLight} alt="Server room" />
+                    <Picture wrapperClassName="hidden dark:block" imgClassName="rounded-lg shadow-lg" image={ServerRoomDark} alt="Server room" />
                 </div>
             </div>
             <style jsx>{`
@@ -44,6 +54,15 @@ export function Hero() {
                 padding-left: max(env(safe-area-inset-left),1.5rem);
                 padding-right: max(env(safe-area-inset-right),1.5rem);
                 margin: 0 auto;
+                display: grid;
+                gap: 2rem;
+                grid-template-columns: 1fr;
+                align-items: center;
+            }
+            @media screen and (min-width: 768px) {
+                .hero-inner {
+                    grid-template-columns: 1fr 1fr;
+                }
             }
             .hero-title {
                 display: inline-flex;
