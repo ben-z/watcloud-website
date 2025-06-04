@@ -1,6 +1,7 @@
 import json
 from itertools import chain
 from pathlib import Path
+import re
 
 import typer
 
@@ -24,6 +25,29 @@ def hash_code(s):
         hash = (hash << 5) - hash + ord(char)
         hash &= 0xFFFFFFFF  # Convert to 32bit integer
     return hash
+
+
+def escape_non_math_dollars(text: str) -> str:
+    """Escape dollar signs that aren't part of LaTeX math expressions.
+
+    This keeps existing ``\$`` sequences and ``$...$`` or ``$$...$$`` math
+    expressions intact while escaping any other ``$`` characters so KaTeX does
+    not treat them as math delimiters.
+    """
+
+    pattern = re.compile(
+        r"(\\\$)|(\$\$.*?\$\$)|(\$\S.*?\S\$)|(\$)",
+        re.DOTALL,
+    )
+
+    def repl(match: re.Match) -> str:
+        if match.group(1):
+            return match.group(1)
+        if match.group(2) or match.group(3):
+            return match.group(0)
+        return "\\$"
+
+    return pattern.sub(repl, text)
 
 
 # Derived from:
@@ -70,7 +94,7 @@ def dump_mdx(strings: list[str], output_dir: str, overwrite: bool = False):
     for h, s in hash_to_string.items():
         basename = f"{h}.mdx"
 
-        sanitized = s.replace("$", "\\$")
+        sanitized = escape_non_math_dollars(s)
 
         with open(output_dir / basename, "w") as file:
             file.write(sanitized)
