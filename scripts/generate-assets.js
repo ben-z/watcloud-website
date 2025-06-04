@@ -6,7 +6,17 @@ const dedent = require('dedent');
 const os = require('os');
 const slugify = require('slugify');
 const axios = require('axios');
+const httpsProxyAgent = require('https-proxy-agent');
 const assetConfig = require("./asset-config.json");
+
+const axiosConfig = {}
+if (process.env.HTTPS_PROXY) {
+    axiosConfig.httpsAgent = new httpsProxyAgent(process.env.HTTPS_PROXY);
+}
+if (process.env.HTTP_PROXY || process.env.http_proxy) {
+    axiosConfig.httpAgent = new httpsProxyAgent(process.env.HTTP_PROXY || process.env.http_proxy);
+}
+const axiosInstance = axios.create(axiosConfig);
 
 const USER_PROFILES_PATH = path.resolve(process.argv[2]);
 if (!USER_PROFILES_PATH) {
@@ -68,7 +78,7 @@ class WATcloudURI extends URL {
         for (const prefix of RESOLVER_URL_PREFIXES) {
             const r = `${prefix}/${this.sha256}`;
             try {
-                await axios.head(r);
+                await axiosInstance.head(r);
                 console.log(`Resolved ${this} to ${r}`);
                 return r;
             } catch (error) {
@@ -94,7 +104,7 @@ async function processImage(image, preprocessSteps = []) {
 
         const url = await imageURI.resolveToURL();
         console.log(`Downloading and processing ${image.name} from ${url}`);
-        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        const response = await axiosInstance.get(url, { responseType: 'arraybuffer' });
         const buffer = response.data;
         const sha256Hash = sha256(Buffer.from(buffer));
         if (sha256Hash !== imageURI.sha256) {
