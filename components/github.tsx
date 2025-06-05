@@ -122,8 +122,8 @@ export function UsernameToID() {
     // Use MDX components from the theme:
     // https://github.com/shuding/nextra/blob/33a2f9a5fe8eb58f78b4b9c8a671bc7f854ea504/packages/nextra-theme-docs/src/mdx-components.tsx#L113
     const components = useMDXComponents();
-    const Summary = components.summary ?? "summary";
-    const Details = components.details ?? "details";
+    const Summary = (components.summary ?? 'summary') as any;
+    const Details = (components.details ?? 'details') as any;
 
     const form = useForm<z.infer<typeof usernameToIDFormSchema>>({
         resolver: zodResolver(usernameToIDFormSchema),

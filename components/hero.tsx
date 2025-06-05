@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button"
 import { Link } from "nextra-theme-docs"
 import {
     bytesToSize,
@@ -7,6 +6,9 @@ import {
 } from '@/lib/utils'
 import heroStyles from '@/styles/hero.module.css'
 import { machineInfo } from '@/lib/data'
+import dynamic from 'next/dynamic'
+
+const ServerRackScene = dynamic(() => import('./server-rack-scene'), { ssr: false })
 
 const DEV_MACHINES = [
     ...machineInfo.machines.slurm_compute_nodes,
@@ -23,32 +25,55 @@ export function Hero() {
     return (
         <div className="hero">
             <div className="hero-inner">
-                <h1 className="hero-title">
-                    {vCPUs} vCPUs<br />
-                    {bytesToSize(ramBytes,0)} RAM<br />
-                    {bytesToSize(redundantStorageBytes,0)} Storage<br />
-                    {pluralizeWithCount(gpuCount, "GPU")}<br />
-                    {"10/40 Gbps Network"}
-                </h1>
-                <p className="hero-subtitle">Welcome to WATcloud. We make powerful computers <br className='sm:block hidden'/>easily accessible to students and researchers.</p>
-                <div className="hero-subtitle">
-                    <Link className={cn(heroStyles['cta-btn'],heroStyles['secondary'],"mr-4")} href="/machines">View Specs</Link>
-                    <Link className={heroStyles['cta-btn']} href="/docs">Learn More <span>→</span></Link>
+                <div className="hero-text">
+                    <h1 className="hero-title">
+                        {vCPUs} vCPUs<br />
+                        {bytesToSize(ramBytes,0)} RAM<br />
+                        {bytesToSize(redundantStorageBytes,0)} Storage<br />
+                        {pluralizeWithCount(gpuCount, "GPU")}<br />
+                        {"10/40 Gbps Network"}
+                    </h1>
+                    <p className="hero-subtitle">Welcome to WATcloud. We make powerful computers <br className='sm:block hidden'/>easily accessible to students and researchers.</p>
+                    <div className="hero-subtitle">
+                        <Link className={cn(heroStyles['cta-btn'],heroStyles['secondary'],"mr-4")} href="/machines">View Specs</Link>
+                        <Link className={heroStyles['cta-btn']} href="/docs">Learn More <span>→</span></Link>
+                    </div>
+                </div>
+                <div className="hero-image">
+                    <ServerRackScene />
                 </div>
             </div>
+            <div className="hero-bg" />
             <style jsx>{`
             .hero {
+                position: relative;
+                overflow: hidden;
+            }
+            .hero-bg {
+                pointer-events: none;
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(circle at 40% 20%, #238aff33, transparent 70%);
             }
             .hero-inner {
                 max-width: 90rem;
                 padding-left: max(env(safe-area-inset-left),1.5rem);
                 padding-right: max(env(safe-area-inset-right),1.5rem);
                 margin: 0 auto;
+                display: grid;
+                gap: 2rem;
+                grid-template-columns: 1fr;
+                align-items: center;
+            }
+            @media screen and (min-width: 768px) {
+                .hero-inner {
+                    grid-template-columns: auto 1fr;
+                }
             }
             .hero-title {
-                display: inline-flex;
-                font-size: 3.125rem;
-                font-size: min(4.375rem, max(8vw, 2.5rem));
+                display: inline-block;
+                white-space: nowrap;
+                font-size: clamp(2.5rem, 5vw, 4.375rem);
                 font-weight: 700;
                 font-feature-settings: initial;
                 letter-spacing: -.12rem;
@@ -64,11 +89,20 @@ export function Hero() {
                 background-image: linear-gradient(146deg,#fff,#757a7d);
             }
             .hero-subtitle {
-                font-size: 1.3rem;
-                font-size: min(1.3rem, max(3.5vw, 1.2rem));
+                font-size: clamp(1.1rem, 2.5vw, 1.3rem);
                 font-feature-settings: initial;
                 line-height: 1.6;
                 margin-top: 1.5rem;
+            }
+            .hero-image {
+                width: 100%;
+                height: clamp(20rem, 40vw, 28rem);
+            }
+            @media screen and (max-width: 768px) {
+                .hero-image {
+                    margin-top: 2rem;
+                    height: 20rem;
+                }
             }
             @media screen and (max-width: 768px) {
                 .hero-title {
