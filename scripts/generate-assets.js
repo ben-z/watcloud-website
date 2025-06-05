@@ -6,7 +6,17 @@ const dedent = require('dedent');
 const os = require('os');
 const slugify = require('slugify');
 const axios = require('axios');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 const assetConfig = require("./asset-config.json");
+
+const axiosConfig = { proxy: false }
+if (process.env.HTTPS_PROXY || process.env.https_proxy) {
+    axiosConfig.httpsAgent = new HttpsProxyAgent(process.env.HTTPS_PROXY || process.env.https_proxy);
+}
+if (process.env.HTTP_PROXY || process.env.http_proxy) {
+    axiosConfig.httpAgent = new HttpsProxyAgent(process.env.HTTP_PROXY || process.env.http_proxy);
+}
+const axiosInstance = axios.create(axiosConfig);
 
 const USER_PROFILES_PATH = path.resolve(process.argv[2]);
 if (!USER_PROFILES_PATH) {
@@ -65,22 +75,18 @@ class WATcloudURI extends URL {
     }
 
     async resolveToURL() {
-        const urls = await Promise.all(RESOLVER_URL_PREFIXES.map(async (prefix) => {
+        const errors = [];
+        for (const prefix of RESOLVER_URL_PREFIXES) {
             const r = `${prefix}/${this.sha256}`;
             try {
-                await axios.head(r);
+                await axiosInstance.head(r);
                 return r;
             } catch (error) {
-                return undefined;
+                errors.push(error);
             }
-        }));
-
-        const url = urls.find((url) => url !== undefined);
-        if (!url) {
-            throw new Error('Asset not found.');
         }
 
-        return url
+        throw new Error(`Asset not found: ${this}. Errors:\n${errors.map(e => e.message).join("\n")}`);
     }
 }
 
@@ -98,7 +104,7 @@ async function processImage(image, preprocessSteps = []) {
 
         const url = await imageURI.resolveToURL();
         console.log(`Downloading and processing ${image.name} from ${url}`);
-        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        const response = await axiosInstance.get(url, { responseType: 'arraybuffer' });
         const buffer = response.data;
         const sha256Hash = sha256(Buffer.from(buffer));
         if (sha256Hash !== imageURI.sha256) {
