@@ -45,7 +45,7 @@ if (process.env.NODE_ENV === 'production') {
 
   // Lazy-load the Sentry Replay integration
   // https://docs.sentry.io/platforms/javascript/session-replay/#lazy-loading-replay
-  import('@sentry/browser').then(({ Replay }) => {
+  import('@sentry/replay').then(({ Replay }) => {
     Sentry.addIntegration(new Replay());
   })
 }
