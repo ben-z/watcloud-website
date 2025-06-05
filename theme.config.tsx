@@ -58,7 +58,7 @@ const themeConfig = {
     icon: (
       <>
         <DiscordIcon />
-        <span className="nx-sr-only">Discord</span>
+        <span className="sr-only">Discord</span>
       </>
     ),
     link: `https://discord.gg/${websiteConfig.discord_invite_code}`
