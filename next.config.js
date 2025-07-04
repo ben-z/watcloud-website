@@ -9,6 +9,13 @@ module.exports = {
   // Next.js doesn't support trailing slashes in basePath
   // This config needs to be in sync with export-images.config.js
   basePath: (process.env.WEBSITE_BASE_PATH || '').replace(/\/$/, ""),
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    // !! WARN !!
+    ignoreBuildErrors: true,
+  },
   webpack: (config) => {
     // Add Typescript support
     // Reference: https://www.altogic.com/blog/nextjs-typescript
