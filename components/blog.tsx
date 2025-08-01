@@ -20,8 +20,7 @@ import { dayjsTz } from '@/lib/utils';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from 'next/router';
 import { MdxFile } from "nextra";
-import { Link } from "nextra-theme-docs";
-import { getPagesUnderRoute } from "nextra/context";
+import { Link, useConfig } from "nextra-theme-docs";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -45,8 +44,14 @@ export function BlogHeader() {
 
 export function BlogIndex() {
     const { locale = websiteConfig.default_locale } = useRouter()
+    const { normalizePagesResult } = useConfig();
+    
+    // Filter pages under /blog route from the page map
+    const blogPages = normalizePagesResult.docsDirectories
+        .find(dir => dir.route === '/blog')
+        ?.children || [];
 
-    const items = getPagesUnderRoute("/blog").map((page) => {
+    const items = blogPages.map((page) => {
         const frontMatter = (page as MdxFile).frontMatter || {}
         if (frontMatter.hidden) {
             return null

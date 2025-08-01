@@ -1,5 +1,5 @@
 import Giscus from "@giscus/react";
-import websiteConfig from "@/build/fixtures/website-config.json";
+import { websiteConfig } from "@/lib/data";
 import { useTheme } from "nextra-theme-docs";
 
 export default function CommentSection() {

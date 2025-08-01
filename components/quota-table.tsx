@@ -24,7 +24,7 @@ export function GlobalQuotaTable({
     className?: string
 }) {
     const rows = []
-    for (const quota of machineInfo.global_user_disk_quotas) {
+    for (const quota of machineInfo.global_user_disk_quotas || []) {
         rows.push(
             <TableRow>
                 <TableCell>{quota.name}</TableCell>

@@ -15,10 +15,10 @@ const DEV_MACHINES = [
 ]
 
 export function Hero() {
-    const vCPUs = DEV_MACHINES.reduce((acc, m) => acc + parseInt(m.cpu_info.logical_processors || "0"), 0)
-    const ramBytes = DEV_MACHINES.reduce((acc, m) => acc + parseInt(m.memory_info.memory_total_kibibytes || "0") * 1024, 0)
-    const redundantStorageBytes = machineInfo.machines.bare_metals.flatMap(m => m.hosted_storage.map(s => parseInt(s.size_bytes || "0"))).reduce((acc, size) => acc + size, 0)
-    const gpuCount = DEV_MACHINES.reduce((acc, m) => acc + m.gpus.length, 0)
+    const vCPUs = DEV_MACHINES.reduce((acc: number, m: any) => acc + parseInt(m.cpu_info?.logical_processors || "0"), 0)
+    const ramBytes = DEV_MACHINES.reduce((acc: number, m: any) => acc + parseInt(m.memory_info?.memory_total_kibibytes || "0") * 1024, 0)
+    const redundantStorageBytes = machineInfo.machines.bare_metals.flatMap((m: any) => m.hosted_storage?.map((s: any) => parseInt(s.size_bytes || "0")) || []).reduce((acc: number, size: number) => acc + size, 0)
+    const gpuCount = DEV_MACHINES.reduce((acc: number, m: any) => acc + (m.gpus?.length || 0), 0)
 
     return (
         <div className="hero">
