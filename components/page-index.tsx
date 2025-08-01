@@ -1,15 +1,24 @@
-import {
-  getPagesUnderRoute,
-} from "nextra/context";
-import { Card, Cards } from "nextra/components";
+import { Cards } from "nextra/components";
 import { BookMarkedIcon } from "lucide-react";
+import { useConfig } from "nextra-theme-docs";
+
+const { Card } = Cards;
 
 function PageIndex({
     pageRoot,
 }: {
     pageRoot: string;
 }) {
-    const pages = getPagesUnderRoute(pageRoot);
+    const { normalizePagesResult } = useConfig();
+    
+    // Find pages under the specified route
+    const findPagesUnderRoute = (route: string) => {
+        const targetDir = normalizePagesResult.docsDirectories
+            .find(dir => dir.route === route);
+        return targetDir?.children || [];
+    };
+    
+    const pages = findPagesUnderRoute(pageRoot);
 
     return (
         <Cards>

@@ -58,14 +58,17 @@ export function MachineCard({
         isLoading?: boolean,
     } = useSWR(
         [`https://healthchecks.io/api/v2/checks/`, websiteConfig.healthchecksio_read_key],
-        ([url, key]) => fetcher(url, {
-            headers: {
-                'X-Api-Key': key,
-            },
-        }).then(data => data['checks'].map((check: HealthchecksioCheck) => ({
-                ...check,
-                tags: check['tags'].split(' ')
-        }))),
+        ([url, key]: [string, string | undefined]) => {
+            if (!key) return Promise.resolve([]);
+            return fetcher(url, {
+                headers: {
+                    'X-Api-Key': key,
+                },
+            }).then(data => data['checks'].map((check: HealthchecksioCheck) => ({
+                    ...check,
+                    tags: check['tags'].split(' ')
+            })));
+        },
         {
             refreshInterval: 10000, // milliseconds
         }
@@ -143,7 +146,7 @@ export function MachineCard({
                     </PopoverContent>
                 </Popover>
                 {
-                    machine.tags.map(({name, description}) => (
+                    machine.tags.map(({name, description}: {name: string, description: string}) => (
                         <span key={name} className="ml-2 mr-1">
                             <Popover>
                                 <PopoverTrigger><Badge className="align-bottom">{name}</Badge></PopoverTrigger>
@@ -175,7 +178,7 @@ export function MachineCard({
                             </dt>
                             <dd className="font-medium">
                                 <ul className="list-none">
-                                    {machine.hostnames.length ? machine.hostnames.sort(hostnameSorter).map((hostname, index) => {
+                                    {machine.hostnames.length ? machine.hostnames.sort(hostnameSorter).map((hostname: string, index: number) => {
                                         return (
                                             <li key={index} className="my-0">
                                                 {hostname}
@@ -218,7 +221,7 @@ export function MachineCard({
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.gpus.length, "GPU")}</dt>
                             <dd className="font-medium">
                                 <ol start={0}>
-                                    {machine.gpus.length ? machine.gpus.map((gpu, index) => {
+                                    {machine.gpus.length ? machine.gpus.map((gpu: any, index: number) => {
                                         return (
                                             <li key={index} className="my-0">
                                                 {gpu['name']} ({gpu['memory.total [MiB]']} VRAM)
@@ -234,7 +237,7 @@ export function MachineCard({
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">Hosted Storage</dt>
                             <dd className="font-medium">
                                 <ol start={0}>
-                                    {machine.hosted_storage.length ? machine.hosted_storage.map((storage, index) => {
+                                    {machine.hosted_storage.length ? machine.hosted_storage.map((storage: any, index: number) => {
                                         return (
                                             <li key={index} className="my-0">
                                                 {storage['mountpoint']} ({bytesToSize(parseInt(storage['size_bytes'] || "0"), 0)})
@@ -249,7 +252,7 @@ export function MachineCard({
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.ssh_host_keys.length, "SSH Host Key")}</dt>
                             <dd>
-                                <Pre hasCopyCode>
+                                <Pre data-copy="">
                                     <Code>
                                         {machine.ssh_host_keys.join('\n')}
                                     </Code>
@@ -266,7 +269,7 @@ export function MachineCard({
                                 </PopoverContent>
                             </Popover>
                             <dd>
-                                <Pre hasCopyCode>
+                                <Pre data-copy="">
                                     <Code>
                                         {machine.ssh_host_keys_bastion.join('\n')}
                                     </Code>
